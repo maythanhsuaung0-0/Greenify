@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 from Forms import CreateUserForm
 import shelve, User
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 
 
 @app.route("/")
@@ -35,6 +35,11 @@ def create_user():
 
         return redirect(url_for('home'))
     return render_template('createUser.html', form=create_user_form)
+
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
 
 if __name__ == "__main__":
     app.run()
