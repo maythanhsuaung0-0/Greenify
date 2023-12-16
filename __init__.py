@@ -7,7 +7,11 @@ app = Flask(__name__, static_url_path='/static')
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("homepage.html")
+
+@app.route("/Product")
+def product():
+    return render_template("test_product.html")
 
 
 @app.route('/createUser', methods=['GET', 'POST'])

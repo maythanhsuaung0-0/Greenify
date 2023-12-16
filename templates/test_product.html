@@ -1,0 +1,39 @@
+{% extends "Product base.html" %}
+{% block title%}Test Product Page{% endblock %}
+
+{% block product_name %}
+    Sustainable Container
+{% endblock %}
+
+{% block carousel_indicator %}
+    <button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="0" class="active"
+              aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="1"
+      aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="2"
+      aria-label="Slide 3"></button>
+{% endblock %}
+
+
+{% block carousel_multimedia %}
+    <div class="carousel-item active">
+      <img src="..." class="d-block w-100" alt="...">
+    </div>
+    <div class="carousel-item">
+      <img src="..." class="d-block w-100" alt="...">
+    </div>
+    <div class="carousel-item">
+      <img src="..." class="d-block w-100" alt="...">
+    </div>
+{% endblock %}
+
+{% block options %}
+{% endblock %}
+
+{% block product_desp %}
+    <h5>Lorem ipsum</h5>
+{% endblock %}
+
+{% block product_review %}
+    <h5>Lorem Ipsum</h5>
+{% endblock %}
