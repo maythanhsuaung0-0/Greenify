@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
-from Forms import CreateUserForm, CreateProductForm
+from Forms import CreateUserForm
 import shelve, User, SellerProduct
+from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 

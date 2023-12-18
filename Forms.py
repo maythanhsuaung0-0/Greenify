@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, FileField, TextAreaField, IntegerField, FloatField, validators
+from wtforms import Form, StringField, validators
 from wtforms.validators import DataRequired
 from wtforms.fields import EmailField
 
@@ -11,9 +11,4 @@ class CreateUserForm(Form):
                                        validators.Regexp(regex="[a-zA-Z0-9]")])
 
 
-class CreateProductForm(Form):
-    product_name = StringField('Product Name', [validators.Length(min=1, max=150), validators.DataRequired()])
-    product_price = FloatField('Price', validators.DataRequired())
-    product_stock = IntegerField('Stock', validators.DataRequired())
-    image = FileField('Image File', [validators.regexp, validators.DataRequired()])
-    description = TextAreaField('Product Description')
+
