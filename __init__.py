@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 from Forms import CreateUserForm, CreateProductForm
 import shelve, User, SellerProduct
+from applicationForm import ApplicationForm
+from application import ApplicationFormFormat as AppFormFormat
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -67,6 +69,34 @@ def create_product():
         # return redirect()
     return render_template('createProduct.html', form=create_product_form)
 
+@app.route('/respond')
+def respond():
+    return render_template('respondPage.html')
+
+@app.route("/register",methods = ['GET','POST'])
+def register():
+    registration_form = ApplicationForm(request.form)
+    if request.method == 'POST' and registration_form.validate():
+        application_form = {}
+        db = shelve.open('application.db','c')
+        try:
+            application_form = db['Application']
+        except:
+            print("Error in retrieving application from application.db")
+        # create an instance appForm of class
+        appForm = AppFormFormat(registration_form.business_name.data, registration_form.seller_email.data, registration_form.business_desc.data, registration_form.support_document.data)
+        print("appForm", appForm)
+        application_form[appForm.get_application_id()] = appForm
+        db['Application'] = application_form
+        # testing
+        application_form = db['Application']
+        appForm = application_form[appForm.get_application_id()]
+        print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
+              appForm.get_application_id())
+
+        db.close()
+        return redirect(url_for('respond'))
+    return render_template('registration.html', form = registration_form)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

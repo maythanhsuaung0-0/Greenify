@@ -1,0 +1,17 @@
+.w-small{
+    width: 100%;
+}
+.m-auto{
+    margin: auto;
+}
+.grid-box{
+    display: grid;
+    gap: 1em;
+}
+
+@media screen and (min-width: 1024px) {
+    .w-small{
+        width: 50%;
+    }
+    
+}
