@@ -71,7 +71,7 @@ def create_product():
 
 @app.route('/respond')
 def respond():
-    return render_template('respondPage.html')
+    return render_template('sellers_application/respondPage.html')
 
 @app.route("/register",methods = ['GET','POST'])
 def register():
@@ -96,7 +96,15 @@ def register():
 
         db.close()
         return redirect(url_for('respond'))
-    return render_template('registration.html', form = registration_form)
+    return render_template('sellers_application/registration.html', form = registration_form)
+
+@app.route('/staff/retrieveApplicationForms')
+def retrieveApplicationForms():
+    return render_template('staff/retrieveAppForms.html')
+
+# @app.route('/staff/dashboard')
+# def dashboard():
+#     return render_template('staff/dashboard')
 
 if __name__ == "__main__":
     app.run(debug=True)
