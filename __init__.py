@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
-from Forms import CreateUserForm
-import shelve, User
+from Forms import CreateUserForm, CreateProductForm
+import shelve, User, SellerProduct
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -44,6 +44,29 @@ def create_user():
 @app.route("/login")
 def login():
     return render_template("login.html")
+
+
+@app.route('/createProduct', methods=['GET', 'POST'])
+def create_product():
+    create_product_form = CreateProductForm(request.form)
+    if request.method == 'POST' and create_product_form.validate():
+        sellerProduct = {}
+        db = shelve.open('seller-product.db', 'c')
+
+        try:
+            sellerProduct = db['SellerProducts']
+
+        except:
+            print("Error in retrieving Seller Products from seller-product.db.")
+        sellerproduct = SellerProduct.SellerProduct(create_product_form.product_name.data, create_product_form.product_price.data, create_product_form.product_stock.data, create_product_form.description.data)
+        sellerProduct[sellerproduct.get_product_id()] = sellerproduct
+        db['SellerProducts'] = sellerProduct
+
+        db.close()
+
+        # return redirect()
+    return render_template('createProduct.html', form=create_product_form)
+
 
 if __name__ == "__main__":
     app.run()
