@@ -53,21 +53,19 @@ def login():
 def create_product():
     create_product_form = CreateProductForm(request.form)
     if request.method == 'POST' and create_product_form.validate():
-        sellerProduct = {}
+        seller_product = {}
         db = shelve.open('seller-product.db', 'c')
 
         try:
-            sellerProduct = db['SellerProducts']
+            seller_product = db['SellerProducts']
 
         except:
             print("Error in retrieving Seller Products from seller-product.db.")
-        sellerproduct = SellerProduct.SellerProduct(create_product_form.product_name.data, create_product_form.product_price.data, create_product_form.product_stock.data, create_product_form.description.data)
-        sellerProduct[sellerproduct.get_product_id()] = sellerproduct
-        db['SellerProducts'] = sellerProduct
+        sellerproduct = SellerProduct.SellerProduct(create_product_form.product_name.data, create_product_form.product_price.data, create_product_form.product_stock.data, create_product_form.image.data, create_product_form.description.data)
+        seller_product[sellerproduct.get_product_id()] = sellerproduct
+        db['SellerProducts'] = seller_product
 
         db.close()
-
-        # return redirect()
     return render_template('createProduct.html', form=create_product_form)
 
 @app.route('/respond')
