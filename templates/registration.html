@@ -5,7 +5,7 @@
 
 <div class="w-small m-auto">
     <h3 class="pb-3">Registration</h3>
-    <form class="grid-box">
+    <form class="grid-box" method="POST" action="">
         <div class="form-group">
             {{render_field(form.business_name, class="form-control mt-1")}}
           </div>
@@ -18,7 +18,7 @@
  
             <div class="form-group">
             {{render_field(form.support_document, class="form-control mt-1")}}
-          </form>
+            </div>
         <div class="pt-3">
             <button type="submit" class="btn btn-primary">Submit</button>
         </div>

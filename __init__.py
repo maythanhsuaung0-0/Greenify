@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for
 from Forms import CreateUserForm
 from applicationForm import ApplicationForm
-from application import ApplicationFormFormat
+from application import ApplicationFormFormat as AppFormFormat
 import shelve, User
 
 app = Flask(__name__, static_url_path='/static')
@@ -47,6 +47,10 @@ def create_user():
 def login():
     return render_template("login.html")
 
+@app.route('/respond')
+def respond():
+    return render_template('respondPage.html')
+
 @app.route("/register",methods = ['GET','POST'])
 def register():
     registration_form = ApplicationForm(request.form)
@@ -57,16 +61,19 @@ def register():
             application_form = db['Application']
         except:
             print("Error in retrieving application from application.db")
-        appForm = ApplicationFormFormat(registration_form.business_name.data, registration_form.seller_email.data, registration_form.business_desc.data, registration_form.support_document.data)
+        # create an instance appForm of class
+        appForm = AppFormFormat(registration_form.business_name.data, registration_form.seller_email.data, registration_form.business_desc.data, registration_form.support_document.data)
         print("appForm", appForm)
         application_form[appForm.get_application_id()] = appForm
         db['Application'] = application_form
-        #testing
+        # testing
         application_form = db['Application']
         appForm = application_form[appForm.get_application_id()]
-        print(appForm.get_business_name(), appForm.get_seller_email(), "was stored in application.db successfully with application_id ==", appForm.get_application_id())
+        print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
+              appForm.get_application_id())
+
         db.close()
-        return redirect(url_for('home'))
+        return redirect(url_for('respond'))
     return render_template('registration.html', form = registration_form)
 
 if __name__ == "__main__":
