@@ -97,5 +97,6 @@ def register():
         return redirect(url_for('respond'))
     return render_template('registration.html', form = registration_form)
 
+
 if __name__ == "__main__":
     app.run(debug=True)
