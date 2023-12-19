@@ -64,7 +64,24 @@ def create_product():
         db['SellerProducts'] = seller_product
 
         db.close()
-    return render_template('createProduct.html', form=create_product_form)
+        return redirect(url_for('retrieve_product'))
+    return render_template('seller/createProduct.html', form=create_product_form)
+
+
+@app.route('/seller/retrieveProduct')
+def retrieve_product():
+    seller_product = {}
+    db = shelve.open('seller-product.db', 'r')
+    seller_product = db['SellerProducts']
+    db.close()
+
+    product_list = []
+    for key in seller_product:
+        products = seller_product.get(key)
+        product_list.append(products)
+
+    return render_template('seller/retrieveProducts.html', count=len(product_list), product_list=product_list)
+
 
 @app.route('/respond')
 def respond():

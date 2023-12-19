@@ -1,0 +1,41 @@
+{% extends "seller/sellerBaseLayout.html" %}
+{% from "seller/sellerDataComponent.html" import dataComponent %}
+{% block title %}View Products{% endblock %}
+{% block content %}
+<h3>View Products</h3>
+<div class="py-3 d-flex flex-column gap-2">
+    {% if count == 0 %}
+    <div class="d-flex justify-content-center align-items-center">
+        <h4>No products added</h4>
+    </div>
+    {% elif count > 0 %}
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="">Total products: <b>{{count}}</b></div>
+        <div class="">
+            <button class="btn btn-light">Filter by Date</button>
+        </div>
+    </div>
+    <div class="d-flex flex-column gap-2">
+        <div class='card'>
+            <div class="row card-body head">
+                <div class="col-1 text-center">ID</div>
+                <div class="col-2 text-center">Product Name</div>
+                <div class="col-3 text-center">Product Description</div>
+                <div class="col-1 text-center">Price</div>
+                <div class="col-1 text-center">Stock</div>
+                <div class="col-2 text-center">Actions</div>
+                <div class="col-1 text-center"></div>
+            </div>
+            </div>
+          </div>
+          {% for i in product_list %}
+          {{dataComponent(i.get_product_id(), i.get_product_name(),i.get_description(), i.get_product_price(), i.get_product_stock())}}
+          {% endfor %}
+    </div>
+    {% endif %}
+
+
+
+
+</div>
+{% endblock %}
