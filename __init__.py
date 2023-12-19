@@ -6,8 +6,6 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 
 app = Flask(__name__, static_url_path='/static')
-
-
 @app.route("/")
 def home():
     return render_template("homepage.html")
@@ -70,7 +68,7 @@ def create_product():
 
 @app.route('/respond')
 def respond():
-    return render_template('respondPage.html')
+    return render_template('sellers_application/respondPage.html')
 
 @app.route("/register",methods = ['GET','POST'])
 def register():
@@ -83,7 +81,8 @@ def register():
         except:
             print("Error in retrieving application from application.db")
         # create an instance appForm of class
-        appForm = AppFormFormat(registration_form.business_name.data, registration_form.seller_email.data, registration_form.business_desc.data, registration_form.support_document.data)
+        # ----haven't done changing types and storing files-----
+        appForm = AppFormFormat(registration_form.business_name.data, registration_form.seller_email.data, registration_form.business_desc.data,registration_form.support_document.data)
         print("appForm", appForm)
         application_form[appForm.get_application_id()] = appForm
         db['Application'] = application_form
@@ -95,7 +94,29 @@ def register():
 
         db.close()
         return redirect(url_for('respond'))
-    return render_template('registration.html', form = registration_form)
+    return render_template('sellers_application/registration.html', form = registration_form)
+
+@app.route('/staff/retrieveApplicationForms')
+def retrieveApplicationForms():
+    app_dict = {}
+    db = shelve.open('application.db','r')
+    app_dict = db['Application']
+    db.close()
+
+    app_list = []
+    for key in app_dict:
+        forms = app_dict.get(key)
+        app_list.append(forms)
+    print('1st data', app_list[0].get_doc())
+    return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list = app_list)
+
+@app.route('/staff/retrieveUpdateForms')
+def retrieveUpdateForms():
+    return render_template('staff/retrieveUpdateForms.html')
+
+# @app.route('/staff/dashboard')
+# def dashboard():
+#     return render_template('staff/dashboard')
 
 
 if __name__ == "__main__":
