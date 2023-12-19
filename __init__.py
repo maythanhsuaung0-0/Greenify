@@ -47,7 +47,7 @@ def login():
     return render_template("login.html")
 
 
-@app.route('/createProduct', methods=['GET', 'POST'])
+@app.route('/seller/createProduct', methods=['GET', 'POST'])
 def create_product():
     create_product_form = CreateProductForm(request.form)
     if request.method == 'POST' and create_product_form.validate():
@@ -65,10 +65,10 @@ def create_product():
 
         db.close()
         return redirect(url_for('retrieve_product'))
-    return render_template('seller/createProduct.html', form=create_product_form)
+    return render_template('createProduct.html', form=create_product_form)
 
 
-@app.route('/seller/retrieveProduct')
+@app.route('/seller/retrieveProducts')
 def retrieve_product():
     seller_product = {}
     db = shelve.open('seller-product.db', 'r')
@@ -80,7 +80,7 @@ def retrieve_product():
         products = seller_product.get(key)
         product_list.append(products)
 
-    return render_template('seller/retrieveProducts.html', count=len(product_list), product_list=product_list)
+    return render_template('retrieveProducts.html', count=len(product_list), product_list=product_list)
 
 
 @app.route('/respond')
