@@ -11,17 +11,21 @@
     {% block JS_CSS %}{% endblock %}
 </head>
 {% macro dataComponent(id,name,desc) -%}
-      <div class='dataContainer'>
-        <div class="id">{{id}}</div>
-        <div class="name">{{name}}</div>
-        <div class="description">{{desc}}</div>
-        <div class="certificate">
-            null
+      <div class='card'>
+        <div class="row card-body">
+            <div class="col-1 text-center">{{id}}</div>
+        <div class="col-2 text-center">{{name}}</div>
+        <div class="col-4 text-center">{{desc}}</div>
+        <div class="col-2 text-center">
+            certificate
         </div>
-        <div class="btns">
+        <div class="col-2 text-center">
             <button class="btn btn-primary btn-sm">Approve</button>
-            <button class="btn btn-primary btn-sm">Reject</button>
+            <button class="btn btn-danger btn-sm">Reject</button>
         </div>
-        <div class="expand">expand</div>
+        <div class="col-1 text-center">
+            <button class="btn btn-sm btn-light"><i class="fa-solid fa-caret-down"></i></button>
+        </div>
+        </div>
       </div>
   {%- endmacro %}

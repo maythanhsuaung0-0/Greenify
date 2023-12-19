@@ -3,3 +3,9 @@
     grid-template-columns: 5% 35% 35% 20% 5%;
     gap: 1em;
 }
+.profile-sm{
+    width: 2em;
+    height:2em;
+    border-radius: 50%;
+    object-fit: cover;
+}

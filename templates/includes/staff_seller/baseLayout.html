@@ -15,34 +15,35 @@
     {% block JS_CSS %}{% endblock %}
     <!-- fontawesome for icons -->
     <script src="https://kit.fontawesome.com/344ef59591.js" crossorigin="anonymous"></script>
+
 </head>
 <body>
     <div class="sidebar">
         <div class="side-nav">
-            <div class="logo">
+            <div class="logo" id="mylogo">
                 <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="logo">
             </div>
-            <a class="" href="/staff/dashboard">
+            <a class="side-nav-link" id="dashboard" href="/staff/dashboard">
                 <i class="fa-solid fa-chart-line"></i>
                 <span class="nav-link-text">Dashboard</span>
             </a>
-            <a class="active" href="/staff/retrieveSellers">
+            <a class="side-nav-link" id="business" href="/staff/retrieveSellers">
                 <i class="fa-solid fa-users"></i>
                 <span class="nav-link-text">Businesses</span>
             </a>
-            <a href="/staff/retrieveAppForms">
+            <a class="side-nav-link" id="appForm" href="/staff/retrieveApplicationForms">
                 <i class="fa-solid fa-list"></i>
                 <span class="nav-link-text">Application Forms</span> 
             </a>
-            <a href="/staff/retrieveUpdateForms">
+            <a class="side-nav-link" id="updateForm" href="/staff/retrieveUpdateForms">
                 <i class="fa-solid fa-star"></i>
                 <span class="nav-link-text">Update Forms</span>  
             </a>
-            <!-- <a href="/staff/retrieveDeleteForms">
+            <!-- <a class="side-nav-link" href="/staff/retrieveDeleteForms">
                 <i class="fa-solid fa-trash"></i>
                 <span class="nav-link-text">Delete Forms</span>
             </a> -->
-            <a href="/staff/profileSetting">
+            <a class="side-nav-link" id="setting" href="/staff/profileSetting">
                 <i class="fa-solid fa-gear"></i>
                 <span class="nav-link-text">Profile</span>
             </a>
@@ -51,5 +52,8 @@
       <div class="content">
         {% block content %} {% endblock %}
       </div>
+    <!-- own script -->
+    <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
 </body>
+
 </html>

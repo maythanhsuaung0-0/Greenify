@@ -19,8 +19,9 @@ body {
   }
   .logo{
     padding: 1em 2em;
+    cursor: pointer;
   }
-  .side-nav a {
+  .side-nav-link {
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -30,12 +31,12 @@ body {
     text-decoration: none;
   }
    
-  .side-nav a.active {
+  .active {
     font-weight: bold;
     color: black;
   }
   
-  .side-nav a:hover:not(.active) {
+  .side-nav-link:hover:not(.active) {
     background-color: #555;
     color: white;
   }
@@ -45,19 +46,22 @@ body {
     padding:1em 2em;
     height: 1000px;
   }
-  
+  /* for staff side card */
+  .head{
+    font-weight: bold;
+}
   @media screen and (max-width: 700px) {
     .side-nav {
       width: 100%;
       height: auto;
       position: relative;
     }
-    .side-nav a {float: left;}
+    .side-nav-link {float: left;}
     div.content {margin-left: 0;}
   }
   
   @media screen and (max-width: 400px) {
-    .side-nav a {
+    .side-nav-link {
       text-align: center;
       float: none;
     }
