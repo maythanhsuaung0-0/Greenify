@@ -15,17 +15,22 @@
         <div class="row card-body">
             <div class="col-1 text-center">{{id}}</div>
         <div class="col-2 text-center">{{name}}</div>
-        <div class="col-4 text-center">{{desc}}</div>
+        <div class="col-4 text-center text-truncate">{{desc}}</div>
         <div class="col-2 text-center">
             certificate
         </div>
-        <div class="col-2 text-center">
-            <button class="btn btn-primary btn-sm">Approve</button>
+        <div class="col-3 text-center">
+           <form class="d-inline" action="{{url_for('approve_form', id= id)}}" method="post">
+                <input id="approve_btn" type="submit" class="btn btn-primary btn-sm" name="id" value="Approve"
+                onclick="return confirm('Are you sure you want to approve {{name}}?')"
+                >
+           </form>
             <button class="btn btn-danger btn-sm">Reject</button>
         </div>
-        <div class="col-1 text-center">
-            <button class="btn btn-sm btn-light"><i class="fa-solid fa-caret-down"></i></button>
-        </div>
+        <!-- <div class="col-1 text-center">
+            <button class="btn btn-sm btn-light"><i class="fa-solid fa-caret-down"></i></button> 
+        </div> -->
         </div>
       </div>
   {%- endmacro %}
+  <script src="{{url_for('static', filename='js/components.js')}}"></script>

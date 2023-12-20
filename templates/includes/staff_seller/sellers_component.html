@@ -1,0 +1,36 @@
+<head>
+    <!-- bootstrap -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components.css') }}">
+    {% block JS_CSS %}{% endblock %}
+</head>
+{% macro dataComponent(form) -%}
+      <div class='card'>
+        <div class="row card-body">
+            <div class="col-1 text-center">{{form.get_id()}}</div>
+        <div class="col-2 text-center">{{form.get_name()}}</div>
+        <div class="col-5 text-center text-truncate">{{form.get_desc()}}</div>
+        <div class="col-2 text-center">
+            certificate
+        </div>
+        <div class="col-2 text-center">
+           <form class="d-inline" action="" method="post">
+                <input  type="submit" class="btn btn-primary btn-sm" name="id" value="Update"/>
+           </form>
+           <form class="d-inline" action="" method="post">
+            <input  type="submit" class="btn btn-danger btn-sm" name="id" value="Delete"/>
+       </form>
+        </div>
+        <!-- <div class="col-1 text-center">
+            <button class="btn btn-sm btn-light"><i class="fa-solid fa-caret-down"></i></button> 
+        </div> -->
+        </div>
+      </div>
+  {%- endmacro %}
+  <script src="{{url_for('static', filename='js/components.js')}}"></script>

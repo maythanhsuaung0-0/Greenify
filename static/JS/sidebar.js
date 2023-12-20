@@ -22,7 +22,7 @@ function showActiveNavLink() {
         updateForm.classList.remove("active");
         setting.classList.remove("active");
     }
-    if (currentPathname == "/staff/business") { 
+    if (currentPathname == "/staff/retrieveSellers") {
         business.classList.add("active");
         // Remove active class from other elements
         dashboard.classList.remove("active");

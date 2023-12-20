@@ -98,7 +98,7 @@ def register():
         except:
             print("Error in retrieving application from application.db")
         # create an instance appForm of class
-        # ----haven't done changing types and storing files-----
+        # ----haven't done storing files-----
         appForm = AppFormFormat(registration_form.business_name.data, registration_form.seller_email.data, registration_form.business_desc.data,registration_form.support_document.data)
         print("appForm", appForm)
         application_form[appForm.get_application_id()] = appForm
@@ -124,12 +124,48 @@ def retrieveApplicationForms():
     for key in app_dict:
         forms = app_dict.get(key)
         app_list.append(forms)
-    print('1st data', app_list[0].get_doc())
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list = app_list)
 
 @app.route('/staff/retrieveUpdateForms')
 def retrieveUpdateForms():
     return render_template('staff/retrieveUpdateForms.html')
+
+# for approving forms
+@app.route('/staff/approveForm/<int:id>', methods = ['POST'])
+def approve_form(id):
+    app_dict = {}
+    db = shelve.open('application.db', 'w')
+    app_dict = db['Application']
+    approved = app_dict.pop(id)
+    db['Application'] = app_dict
+    db.close()
+    print("This user is approved", approved.get_application_id())
+    # storing approved sellers
+    approved_sellers = {}
+    approved_db = shelve.open('approved_sellers.db','c')
+    try:
+        approved_sellers = approved_db['Approved_sellers']
+    except:
+        print("Error in retrieving sellers from application.db")
+    approved_sellers[approved.get_application_id()] = approved
+    approved_db['Approved_sellers'] = approved_sellers
+    print("approved seller is ---", approved_sellers)
+    approved_db.close()
+    return redirect(url_for('retrieveApplicationForms'))
+
+@app.route('/staff/retrieveSellers')
+def retrieveSellers():
+    approved_sellers = {}
+    approved_db = shelve.open('approved_sellers.db','r')
+    approved_sellers = approved_db['Approved_sellers']
+    approved_db.close()
+
+    sellers_list = []
+    for key in approved_sellers:
+        forms = approved_sellers.get(key)
+        sellers_list.append(forms)
+    return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers = sellers_list)
+
 
 # @app.route('/staff/dashboard')
 # def dashboard():
