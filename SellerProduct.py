@@ -42,3 +42,4 @@ class SellerProduct:
 
     def get_description(self):
         return self.__description
+

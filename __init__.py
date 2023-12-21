@@ -84,7 +84,7 @@ def retrieve_product():
 
 
 @app.route('/seller/updateProduct/<int:id>/', methods=['GET', 'POST'])
-def update_product():
+def update_product(id):
     update_product_form = CreateProductForm(request.form)
     if request.method == 'POST' and update_product_form.validate():
         db = shelve.open('seller-product.db', 'w')
