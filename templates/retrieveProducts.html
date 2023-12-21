@@ -25,15 +25,16 @@
                 <div class="col-3 text-center">Description</div>
                 <div class="col-1 text-center">Price</div>
                 <div class="col-1 text-center">Stock</div>
+
                 <div class="col-2 text-center">
                     Actions
                 </div>
                 <div class="col-1 text-center"></div>
                 </div>
-          </div>
-          {% for i in product_list %}
-          {{dataComponent(i.get_product_id(),i.get_product_name(),i.get_description(), i.get_product_price(), i.get_product_stock())}}
-          {% endfor %}
+        </div>
+        {% for i in product_list %}
+        <div>{{dataComponent(i.get_product_id(), i.get_product_name(), i.get_description(), i.get_product_price(), i.get_product_stock())}}</div>
+        {% endfor %}
     </div>
     {% endif %}
 
