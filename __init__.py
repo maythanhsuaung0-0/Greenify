@@ -31,20 +31,21 @@ def create_user():
         users_dict[user.get_user_id()] = user
         db['Users'] = users_dict
 
-        # Test codes
-        users_dict = db['Users']
-        user = users_dict[user.get_user_id()]
-        print(user.get_first_name(), user.get_last_name(), "was stored in user.db successfully with user_id ==", user.get_user_id())
-
         db.close()
 
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
     return render_template('createUser.html', form=create_user_form)
 
 
-@app.route("/login")
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template("login.html")
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+            error = 'Invalid Credentials. Please try again.'
+        else:
+            return redirect(url_for('home'))
+    return render_template('login.html', error=error)
 
 
 @app.route('/seller/createProduct', methods=['GET', 'POST'])
