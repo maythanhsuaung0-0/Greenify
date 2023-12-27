@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from Forms import CreateUserForm
 import shelve, User, SellerProduct
 from sellerproductForm import CreateProductForm
@@ -6,6 +8,16 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 
 app = Flask(__name__, static_url_path='/static')
+db = SQLAlchemy(app) # creates the database instance
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db' # connects init to database.db
+app.config['SECRET_KEY'] = 'key'
+
+
+class Users(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(nullable=False)
+    password = db.Column(db.string(30), nullable=False)
+
 @app.route("/")
 def home():
     return render_template("homepage.html")
@@ -41,7 +53,7 @@ def create_user():
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != 'admin' or request.form['password'] != 'admin':
+        if request.form['email'] != 'admin' or request.form['password'] != 'admin':
             error = 'Invalid Credentials. Please try again.'
         else:
             return redirect(url_for('home'))
