@@ -1,13 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for
 from Forms import CreateUserForm
-import shelve, SellerProduct
-import os
-import sqlite3
+import shelve, User, SellerProduct
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 
-currentlocation = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__, static_url_path='/static')
 
 @app.route("/")
@@ -23,39 +20,35 @@ def product():
 def create_user():
     create_user_form = CreateUserForm(request.form)
     if request.method == 'POST' and create_user_form.validate():
-        rem = request.form['email']
-        rp = request.form['password']
-        sqlconnection = sqlite3.Connection(currentlocation + "SQLite_Python.db")
-        cursor = sqlconnection.cursor()
-        query1 = "INSERT INTO User VALUES('{e}','{p}')".format(e=rem, p=rp)
-        cursor.execute(query1)
-        sqlconnection.commit()
-        return redirect("/")
+        users_dict = {}
+        db = shelve.open('user.db', 'c')
+
+        try:
+            users_dict = db['Users']
+        except:
+            print("Error in retrieving Users from user.db.")
+
+        user = User.User(create_user_form.email.data, create_user_form.password.data)
+        users_dict[user.get_email()] = user
+        db['Users'] = users_dict
+
+        db.close()
+
+        return redirect(url_for('login'))
     return render_template('createUser.html', form=create_user_form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # error = None
-    # if request.method == 'POST':
-    #     if request.form['email'] != 'admin' or request.form['password'] != 'admin':
-    #         error = 'Invalid Credentials. Please try again.'
-    #     else:
-    #         return redirect(url_for('home'))
-    # return render_template('login.html', error=error)
-
-    if request.method == 'GET':
-        le = request.form['Email']
-        lp = request.form['Password']
-        sqlconnection = sqlite3.Connection(currentlocation + "SQLite_Python.db")
-        cursor = sqlconnection.cursor()
-        query1 = "SELECT Email, Password from Users WHERE Email = {em} AND Password = {pw})".format(em=le, pw=lp)
-        rows = cursor.execute(query1)
-        rows = rows.fetchall()
-        if len(rows) == 1:
-            return render_template("homepage.html")
+    error = None
+    if request.method == 'POST':
+        user_file = open('user.db.bak', 'r')
+        contents = user_file.read()
+        if request.form['Email'] or request.form['Password'] in contents:
+            return redirect(url_for('home'))
         else:
-            return redirect('/createUser')
+            error = 'Invalid Credentials. Please try again.'
+    return render_template('login.html', error=error)
 
 
 @app.route('/seller/createProduct', methods=['GET', 'POST'])
