@@ -58,12 +58,14 @@ def login():
             error = 'Invalid Credentials. Please try again.'
     return render_template('login.html', error=error)
 
-
+@app.route('/staff')
 def staff_login():
-    if request.form['Email'] != '@dmin@gmail.com' or request.form['Password'] != 'admin':
-        error = 'Please try again.'
-    else:
-        return redirect(url_for('retrieveApplicationForms'))
+    error = None
+    if request.method == 'POST':
+        if request.form['Email'] != '@dmin@gmail.com' or request.form['Password'] != 'admin':
+            error = 'Please try again.'
+        else:
+            return redirect(url_for('retrieveApplicationForms'))
     return render_template('login.html', error=error)
 
 
