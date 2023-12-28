@@ -108,8 +108,19 @@ def create_product(seller_id):
                                                     create_product_form.description.data)
         seller_product[sellerproduct.get_product_id()] = sellerproduct
         db['SellerProducts'] = seller_product
-
         db.close()
+
+        sellers_db = shelve.open('SellerDetails.db', 'c')
+        sellers_dict = {}
+        try:
+            sellers_dict = sellers_db['SellerDetails']
+        except:
+            print("Error in storing Seller Products and Seller ID together in sellers_db.")
+
+        sellers_dict[seller_id] = sellerproduct.get_product_id()
+        sellers_db['SellerDetails'] = sellers_dict
+        sellers_db.close()
+
         return redirect(url_for('retrieve_product', seller_id=seller_id))
     return render_template('seller/createProduct.html', form=create_product_form)
 
@@ -122,6 +133,12 @@ def retrieve_product(seller_id):
     if seller_id not in approved_sellers:
         return "seller not found"
     approved_db.close()
+
+    # sellers_dict = {}
+    # sellers_db = shelve.open('SellerDetails.db', 'r')
+    # sellers_dict = sellers_db['SellerDetails']
+    # sellers_db.close()
+
     seller_product = {}
     db = shelve.open('seller-product.db', 'r')
     seller_product = db['SellerProducts']
