@@ -3,19 +3,7 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.12 (Greenify)" />
   </component>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12" project-jdk-type="Python SDK" />
-=======
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (Greenify)" project-jdk-type="Python SDK" />
->>>>>>> c6a985243a01cc90a98ad2185507dad01a153081
-=======
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (Greenify)" project-jdk-type="Python SDK" />
->>>>>>> parent of 1b380b8 (Updated Product Page)
-=======
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (Greenify)" project-jdk-type="Python SDK" />
->>>>>>> parent of 1b380b8 (Updated Product Page)
   <component name="PyCharmProfessionalAdvertiser">
     <option name="shown" value="true" />
   </component>
