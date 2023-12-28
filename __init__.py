@@ -14,6 +14,7 @@ def home():
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 @app.route("/Product/seller/<int:id>")
 def product(id):
     seller_product = {}
@@ -32,6 +33,12 @@ def product():
     return render_template("test_product.html")
 >>>>>>> parent of 1b380b8 (Updated Product Page)
 
+=======
+@app.route("/Product")
+def product():
+    return render_template("test_product.html")
+
+>>>>>>> parent of 1b380b8 (Updated Product Page)
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
