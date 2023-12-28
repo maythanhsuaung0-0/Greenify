@@ -11,10 +11,16 @@ app = Flask(__name__, static_url_path='/static')
 def home():
     return render_template("homepage.html")
 
-@app.route("/Product")
-def product():
-    return render_template("test_product.html")
+@app.route("/Product/seller/<int:id>")
+def product(id):
+    seller_product = {}
+    db = shelve.open('seller-product.db', 'r')
+    seller_product = db['SellerProducts']
+    db.close()
 
+    product = seller_product[id]
+
+    return render_template("test_product.html", product=product)
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():

@@ -6,6 +6,7 @@ class User:
         self.__user_id = User.count_id
         self.__email = email
         self.__password = password
+        self.products = None
 
     def get_user_id(self):
         return self.__user_id
@@ -16,6 +17,9 @@ class User:
     def get_password(self):
         return self.__password
 
+    def get_products(self):
+        return self.products
+
     def set_user_id(self, user_id):
         self.__user_id = user_id
 
@@ -24,3 +28,6 @@ class User:
 
     def set_password(self, password):
         self.__password = password
+
+    def set_products(self, product_list):
+        self.products = product_list

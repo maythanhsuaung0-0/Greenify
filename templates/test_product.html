@@ -1,8 +1,8 @@
-{% extends "Product base.html" %}
-{% block title%}Test Product Page{% endblock %}
+{% extends "Product_Base.html" %}
+{% block title%} "seller"-{{ product.get_product_name() }} {% endblock %}
 
 {% block product_name %}
-    Sustainable Container
+    {{ product.get_product_name() }}
 {% endblock %}
 
 {% block carousel_indicator %}
@@ -30,8 +30,12 @@
 {% block options %}
 {% endblock %}
 
+{% block price %}
+    ${{ product.get_product_price() }}
+{% endblock %}
+
 {% block product_desp %}
-    <h5>Lorem ipsum</h5>
+    <h5>{{ product.get_description() }}</h5>
 {% endblock %}
 
 {% block product_review %}

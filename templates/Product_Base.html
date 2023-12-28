@@ -1,14 +1,12 @@
-{% extends "Customer base.html" %}
-{% block JS_CSS %}
-  <script type="text/javascript" src="{{ url_for('static', filename='JS/product_base.js') }}"></script>
-{% endblock %}
+{% extends "Customer_Base.html" %}
+
 
 {% block body %}
 <div class="container-fluid">
   <div>
     <h1>{% block product_name %}{% endblock %}</h1>
   </div>
-  <div class="multimedia container">
+  <div class="image container">
     <div id="carouselIndicators" class="carousel slide">
       <div class="carousel-indicators">
         {% block carousel_indicator %}
@@ -42,6 +40,10 @@
     <i class="bi bi-dash-lg" onclick="decrement()"></i>
 
     <div>
+      <h5 id="price">{% block price %}{% endblock %}</h5>
+    </div>
+
+    <div>
       <button type="button" class="btn btn-secondary">Add to Cart</button>
     </div>
 
@@ -62,4 +64,8 @@
 
 </div>
 
+{% endblock %}
+
+{% block End_JS_CSS %}
+  <script type="text/javascript" src="{{ url_for('static', filename='JS/product_base.js') }}"></script>
 {% endblock %}
