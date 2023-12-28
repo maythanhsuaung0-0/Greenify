@@ -58,7 +58,21 @@ def login():
             return redirect('/createUser')
 
 
-def Seller(seller_id):
+# @app.route('/seller')
+# def retrieve_seller_id():
+#     approved_sellers = {}
+#     approved_db = shelve.open('approved_sellers.db', 'r')
+#     approved_sellers = approved_db['Approved_sellers']
+#     seller_id = []
+#     for key in approved_sellers.keys():
+#         seller_id.append(key)
+#
+#     approved_db.close()
+#     return seller_id
+
+
+@app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
+def create_product(seller_id):
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
     approved_sellers = approved_db['Approved_sellers']
@@ -66,10 +80,6 @@ def Seller(seller_id):
         return "seller not found"
     approved_db.close()
 
-
-@app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
-def create_product(seller_id):
-    Seller(seller_id)
     create_product_form = CreateProductForm(request.form)
     if request.method == 'POST' and create_product_form.validate():
         seller_product = {}
@@ -85,13 +95,18 @@ def create_product(seller_id):
         db['SellerProducts'] = seller_product
 
         db.close()
-        return redirect(url_for('retrieve_product'))
+        return redirect(url_for('retrieve_product', seller_id=seller_id))
     return render_template('seller/createProduct.html', form=create_product_form)
 
 
 @app.route('/seller/<int:seller_id>/retrieveProducts')
 def retrieve_product(seller_id):
-    Seller(seller_id)
+    approved_sellers = {}
+    approved_db = shelve.open('approved_sellers.db', 'r')
+    approved_sellers = approved_db['Approved_sellers']
+    if seller_id not in approved_sellers:
+        return "seller not found"
+    approved_db.close()
     seller_product = {}
     db = shelve.open('seller-product.db', 'r')
     seller_product = db['SellerProducts']
@@ -105,34 +120,33 @@ def retrieve_product(seller_id):
     return render_template('seller/retrieveProducts.html', count=len(product_list), product_list=product_list)
 
 
-@app.route('/seller/<int:seller_id>/updateProduct/<int:id>/', methods=['GET', 'POST'])
-def update_product(seller_id, id):
-    Seller(seller_id)
-    update_product_form = CreateProductForm(request.form)
-    if request.method == 'POST' and update_product_form.validate():
-        db = shelve.open('seller-product.db', 'w')
-        seller_product = db['SellerProducts']
-        sellerProduct = seller_product.get(id)
-        sellerProduct.set_product_name(update_product_form.product_name.data)
-        sellerProduct.set_product_price(update_product_form.product_price.data)
-        sellerProduct.set_product_stock(update_product_form.product_stock.data)
-        sellerProduct.set_description(update_product_form.description.data)
-        db['SellerProducts'] = seller_product
-        db.close()
-
-        return redirect(url_for('retrieve_product'))
-    else:
-        seller_product = {}
-        db = shelve.open('seller-product.db', 'r')
-        seller_product = db['SellerProducts']
-        db.close()
-        sellerProduct = seller_product.get(id)
-        update_product_form.product_name.data = sellerProduct.get_product_name()
-        update_product_form.product_price.data = sellerProduct.get_product_price()
-        update_product_form.product_stock.data = sellerProduct.get_product_stock()
-        update_product_form.description.data = sellerProduct.get_description()
-
-        return render_template('/seller/updateProduct.html', form=update_product_form)
+# @app.route('/seller/updateProduct/<int:id>/', methods=['GET', 'POST'])
+# def update_product(id):
+#     update_product_form = CreateProductForm(request.form)
+#     if request.method == 'POST' and update_product_form.validate():
+#         db = shelve.open('seller-product.db', 'w')
+#         seller_product = db['SellerProducts']
+#         sellerProduct = seller_product.get(id)
+#         sellerProduct.set_product_name(update_product_form.product_name.data)
+#         sellerProduct.set_product_price(update_product_form.product_price.data)
+#         sellerProduct.set_product_stock(update_product_form.product_stock.data)
+#         sellerProduct.set_description(update_product_form.description.data)
+#         db['SellerProducts'] = seller_product
+#         db.close()
+#
+#         return redirect(url_for('retrieve_product'))
+#     else:
+#         seller_product = {}
+#         db = shelve.open('seller-product.db', 'r')
+#         seller_product = db['SellerProducts']
+#         db.close()
+#         sellerProduct = seller_product.get(id)
+#         update_product_form.product_name.data = sellerProduct.get_product_name()
+#         update_product_form.product_price.data = sellerProduct.get_product_price()
+#         update_product_form.product_stock.data = sellerProduct.get_product_stock()
+#         update_product_form.description.data = sellerProduct.get_description()
+#
+#         return render_template('/seller/updateProduct.html', form=update_product_form)
 
 
 
