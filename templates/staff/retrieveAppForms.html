@@ -1,5 +1,5 @@
 {% extends "includes/staff_seller/baseLayout.html" %}
-{% from "includes/staff_seller/applicationForm_component.html" import dataComponent %}
+{% from "includes/staff_seller/accordion_component.html" import accordionComponent%}
 {% block title %}Application Forms{% endblock %}
 {% block content %}
 <h3>Application forms</h3>
@@ -31,7 +31,7 @@
             </div>
           </div>
           {% for i in app_list %}
-          <div>{{dataComponent(i.get_id(),i.get_name(),i.get_desc()
+          <div>{{accordionComponent(i.get_id(),i.get_name(),i.get_email(),i.get_desc(), i.get_doc(),'approve_form','reject_form',''
             )}}</div>
           {% endfor %}
           

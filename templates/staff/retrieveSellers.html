@@ -2,7 +2,7 @@
 {% from "includes/staff_seller/sellers_component.html" import dataComponent %}
 {% block title %}Application Forms{% endblock %}
 {% block content %}
-<h3>Application forms</h3>
+<h3>Businesses</h3>
 <div class="py-3 d-flex flex-column gap-2">
     {% if count == 0 %}
     <div class="d-flex justify-content-center align-items-center">
@@ -10,7 +10,7 @@
     </div>
     {% elif count > 0 %}
     <div class="d-flex justify-content-between align-items-center">
-        <div class="">Total Sellers :<b>{{count}}</b></div>
+        <div class="">Our beloved clients : <b>{{count}}</b></div>
         <div class="">
             <button class="btn btn-light">Filter by Date</button>
         </div>
@@ -20,17 +20,17 @@
             <div class="row card-body head">
                 <div class="col-1 text-center">ID</div>
             <div class="col-2 text-center">Business Name</div>
-            <div class="col-5 text-center">Business Description</div>
+            <div class="col-4 text-center">Business Description</div>
             <div class="col-2 text-center">
                 Certificates
             </div>
             <div class="col-2 text-center">
                 Actions
             </div>
-<!--           x-->
+            <div>   </div>
           </div>
           {% for i in sellers %}
-          <div>{{dataComponent(i)}}</div>
+          <div>{{dataComponent(i.get_id(),i.get_name(),i.get_desc(),i.get_doc())}}</div>
           {% endfor %}
           
     </div>

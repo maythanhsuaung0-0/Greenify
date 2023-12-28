@@ -10,27 +10,49 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components.css') }}">
     {% block JS_CSS %}{% endblock %}
 </head>
-{% macro dataComponent(form) -%}
-      <div class='card'>
-        <div class="row card-body">
-            <div class="col-1 text-center">{{form.get_id()}}</div>
-        <div class="col-2 text-center">{{form.get_name()}}</div>
-        <div class="col-5 text-center text-truncate">{{form.get_desc()}}</div>
-        <div class="col-2 text-center">
-            certificate
-        </div>
-        <div class="col-2 text-center">
-           <form class="d-inline" action="" method="post">
-                <input  type="submit" class="btn btn-primary btn-sm" name="id" value="Update"/>
-           </form>
-           <form class="d-inline" action="" method="post">
-            <input  type="submit" class="btn btn-danger btn-sm" name="id" value="Delete"/>
+{% macro dataComponent(id,name,desc,docs) -%}
+<div class="card">
+    <div
+    class="row card-body">
+    <div class="col-1 text-center">{{id}}</div>
+    <div class="col-2 text-center">{{name}}</div>
+    <div class="col-4 text-center text-truncate">{{desc}}</div>
+    <div class="col-2 text-center">certificate</div>
+    <div class="col-2 text-center">
+        <form class="d-inline" action="{{url_for('delete_form', id = id)}}" method="post">
+            <input  type="submit" class="btn btn-danger btn-sm" name="id" value="Delete" onclick="return confirm('Are you sure you want to delete {{name}}?')"/>
        </form>
-        </div>
-        <!-- <div class="col-1 text-center">
-            <button class="btn btn-sm btn-light"><i class="fa-solid fa-caret-down"></i></button> 
-        </div> -->
-        </div>
+    </div>
+    <div class="col-1">
+      <a class="btn btn-sm btn-light" data-bs-toggle="collapse" href="#collapse{{id}}" role="button" aria-expanded="false" aria-controls="collapse{{id}}"> <i class="fa-solid fa-caret-down"></i> </a>
+    </div>
+    </div>
+
+    <div class="row">
+        <div class="collapse multi-collapse" id="collapse{{id}}">
+          <div class="card card-body">
+              <div>
+                  <h6 class="fw-bold">Business Email</h6>
+                  <p>{{email}}</p>
+               </div>
+           <div>
+              <h6 class="fw-bold">Business Description</h6>
+              <p>{{desc}}</p>
+           </div>
+           <div>
+            <h6 class="fw-bold">Business Certificates</h6>
+            {{if certi == 'null'}}
+               <p>No certificates</p>
+           {{else}}
+           <div class="row">
+               <img src="{{certi}}">
+            </div>
+           {{endif}}
+           </div>
+          </div>
       </div>
+    </div>
+</div>
+     
   {%- endmacro %}
   <script src="{{url_for('static', filename='js/components.js')}}"></script>

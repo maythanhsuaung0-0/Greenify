@@ -1,12 +1,12 @@
 class ApplicationFormFormat:
     id = 0
-    def __init__(self, name, email, desc, doc):
+    def __init__(self, name, email, desc):
         ApplicationFormFormat.id += 1
         self.__id = ApplicationFormFormat.id
         self.__name = name
         self.__email = email
         self.__desc = desc
-        self.__doc = doc
+        self.__doc = None
 
     def get_id(self):
         return self.__id
