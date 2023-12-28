@@ -10,7 +10,7 @@
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/Customer base.css') }}">
-    {% block Head_JS_CSS %}{% endblock %}
+    {% block JS_CSS %}{% endblock %}
     <title>{% block title %}{% endblock%}</title>
 </head>
 <body>
@@ -74,6 +74,5 @@
     </div>
 
     {% block body %}{% endblock %}
-    {% block End_JS_CSS %}{% endblock %}
 </body>
 </html>
