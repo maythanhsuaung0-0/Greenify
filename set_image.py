@@ -17,11 +17,11 @@ def create_image_set(img_dir,img_name):
     image_extension = img_name.split('.')[-1]
     # for webp
     webp_img = image.copy()
-    fixed_height = 250
+    fixed_height = 1000
     height_percent = (fixed_height/float(webp_img.size[1]))
     width_size = int(float(webp_img.size[0])*float(height_percent))
     webp_img = webp_img.resize((width_size,fixed_height), PIL.Image.NEAREST)
-    webp_img.save(f"{os.path.join(img_dir, image_name)}.webp",'webp', optimize=True, quality=95)
+    webp_img.save(f"{os.path.join(img_dir, image_name)}.webp",'webp', optimize=True, quality=99)
 
     end = time.time()
     time_elapsed = end - start

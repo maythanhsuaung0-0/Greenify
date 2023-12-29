@@ -17,10 +17,19 @@
 
 </head>
 <body>
-<picture>
-  <source srcset="{{ url_for('static', filename='images/uploads/' + image_file) }}">
-  <img src="{{ url_for('static', filename='images/uploads/' + image_file) }}" class="img-fluid img-thumbnail" alt="...">
-</picture>
 
+<div class="container-fluid h-100">
+  <div class="row h-100">
+    <div class="col-md-12 h-100">
+      <!-- Your content goes here -->
+      <div class="d-flex align-items-center justify-content-center h-100">
+      <picture class="">
+  <source srcset="{{ image_url }}" type="image/svg+xml">
+  <img src="{{ image_url }}" class="img-fluid img-thumbnail" alt="...">
+</picture>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

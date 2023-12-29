@@ -1,5 +1,5 @@
 import secrets
-
+import shutil
 from flask import Flask, render_template, request, redirect, url_for
 from Forms import CreateUserForm
 import shelve, User, SellerProduct
@@ -23,6 +23,16 @@ def deleting(my_db,db_key,id):  #function for deleting and rejecting
     db[db_key] = form_dict
     db.close()
     return item
+
+
+def delete_folder(item):
+    filename = item.get_doc()
+    folder_path, _ = os.path.split(filename)
+    full_folder_path = os.path.join(app.config["UPLOAD_DIRECTORY"], folder_path)
+
+    if os.path.exists(full_folder_path):
+        shutil.rmtree(full_folder_path)
+        print(f"folder deleted: {full_folder_path}")
 
 
 @app.route("/")
@@ -176,9 +186,12 @@ def register():
         return redirect(url_for('respond'))
     return render_template('sellers_application/registration.html', form = registration_form)
 
-@app.route('/display_image/<filename>')
-def display_image(filename):
-    return render_template('display_image.html', image_file = filename)
+@app.route('/display_image/<filename>/<filepath>')
+# http://127.0.0.1:5000/static/images/uploads/52a7f27d655036e2a5bb150df85f9ba2/hotel_logo.webp
+def display_image(filename,filepath):
+    print(filename,filepath)
+    image_url = url_for('static',filename='images/uploads/'+ filename+ '/'+ filepath)
+    return render_template('display_image.html', image_url = image_url)
 
 @app.route('/staff/retrieveApplicationForms')
 def retrieveApplicationForms():
@@ -215,13 +228,9 @@ def approve_form(id):
 @app.route('/staff/rejectForm/<int:id>', methods =['POST']) #for rejecting forms
 def reject_form(id):
     rejected = deleting('application.db', 'Application', id)
-    filename = rejected.get_doc()
-    file_path = os.path.join(app.config["UPLOAD_DIRECTORY"], filename)
-
-    if os.path.exists(file_path):
-        os.remove(file_path)
-        print(f"folder deleted: {file_path}")
+    delete_folder(rejected)
     return redirect(url_for('retrieveApplicationForms'))
+
 
 @app.route('/staff/retrieveUpdateForms')
 def retrieveUpdateForms():
@@ -243,7 +252,8 @@ def retrieveSellers():
 
 @app.route('/staff/deleteForm/<int:id>', methods = ['POST'])
 def delete_form(id):
-    deleting('approved_sellers.db','Approved_sellers',id)
+    deleted_item = deleting('approved_sellers.db','Approved_sellers',id)
+    delete_folder(deleted_item)
     return redirect(url_for('retrieveSellers'))
 
 # @app.route('/staff/dashboard')

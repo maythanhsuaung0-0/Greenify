@@ -31,7 +31,7 @@
             </div>
           </div>
           {% for i in app_list %}
-          <div>{{accordionComponent(i.get_id(),i.get_name(),i.get_email(),i.get_desc(), i.get_doc(),'approve_form','reject_form',''
+          <div>{{accordionComponent(i.get_id(),i.get_name(),i.get_email(),i.get_desc(), i.get_doc().split('/')[0], i.get_doc().split('/')[1], i.get_doc(),'approve_form','reject_form',''
             )}}</div>
           {% endfor %}
           

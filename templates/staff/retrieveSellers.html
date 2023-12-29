@@ -30,7 +30,7 @@
             <div>   </div>
           </div>
           {% for i in sellers %}
-          <div>{{dataComponent(i.get_id(),i.get_name(),i.get_desc(),i.get_doc())}}</div>
+          <div>{{dataComponent(i.get_id(),i.get_name(),i.get_desc(),i.get_doc().split('/')[0], i.get_doc().split('/')[1],i.get_doc())}}</div>
           {% endfor %}
           
     </div>
