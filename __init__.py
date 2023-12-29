@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from Forms import CreateUserForm, LoginForm, StaffLoginForm
+from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
@@ -51,18 +51,18 @@ def create_user():
 def login():
     # error = None
     # if request.method == 'POST':
-    #     user_file = open('user.db.bak', 'r')
+    #     user_file = open('user.db', 'r')
     #     contents = user_file.read()
     #     if request.form['Email'] or request.form['Password'] in contents:
     #         return redirect(url_for('home'))
     #     else:
     #         error = 'Invalid Credentials. Please try again.'
     # return render_template('login.html', error=error)
-    login_form = LoginForm(request.form)
+    login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
         users_dict = {}
         db = shelve.open('user.db', 'r')
-        user_values = User.User(login_form.Email.data, login_form.Password.data)
+        user_values = User.User(login_form.email.data, login_form.password.data)
         try:
             if 'Users' in db:
                 users_dict = db["Users"]
@@ -74,6 +74,60 @@ def login():
             print("Error in opening user.db")
     return render_template('login.html', form=login_form)
 
+
+@app.route('/retrieveUsers')
+def retrieve_users():
+    users_dict = {}
+    db = shelve.open('user.db', 'r')
+    users_dict = db['Users']
+    db.close()
+
+    users_list = []
+    for key in users_dict:
+        user = users_dict.get(key)
+        users_list.append(user)
+
+    return render_template('retrieveUsers.html', count=len(users_list), users_list=users_list)
+
+
+@app.route('/updateUser/<int:id>/', methods=['GET', 'POST'])
+def update_user(id):
+    update_user_form = CreateUserForm(request.form)
+    if request.method == 'POST' and update_user_form.validate():
+        users_dict = {}
+        db = shelve.open('user.db', 'w')
+        users_dict = db['Users']
+
+        user = users_dict.get(id)
+        user.set_email(update_user_form.email.data)
+        user.set_password(update_user_form.password.data)
+
+        db['Users'] = users_dict
+        db.close()
+
+        return redirect(url_for('retrieve_users'))
+    else:
+        users_dict = {}
+        db = shelve.open('user.db', 'r')
+        users_dict = db['Users']
+        db.close()
+
+        user = users_dict.get(id)
+        update_user_form.email.data = user.get_email()
+        update_user_form.password.data = user.get_password()
+
+        return render_template('updateUser.html', form=update_user_form)
+
+
+@app.route('/deleteUser/<int:id>', methods=['POST'])
+def delete_user(id):
+    users_dict = {}
+    db = shelve.open('user.db', 'w')
+    users_dict = db['Users']
+    users_dict.pop(id)
+    db['Users'] = users_dict
+    db.close()
+    return redirect(url_for('retrieve_users'))
 
 @app.route('/stafflogin', methods=['GET', 'POST'])
 def staff_login():
