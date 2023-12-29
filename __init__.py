@@ -151,10 +151,14 @@ def delete_user(id):
     users_dict = {}
     db = shelve.open('user.db', 'w')
     users_dict = db['Users']
+
     users_dict.pop(id)
+
     db['Users'] = users_dict
     db.close()
+
     return redirect(url_for('retrieve_users'))
+
 
 @app.route('/stafflogin', methods=['GET', 'POST'])
 def staff_login():
