@@ -1,11 +1,38 @@
+import secrets
+import shutil
 from flask import Flask, render_template, request, redirect, url_for
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
+import os
+from set_image import create_image_set
+from werkzeug.utils import secure_filename
+from urllib.parse import quote
 
 app = Flask(__name__, static_url_path='/static')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/images/uploads"
+
+def deleting(my_db,db_key,id):  #function for deleting and rejecting
+    form_dict = {}
+    db = shelve.open(my_db, 'w')
+    form_dict = db[db_key]
+    item = form_dict.pop(id)
+    db[db_key] = form_dict
+    db.close()
+    return item
+
+
+def delete_folder(item):
+    filename = item.get_doc()
+    folder_path, _ = os.path.split(filename)
+    full_folder_path = os.path.join(app.config["UPLOAD_DIRECTORY"], folder_path)
+
+    if os.path.exists(full_folder_path):
+        shutil.rmtree(full_folder_path)
+        print(f"folder deleted: {full_folder_path}")
 
 
 @app.route("/")
@@ -264,12 +291,26 @@ def register():
             application_form = db['Application']
         except:
             print("Error in retrieving application from application.db")
-        # create an instance appForm of class
-        # ----haven't done storing files-----
+
+        # saving image
+        support_docs = request.files.get('support_document')
+        print(support_docs)
         appForm = AppFormFormat(registration_form.business_name.data, registration_form.seller_email.data,
-                                registration_form.business_desc.data, registration_form.support_document.data)
-        print("appForm", appForm)
+                                registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
+
+        if support_docs:
+            filename = secure_filename(support_docs.filename)
+            img_id = secrets.token_hex(16)
+            # Create
+            os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"],img_id))
+            support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"],img_id,filename))
+            image_dir = os.path.join(app.config["UPLOAD_DIRECTORY"],img_id)
+            create_image_set(image_dir,filename)
+            message = f"{img_id}/{filename.split('.')[0]}.webp"
+            appForm.set_doc(message)
+            print(message)
+
         db['Application'] = application_form
         # testing
         application_form = db['Application']
@@ -281,6 +322,13 @@ def register():
         return redirect(url_for('respond'))
     return render_template('sellers_application/registration.html', form=registration_form)
 
+
+@app.route('/display_image/<filename>/<filepath>')
+# http://127.0.0.1:5000/static/images/uploads/52a7f27d655036e2a5bb150df85f9ba2/hotel_logo.webp
+def display_image(filename,filepath):
+    print(filename,filepath)
+    image_url = url_for('static',filename='images/uploads/'+ filename+ '/'+ filepath)
+    return render_template('display_image.html', image_url = image_url)
 
 @app.route('/staff/retrieveApplicationForms')
 def retrieveApplicationForms():
@@ -296,22 +344,13 @@ def retrieveApplicationForms():
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
-@app.route('/staff/retrieveUpdateForms')
-def retrieveUpdateForms():
-    return render_template('staff/retrieveUpdateForms.html')
 
-
-# for approving forms
-@app.route('/staff/approveForm/<int:id>', methods=['POST'])
+@app.route('/staff/approveForm/<int:id>', methods = ['POST']) # for approving forms
 def approve_form(id):
-    app_dict = {}
-    db = shelve.open('application.db', 'w')
-    app_dict = db['Application']
-    approved = app_dict.pop(id)
-    db['Application'] = app_dict
-    db.close()
+    # take the approved application
+    approved = deleting('application.db', 'Application', id)
     print("This user is approved", approved.get_application_id())
-    # storing approved sellers
+    # store in the approved_sellers
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'c')
     try:
@@ -323,6 +362,17 @@ def approve_form(id):
     print("approved seller is ---", approved_sellers)
     approved_db.close()
     return redirect(url_for('retrieveApplicationForms'))
+
+@app.route('/staff/rejectForm/<int:id>', methods =['POST']) #for rejecting forms
+def reject_form(id):
+    rejected = deleting('application.db', 'Application', id)
+    delete_folder(rejected)
+    return redirect(url_for('retrieveApplicationForms'))
+
+
+@app.route('/staff/retrieveUpdateForms')
+def retrieveUpdateForms():
+    return render_template('staff/retrieveUpdateForms.html')
 
 
 @app.route('/staff/retrieveSellers')
@@ -338,6 +388,11 @@ def retrieveSellers():
         sellers_list.append(forms)
     return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
 
+@app.route('/staff/deleteForm/<int:id>', methods = ['POST'])
+def delete_form(id):
+    deleted_item = deleting('approved_sellers.db','Approved_sellers',id)
+    delete_folder(deleted_item)
+    return redirect(url_for('retrieveSellers'))
 
 # @app.route('/staff/dashboard')
 # def dashboard():
