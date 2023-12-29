@@ -1,6 +1,6 @@
 import secrets
 import shutil
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, json
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct
 from sellerproductForm import CreateProductForm
@@ -37,19 +37,21 @@ def delete_folder(item):
 
 @app.route("/")
 def home():
-    return render_template("homepage.html")
+    return render_template("customer/homepage.html")
 
 
-@app.route("/Product/seller/<int:id>")
+@app.route("/Product/seller/<int:id>", methods=['GET', 'POST'])
 def product(id):
     seller_product = {}
     db = shelve.open('seller-product.db', 'r')
     seller_product = db['SellerProducts']
     db.close()
 
-    product = seller_product[id]
+    if request.method == "POST":
+        product = json.loads(request.data)
+        print("Success")
 
-    return render_template("test_product.html", product=product)
+    return render_template("customer/test_product.html", product=seller_product[id])
 
 
 @app.route('/createUser', methods=['GET', 'POST'])

@@ -1,4 +1,5 @@
-{% extends "Customer base.html" %}
+{% extends "customer/Customer_Base.html" %}
+{% from "includes/_formHelper.html" import render_field %}
 
 {% block body %}
 <div class="container-fluid">
@@ -28,25 +29,28 @@
     </div>
   </div>
 
-  <div class="product-selection">
-    <h3>Product Options</h3>
-    {% block options %}
-    {% endblock %}
+  <form method="post">
+    <div class="product-selection">
+      <h3>Product Options</h3>
+      {% block options %}
+      {% endblock %}
 
-    <h5>Qty</h5>
-    <i class="bi bi-plus-lg" onclick="increment()"></i>
-    <span id="qty-count">1</span>
-    <i class="bi bi-dash-lg" onclick="decrement()"></i>
+      <h5>Qty</h5>
+      <i class="bi bi-plus-lg" id="increment"></i>
+      <span id="qty-count">1</span>
+      <i class="bi bi-dash-lg" id="decrement"></i>
 
-    <div>
-      <h5 id="price">{% block price %}{% endblock %}</h5>
+      <div>
+        <h5 id="price">{% block price %}{% endblock %}</h5>
+      </div>
+
+      <div>
+        <button type="button" class="btn btn-secondary" id="addCart">Add to Cart</button>
+      </div>
+
     </div>
+  </form>
 
-    <div>
-      <button type="button" class="btn btn-secondary">Add to Cart</button>
-    </div>
-
-  </div>
 
   <div class="product-desp">
     <h3>Product Description</h3>
@@ -66,5 +70,7 @@
 {% endblock %}
 
 {% block End_JS_CSS %}
+  {% include "customer/product_base_js.html" %}
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='JS/product_base.js') }}"></script>
 {% endblock %}
