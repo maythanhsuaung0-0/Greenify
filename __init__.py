@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from Forms import CreateUserForm
+from Forms import CreateUserForm, LoginForm, StaffLoginForm
 import shelve, User, SellerProduct
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
@@ -23,6 +23,7 @@ def product(id):
     product = seller_product[id]
 
     return render_template("test_product.html", product=product)
+
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
@@ -48,25 +49,38 @@ def create_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    error = None
-    if request.method == 'POST':
-        user_file = open('user.db.bak', 'r')
-        contents = user_file.read()
-        if request.form['Email'] or request.form['Password'] in contents:
-            return redirect(url_for('home'))
-        else:
-            error = 'Invalid Credentials. Please try again.'
-    return render_template('login.html', error=error)
+    # error = None
+    # if request.method == 'POST':
+    #     user_file = open('user.db.bak', 'r')
+    #     contents = user_file.read()
+    #     if request.form['Email'] or request.form['Password'] in contents:
+    #         return redirect(url_for('home'))
+    #     else:
+    #         error = 'Invalid Credentials. Please try again.'
+    # return render_template('login.html', error=error)
+    login_form = LoginForm(request.form)
+    if request.method == 'POST' and login_form.validate():
+        users_dict = {}
+        db = shelve.open('user.db', 'r')
+        user_values = User.User(login_form.Email.data, login_form.Password.data)
+        try:
+            if 'Users' in db:
+                users_dict = db["Users"]
+                if users_dict == user_values:
+                    return redirect(url_for('home'))
+            else:
+                return render_template('createUser.html')
+        except:
+            print("Error in opening user.db")
+    return render_template('login.html', form=login_form)
 
-@app.route('/staff')
+
+@app.route('/stafflogin', methods=['GET', 'POST'])
 def staff_login():
-    error = None
-    if request.method == 'POST':
-        if request.form['Email'] != '@dmin@gmail.com' or request.form['Password'] != 'admin':
-            error = 'Please try again.'
-        else:
+    stafflogin_form = StaffLoginForm(request.form)
+    if request.method == 'POST' and stafflogin_form.validate():
             return redirect(url_for('retrieveApplicationForms'))
-    return render_template('login.html', error=error)
+    return render_template('staff/staff_login.html', form=stafflogin_form)
 
 
 # @app.route('/seller')
