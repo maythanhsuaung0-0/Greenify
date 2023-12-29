@@ -5,7 +5,7 @@
 
 <div class="w-small m-auto">
     <h3 class="pb-3">Registration</h3>
-    <form class="grid-box" method="POST" action="">
+    <form class="grid-box" method="POST" action="" enctype="multipart/form-data">
         <div class="form-group">
             {{render_field(form.business_name, class="form-control mt-1")}}
           </div>
@@ -25,29 +25,3 @@
       </form>
 </div>
 {% endblock %}
-
-<!-- <form class="grid-box">
-    <div class="form-group">
-        <label for="biz_name">Business Name</label>
-        {{render_field(form.business_name, class="form-control mt-1")}}
-    <input type="text" class="form-control mt-1" id="biz_name" placeholder="Business Name">
-      </div>
-    <div class="form-group">
-      <label for="biz_email">Email address</label>
-      <input type="email" class="form-control mt-1" id="biz_email" aria-describedby="emailHelp" placeholder="Enter email">
-      <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-    </div>
-    <div class="form-group">
-        <label for="biz_name">Business Description</label>
-        <textarea class="form-control mt-1" name="biz_name" id="" cols="30" rows="5"></textarea>
-      </div>
-
-        <div class="form-group">
-          <label for="docs">Supporting Document</label>
-          <input type="file" class="form-control-file" id="docs"> <br>
-          <small id="emailHelp" class="form-text text-muted">Certificates or documents as a proof of sustainable business.</small>
-      </form>
-    <div class="pt-3">
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </div>
-  </form> -->
