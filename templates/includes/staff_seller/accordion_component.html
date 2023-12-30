@@ -23,14 +23,19 @@
   />
   {% block JS_CSS %}{% endblock %}
 </head>
-{% macro accordionComponent(id,name,email,desc,filename,filepath,img_link,action1,action2,msg) %}
+{% macro accordionComponent(id,name,email,desc,filename,filepath,img_link,date,action1,action2,msg) %}
 <div class="card">
       <div
       class="row card-body">
       <div class="col-1 text-center">{{id}}</div>
       <div class="col-2 text-center">{{name}}</div>
-      <div class="col-4 text-center text-truncate">{{desc}}</div>
-      <div class="col-2 text-center">certificate</div>
+      <div class="col-3 text-center text-truncate">{{desc}}</div>
+      {% if img_link == None %}
+          <div class="col-1 text-center">-</div>
+          {% else %}
+          <div class="col-1 text-center"><i class="fa-solid fa-check"></i></div>
+          {% endif %}
+       <div class="col-2 text-center">{{date}}</div>
       <div class="col-2 text-center">
         <form
           class="d-inline"
@@ -77,7 +82,7 @@
              </div>
              <div>
                 <h6 class="fw-bold">Business Certificates</h6>
-           {% if certi == None %}
+           {% if img_link == None %}
              <p>No certificates</p>
             {% else %}
                 <div class="row">
@@ -93,3 +98,5 @@
       </div>
   </div>
 {% endmacro %}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src=""></script>

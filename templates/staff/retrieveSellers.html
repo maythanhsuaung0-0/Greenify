@@ -20,17 +20,18 @@
             <div class="row card-body head">
                 <div class="col-1 text-center">ID</div>
             <div class="col-2 text-center">Business Name</div>
-            <div class="col-4 text-center">Business Description</div>
-            <div class="col-2 text-center">
+            <div class="col-3 text-center">Business Description</div>
+            <div class="col-1 text-center">
                 Certificates
             </div>
+                <div class="col-2 text-center">Date</div>
             <div class="col-2 text-center">
                 Actions
             </div>
-            <div>   </div>
+                <div class="col-1"></div>
           </div>
           {% for i in sellers %}
-          <div>{{dataComponent(i.get_id(),i.get_name(),i.get_desc(),i.get_doc().split('/')[0], i.get_doc().split('/')[1],i.get_doc())}}</div>
+          <div>{{dataComponent(i.get_id(),i.get_name(),i.get_desc(),i.get_doc().split('/')[0], i.get_doc().split('/')[1],i.get_doc(), i.get_date())}}</div>
           {% endfor %}
           
     </div>
