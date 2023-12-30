@@ -45,7 +45,7 @@
       </div>
 
       <div>
-        <button type="button" class="btn btn-secondary" id="addCart">Add to Cart</button>
+        <button type="button" class="btn btn-secondary" id="addCart" onclick="addToCart({{ product.get_product_id() }}, 'seller' )">Add to Cart</button>
       </div>
 
     </div>
@@ -70,7 +70,6 @@
 {% endblock %}
 
 {% block End_JS_CSS %}
-  {% include "customer/product_base_js.html" %}
   <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='JS/product_base.js') }}"></script>
 {% endblock %}

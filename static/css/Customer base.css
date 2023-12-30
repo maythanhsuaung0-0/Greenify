@@ -31,7 +31,7 @@ div.offcanvas-body ul li {
     width: 80px;
 }
 
-.navbar #cart-item-number {
+.navbar #cart-item-qty {
     height: 20px;
     width: 20px;
     font-weight: bold;

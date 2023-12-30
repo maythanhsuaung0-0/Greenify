@@ -7,9 +7,9 @@ from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 import os
-from set_image import create_image_set
-from werkzeug.utils import secure_filename
-from urllib.parse import quote
+# from set_image import create_image_set
+# from werkzeug.utils import secure_filename
+# from urllib.parse import quote
 
 app = Flask(__name__, static_url_path='/static')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
@@ -49,9 +49,41 @@ def product(id):
 
     if request.method == "POST":
         product = json.loads(request.data)
-        print("Success")
+        del product["cart_item_qty"]
 
-    return render_template("customer/test_product.html", product=seller_product[id])
+        send_data = json.loads(request.data)
+
+        #Saving Shopping Cart Items
+        #Dummy User (User persistent Log In not Developed)
+        users_shopping_cart = {}
+        shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+        try:
+            users_shopping_cart = shopping_cart_db["hi@gmail.com"]
+        except KeyError:
+            print("This user shopping cart is empty")
+        except:
+            print("Error in retrieving User Shopping Cart Info in user_shopping_cart.db")
+
+        #Check if Product has been added before
+        try:
+            saved_product = users_shopping_cart[product["seller"] + str(product["product_id"])]
+            saved_product["product_qty"] += product["product_qty"]
+            users_shopping_cart[product["seller"] + str(product["product_id"])] = saved_product
+            shopping_cart_db["hi@gmail.com"] = users_shopping_cart
+        except:
+            users_shopping_cart[product["seller"] + str(product["product_id"])] = product
+            shopping_cart_db["hi@gmail.com"] = users_shopping_cart
+
+        #Update Cart Qty
+        cart_qty = send_data["cart_item_qty"]
+        cart_qty = int(cart_qty)
+        product_qty = product["product_qty"]
+        cart_qty += product_qty
+
+        shopping_cart_db.close()
+        return json.jsonify({"data": cart_qty})
+
+    return render_template("customer/test_product.html", product=seller_product[id], seller="seller")
 
 
 @app.route('/createUser', methods=['GET', 'POST'])
