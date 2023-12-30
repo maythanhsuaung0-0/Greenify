@@ -40,8 +40,8 @@ def home():
     return render_template("customer/homepage.html")
 
 
-@app.route("/Product/seller/<int:id>", methods=['GET', 'POST'])
-def product(id):
+@app.route("/Product/<seller>/<int:id>", methods=['GET', 'POST'])
+def product(seller, id):
     seller_product = {}
     db = shelve.open('seller-product.db', 'r')
     seller_product = db['SellerProducts']
@@ -85,6 +85,20 @@ def product(id):
 
     return render_template("customer/test_product.html", product=seller_product[id], seller="seller")
 
+@app.route('/<user>/cart', methods=['GET', 'POST'])
+def shopping_cart(user):
+    users_shopping_cart = {}
+    shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+    try:
+        users_shopping_cart = shopping_cart_db[user]
+    except KeyError:
+        return render_template("customer/error_msg.html", msg="This user shopping cart is empty")
+    except:
+        print("Error in retrieving User Shopping Cart Info in user_shopping_cart.db")
+
+
+
+    return render_template("customer/shopping_cart.html", users_shopping_cart=users_shopping_cart)
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
@@ -226,37 +240,39 @@ def create_product(seller_id):
 
     create_product_form = CreateProductForm(request.form)
     if request.method == 'POST' and create_product_form.validate():
-        seller_product = {}
-        db = shelve.open('seller-product.db', 'c')
+        seller_products = {}
+        seller_product_db = shelve.open('seller-product.db', 'c')
 
         try:
-            seller_product = db['SellerProducts']
+            seller_products = seller_product_db[seller_id]
 
         except:
             print("Error in retrieving Seller Products from seller-product.db.")
-        sellerproduct = SellerProduct.SellerProduct(create_product_form.product_name.data,
+        create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                     create_product_form.product_price.data,
                                                     create_product_form.product_stock.data,
                                                     create_product_form.image.data,
                                                     create_product_form.description.data)
-        seller_product[sellerproduct.get_product_id()] = sellerproduct
-        db['SellerProducts'] = seller_product
-        db.close()
 
-        sellers_db = shelve.open('SellerDetails.db', 'c')
-        sellers_dict = {}
-        try:
-            sellers_dict = sellers_db['SellerDetails']
-        except:
-            print("Error in storing Seller Products and Seller ID together in sellers_db.")
+        seller_products[create_product.get_product_id()] = create_product
+        seller_product_db[seller_id] = seller_products
+        seller_product_db.close()
 
-        sellers_dict[seller_id] = sellerproduct.get_product_id()
-        sellers_db['SellerDetails'] = sellers_dict
-        sellers_db.close()
+
+
+        # sellers_db = shelve.open('SellerDetails.db', 'c')
+        # sellers_dict = {}
+        # try:
+        #     sellers_dict = sellers_db['SellerDetails']
+        # except:
+        #     print("Error in storing Seller Products and Seller ID together in sellers_db.")
+        #
+        # sellers_dict[seller_id] = sellerproduct.get_product_id()
+        # sellers_db['SellerDetails'] = sellers_dict
+        # sellers_db.close()
 
         return redirect(url_for('retrieve_product', seller_id=seller_id))
     return render_template('seller/createProduct.html', form=create_product_form)
-
 
 @app.route('/seller/<int:seller_id>/retrieveProducts')
 def retrieve_product(seller_id):

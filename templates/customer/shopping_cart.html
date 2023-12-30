@@ -1,0 +1,17 @@
+{% extends "customer/Customer_Base.html" %}
+{% block Head_JS_CSS %}{% endblock %}
+
+{% block title %} Shopping Cart{% endblock%}
+
+{% block body %}
+
+    <h1>Shopping Cart</h1>
+
+    <div class="product-showcase">
+        {% for product in users_shopping_cart %}
+    </div>
+
+
+{% endblock %}
+
+{% block End_JS_CSS %}{% endblock %}
