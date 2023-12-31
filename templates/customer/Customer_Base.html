@@ -56,7 +56,7 @@
             <!--Shopping Cart-->
             <a href="cart-page.html" class="btn cart-container col-1 position-relative">
                 <i class="bi bi-bag"></i>
-                <span id="cart-item-qty" class="badge rounded-pill text-black">0</span>
+                <span id="cart-item-qty" class="badge rounded-pill text-black">{{ saved_cart_qty }}</span>
             </a>
 
             <!--Account-->
@@ -69,10 +69,11 @@
 
 
 
-    <div class="container">
+    <div class="container-fluid content">
         <h1>Your Best Shopping Experience at Greenfiy</h1>
         {% block body %}{% endblock %}
     </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     {% block End_JS_CSS %}{% endblock %}
 </body>
 </html>

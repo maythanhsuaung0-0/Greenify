@@ -2,7 +2,7 @@ import secrets
 import shutil
 from flask import Flask, render_template, request, redirect, url_for, json
 from Forms import CreateUserForm, StaffLoginForm
-import shelve, User, SellerProduct
+import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
@@ -34,19 +34,68 @@ def delete_folder(item):
         shutil.rmtree(full_folder_path)
         print(f"folder deleted: {full_folder_path}")
 
+#Returning the qty for the cart icon
+def cart_qty(user):
+    saved_cart_qty = 0
+    shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+    try:
+        users_shopping_cart = shopping_cart_db[user]
+        saved_cart_qty = users_shopping_cart["cart_qty"]
+    except:
+        print("Error in loading cart qty db")
+    return saved_cart_qty
+
 
 @app.route("/")
 def home():
+    saved_cart_qty = cart_qty("hi@gmail.com")
     return render_template("customer/homepage.html")
 
 
-@app.route("/Product/<seller>/<int:id>", methods=['GET', 'POST'])
-def product(seller, id):
-    seller_product = {}
-    db = shelve.open('seller-product.db', 'r')
-    seller_product = db['SellerProducts']
-    db.close()
+@app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
+def product(seller, product_id):
+    def cart_qty(user):
+        saved_cart_qty = 0
+        shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+        try:
+            users_shopping_cart = shopping_cart_db[user]
+            saved_cart_qty = users_shopping_cart["cart_qty"]
+        except:
+            print("Error in loading cart qty db")
 
+        return saved_cart_qty
+
+
+    #Search for Seller Id
+    approved_sellers = {}
+    approve_seller_db = shelve.open('approved_sellers.db')
+    try:
+        approved_sellers = approve_seller_db['Approved_sellers']
+    except:
+        return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+    seller_found = False
+    for id in approved_sellers:
+        if seller == approved_sellers[id].get_name():
+            seller_id = approved_sellers[id].get_id()
+            seller_found = True
+    if seller_found == False:
+        return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+
+
+    #Retrieving Product for html to display
+    seller_products = {}
+    seller_product_db = shelve.open('seller-product.db', 'c')
+    try:
+        seller_products = seller_product_db[str(seller_id)]
+
+    except:
+        return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+
+    product = seller_products[product_id]
+    seller_product_db.close()
+
+
+    # Received AJAX Request for Add To Cart
     if request.method == "POST":
         product = json.loads(request.data)
         del product["cart_item_qty"]
@@ -56,49 +105,140 @@ def product(seller, id):
         #Saving Shopping Cart Items
         #Dummy User (User persistent Log In not Developed)
         users_shopping_cart = {}
+        user_selected_product = {}
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
         try:
             users_shopping_cart = shopping_cart_db["hi@gmail.com"]
+            user_selected_product = users_shopping_cart["selected_product"]
         except KeyError:
-            print("This user shopping cart is empty")
+            print("KeyError in opening saved cart items")
         except:
             print("Error in retrieving User Shopping Cart Info in user_shopping_cart.db")
 
+        user_selected_products = {}
+
         #Check if Product has been added before
         try:
-            saved_product = users_shopping_cart[product["seller"] + str(product["product_id"])]
+            saved_product = user_selected_product[product["seller"] + str(product["product_id"])]
             saved_product["product_qty"] += product["product_qty"]
-            users_shopping_cart[product["seller"] + str(product["product_id"])] = saved_product
+            user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
+            users_shopping_cart["selected_product"] = user_selected_product
             shopping_cart_db["hi@gmail.com"] = users_shopping_cart
         except:
-            users_shopping_cart[product["seller"] + str(product["product_id"])] = product
-            shopping_cart_db["hi@gmail.com"] = users_shopping_cart
+            user_selected_product[product["seller"] + str(product["product_id"])] = product
+            users_shopping_cart["selected_product"] = user_selected_product
 
         #Update Cart Qty
         cart_qty = send_data["cart_item_qty"]
         cart_qty = int(cart_qty)
-        product_qty = product["product_qty"]
-        cart_qty += product_qty
+        print(cart_qty)
+        saved_cart_qty = 0
+        try:
+            saved_cart_qty = users_shopping_cart["cart_qty"]
+        except:
+            print("Failed loading cart qty")
 
+        saved_cart_qty = cart_qty
+        users_shopping_cart["cart_qty"] = saved_cart_qty
+
+        #Saving new info into db
+        shopping_cart_db["hi@gmail.com"] = users_shopping_cart
         shopping_cart_db.close()
-        return json.jsonify({"data": cart_qty})
 
-    return render_template("customer/test_product.html", product=seller_product[id], seller="seller")
+        return json.jsonify({"data": cart_qty, "result": True})
+
+
+    return render_template("customer/test_product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"))
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
 def shopping_cart(user):
     users_shopping_cart = {}
+    user_selected_product = {}
     shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
     try:
         users_shopping_cart = shopping_cart_db[user]
+        user_selected_product = users_shopping_cart["selected_product"]
     except KeyError:
         return render_template("customer/error_msg.html", msg="This user shopping cart is empty")
     except:
         print("Error in retrieving User Shopping Cart Info in user_shopping_cart.db")
 
+    display_shopping_cart = []
+    # print("ll")
+    # print(user_selected_product)
+    for product_selected_name in user_selected_product:
+        product_selected = user_selected_product[product_selected_name]
+
+        # Getting the Product Object
+        seller_product = {}
+        seller_product_db = shelve.open("seller-product.db")
+        # print('ho')
+        # print(product_selected)
+        seller_product = seller_product_db[str(product_selected["seller_id"])]
+        product = seller_product[product_selected["product_id"]]
+
+        # Getting Product Qty
+        product_qty = product_selected["product_qty"]
+
+        # Getting Seller
+        seller_name = product_selected["seller"]
+
+        #Making a dictionary of each product (product, product_qty, seller_name)
+        product_dict = {
+            "product" : product,
+            "product_qty" : product_qty,
+            "seller_name" : seller_name
+        }
+        display_shopping_cart.append(product_dict)
+
+    #Receive AJAX Request to Update Cart Qty
+    if request.method == "POST":
+        sent_data = json.loads(request.data)
+        updated_cart_qty = sent_data["cart_qty"]
+        updated_product_qty = sent_data["product_qty"]
+        seller_name = sent_data["seller_name"]
+        product_id = sent_data["product_id"]
+
+        #Update Cart Icon Qty into db
+        saved_cart_qty = 0
+        shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+        try:
+            users_shopping_cart = shopping_cart_db[user]
+            saved_cart_qty = users_shopping_cart["cart_qty"]
+        except:
+            print("Error in loading cart qty db")
+
+        saved_cart_qty = updated_cart_qty
+        users_shopping_cart["cart_qty"] = saved_cart_qty
+        shopping_cart_db[user] = users_shopping_cart
+        shopping_cart_db.close()
+
+        #Searching for Seller id
+        approved_sellers = {}
+        approve_seller_db = shelve.open('approved_sellers.db')
+        approved_sellers = approve_seller_db['Approved_sellers']
+        for id in approved_sellers:
+            if seller_name == approved_sellers[id].get_name():
+                seller_id = approved_sellers[id].get_id()
+
+        # Update Product Qty into db
+        shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+        users_shopping_cart = shopping_cart_db[user]
+        user_selected_product = users_shopping_cart["selected_product"]
+        product_qty = user_selected_product[seller_name + str(product_id)]["product_qty"]
+
+        if sent_data['type'] == "increment":
+            product_qty += 1
+        elif sent_data['type'] == "decrement":
+            product_qty -= 1
+
+        user_selected_product[seller_name + str(product_id)]["product_qty"] = product_qty
+        users_shopping_cart["selected_product"] = user_selected_product
+        shopping_cart_db[user] = users_shopping_cart
+        shopping_cart_db.close()
 
 
-    return render_template("customer/shopping_cart.html", users_shopping_cart=users_shopping_cart)
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=cart_qty(user))
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
