@@ -443,29 +443,16 @@ def update_product(seller_id, product_id):
         update_product_form.description.data = sellerProduct.get_description()
 
         return render_template('/seller/updateProduct.html', form=update_product_form, seller_id=seller_id, product_id=product_id)
-#         db = shelve.open('seller-product.db', 'w')
-#         seller_product = db['SellerProducts']
-#         sellerProduct = seller_product.get(id)
-#         sellerProduct.set_product_name(update_product_form.product_name.data)
-#         sellerProduct.set_product_price(update_product_form.product_price.data)
-#         sellerProduct.set_product_stock(update_product_form.product_stock.data)
-#         sellerProduct.set_description(update_product_form.description.data)
-#         db['SellerProducts'] = seller_product
-#         db.close()
-#
-#         return redirect(url_for('retrieve_product'))
-#     else:
-#         seller_product = {}
-#         db = shelve.open('seller-product.db', 'r')
-#         seller_product = db['SellerProducts']
-#         db.close()
-#         sellerProduct = seller_product.get(id)
-#         update_product_form.product_name.data = sellerProduct.get_product_name()
-#         update_product_form.product_price.data = sellerProduct.get_product_price()
-#         update_product_form.product_stock.data = sellerProduct.get_product_stock()
-#         update_product_form.description.data = sellerProduct.get_description()
-#
-#         return render_template('/seller/updateProduct.html', form=update_product_form)
+
+
+@app.route('/seller/<int:seller_id>/deleteProduct/<int:product_id>/', methods=['POST'])
+def delete_product(seller_id, product_id):
+    seller_product_db = shelve.open('seller-product.db', 'w')
+    seller_products = seller_product_db[str(seller_id)]
+    seller_products.pop(product_id)
+    seller_product_db[str(seller_id)] = seller_products
+    seller_product_db.close()
+    return redirect(url_for('retrieve_product', seller_id=seller_id))
 
 
 @app.route('/respond')
