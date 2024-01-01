@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components.css') }}">
     {% block JS_CSS %}{% endblock %}
 </head>
-{% macro dataComponent(product_id,product_name,description,product_price,product_stock) -%}
+{% macro dataComponent(product_id,product_name,description,product_price,product_stock,seller_id) -%}
       <div class='card'>
         <div class="row card-body">
             <div class="col-1 text-center">{{product_id}}</div>
@@ -20,7 +20,7 @@
             <div class="col-1 text-center">{{product_stock}}</div>
 
             <div class="col-2 text-center">
-                <a href="/seller/updateProduct/{{product_id}}"><button class="btn btn-primary btn-sm">Update</button></a>
+                <a href="/seller/{{seller_id}}/updateProduct/{{product_id}}"><button class="btn btn-primary btn-sm">Update</button></a>
                 <button class="btn btn-danger btn-sm">Delete</button>
             </div>
 <!--            <div class="col-1 text-center">-->
