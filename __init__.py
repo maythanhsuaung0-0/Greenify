@@ -254,6 +254,9 @@ def create_user():
         except:
             print("Error in retrieving Users from user.db.")
 
+        if create_user_form.email.data in users_dict:
+            return 'An account has already been created with this email. Please Login'
+
         user = User.User(create_user_form.email.data, create_user_form.password.data)
         users_dict[user.get_email()] = user
         db['Users'] = users_dict
@@ -279,11 +282,10 @@ def login():
     if request.method == 'POST' and login_form.validate():
         users_dict = {}
         db = shelve.open('user.db', 'r')
-        user_values = User.User(login_form.email.data, login_form.password.data)
         try:
             if 'Users' in db:
                 users_dict = db["Users"]
-                if users_dict == user_values:
+                if login_form.email.data in users_dict:
                     return redirect(url_for('home'))
             else:
                 return render_template('createUser.html')
