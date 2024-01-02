@@ -1,4 +1,5 @@
 import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
@@ -11,29 +12,31 @@ def send_mail(to_email, approve, seller_name, seller_password):
 
     from_email = smtp_username
     subject = 'Approval mail for your Greenify seller account'
-    link = MIMEText(u'<a href="http://127.0.0.1:5000/staff/login">Greenify seller dashboard</a>', 'html')
+    message = MIMEMultipart()
     body = f"""
-    Subject: Approval of Your Seller Account Registration
     
-    Dear {seller_name},
+    Dear {seller_name}, </br>
     
-    We hope this email finds you well. We appreciate your interest in joining our platform as a seller, and we are delighted to inform you that your seller account registration has been approved.
+    <p>We hope this email finds you well. We appreciate your interest in joining our platform as a seller, and we are delighted to inform you that your seller account registration has been approved.</p>
     
-    You can log in to Greenify seller account using:
-    Seller Email: {to_email}
-    Seller Password:{seller_password}
+    <p>
+    You can log in to Greenify seller account using: </br>
+    Seller Email: {to_email} </br>
+    Seller Password: <u>{seller_password}</u>
+    </p>
 
-    You can now log in to your seller account and start listing your products on our platform. We believe that your offerings will be a valuable addition to our marketplace, and we look forward to a successful and collaborative partnership.
+    <p>You can now log in to your seller account and start listing your products on our platform. We believe that your offerings will be a valuable addition to our marketplace, and we look forward to a successful and collaborative partnership.
+    </p>
+    <p>To access your seller dashboard, please click on the following link: </br>
     
-    To access your seller dashboard, please click on the following link: {link}
+     <a href="http://127.0.0.1:5000/staff/login">Greenify seller dashboard</a></p>
     
-    If you have any questions or need assistance with setting up your account, please do not hesitate to reach out to our support team at this email address.
+    <p>If you have any questions or need assistance with setting up your account, please do not hesitate to reach out to our support team at this email address.
     Thank you for choosing to be a part of our community. We wish you every success in your endeavors as a seller on our platform.
-    
-    Best regards,
+    </p>
+    Best regards,</br>
     
     Greenify"""
-
     if not approve:
         subject = "Rejection of Seller Account Registration"
         body = """
@@ -53,9 +56,12 @@ def send_mail(to_email, approve, seller_name, seller_password):
         Best regards,
         
         Greenify"""
-    message = f'Subject: {subject}\n\n{body}'
+    message['From'] = from_email
+    message['To'] = to_email
+    message['Subject'] = subject
+    message.attach(MIMEText(body, 'html'))
 
     with smtplib.SMTP(smtp_server, smtp_port) as smtp:
         smtp.starttls()
         smtp.login(smtp_username, smtp_password)
-        smtp.sendmail(from_email, to_email, message)
+        smtp.sendmail(from_email, to_email, message.as_string())

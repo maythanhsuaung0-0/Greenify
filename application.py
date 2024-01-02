@@ -1,6 +1,7 @@
 class ApplicationFormFormat:
     id = 0
-    def __init__(self, name, email, desc):
+    def __init__(self,id, name, email, desc):
+        ApplicationFormFormat.id = id
         ApplicationFormFormat.id += 1
         self.__id = ApplicationFormFormat.id
         self.__name = name

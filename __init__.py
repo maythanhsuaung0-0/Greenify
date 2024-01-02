@@ -13,6 +13,7 @@ from werkzeug.utils import secure_filename
 from datetime import date
 from urllib.parse import quote
 # for sending mail
+import string
 from send_email import send_mail
 
 app = Flask(__name__, static_url_path='/static')
@@ -325,6 +326,7 @@ def respond():
 
 @app.route("/register", methods=['GET', 'POST'])
 def register(): #create
+    global last_id
     registration_form = ApplicationForm(request.form)
     if request.method == 'POST' and registration_form.validate():
         application_form = {}
@@ -334,7 +336,14 @@ def register(): #create
         except:
             print("Error in retrieving application from application.db")
 
-        appForm = AppFormFormat(registration_form.business_name.data, registration_form.seller_email.data,
+        # store id
+        try:
+            last_id = db['Id']
+        except KeyError:
+            last_id = max(application_form.keys())
+        db['Id'] = last_id
+
+        appForm = AppFormFormat(last_id,registration_form.business_name.data, registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
@@ -359,7 +368,9 @@ def register(): #create
         appForm = application_form[appForm.get_application_id()]
         print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
               appForm.get_application_id())
-
+        print("last id--",last_id)
+        last_id = max(application_form.keys())
+        db['Id'] = last_id
         db.close()
         return redirect(url_for('respond'))
     return render_template('sellers_application/registration.html', form=registration_form)
@@ -385,10 +396,10 @@ def retrieveApplicationForms():
 
 
 
-@app.route('/staff/approveForm/<int:id>', methods = ['POST']) # for approving forms
-def approve_form(id): # create
+@app.route('/staff/approveForm/<int:seller_id>', methods = ['POST']) # for approving forms
+def approve_form(seller_id): # create
     # take the approved application
-    approved = extracting('application.db', 'Application', id)
+    approved = extracting('application.db', 'Application', seller_id)
     print("This user is approved", approved.get_application_id())
     # store in the approved_sellers
     approved_sellers = {}
@@ -397,16 +408,29 @@ def approve_form(id): # create
         approved_sellers = approved_db['Approved_sellers']
     except:
         print("Error in retrieving sellers from application.db")
+
+    passwords = []
+    alphabet = string.ascii_letters + string.digits + string.punctuation
+    while True:
+        password = "".join(secrets.choice(alphabet) for _ in range(10))
+        if password not in passwords:
+            break
+    send_mail(approved.get_email(),True,approved.get_name(),password)
+    approved.set_password(password)
+    print(approved.get_password())
+    passwords.append(password)
+    # storing approved seller
     approved_sellers[approved.get_application_id()] = approved
     approved_db['Approved_sellers'] = approved_sellers
-    send_mail(approved.get_email(),True,approved.get_name(),'1234')
     approved_db.close()
+    print(passwords)
     return redirect(url_for('retrieveApplicationForms'))
 
-@app.route('/staff/rejectForm/<int:id>', methods =['POST']) #for rejecting forms
-def reject_form(id): # delete
-    rejected = extracting('application.db', 'Application', id)
-    delete_folder(rejected)
+@app.route('/staff/rejectForm/<int:seller_id>', methods =['POST']) #for rejecting forms
+def reject_form(seller_id): # delete
+    rejected = extracting('application.db', 'Application', seller_id)
+    if rejected.get_doc():
+        delete_folder(rejected)
     send_mail(rejected.get_email(), False, rejected.get_name(), '')
     return redirect(url_for('retrieveApplicationForms'))
 

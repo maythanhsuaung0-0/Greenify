@@ -39,7 +39,7 @@
       <div class="col-2 text-center">
         <form
           class="d-inline"
-          action="{{url_for(action1, id= id)}}"
+          action="{{url_for(action1, seller_id= id)}}"
           method="post"
         >
           <input
@@ -52,7 +52,7 @@
         </form>
         <form
         class="d-inline"
-        action="{{url_for(action2, id= id)}}"
+        action="{{url_for(action2, seller_id= id)}}"
         method="post"
       >
         <input
@@ -75,7 +75,7 @@
                 <div>
                     <h6 class="fw-bold">Business Email</h6>
                     <p>{{email}}</p>
-                 </div>
+                 </div> 
              <div>
                 <h6 class="fw-bold">Business Description</h6>
                 <p>{{desc}}</p>
