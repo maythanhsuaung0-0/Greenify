@@ -481,7 +481,10 @@ def register(): #create
         try:
             last_id = db['Id']
         except KeyError:
-            last_id = max(application_form.keys())
+            if application_form.keys():
+                last_id = max(application_form.keys())
+            else:
+                last_id = 0
         db['Id'] = last_id
 
         appForm = AppFormFormat(last_id,registration_form.business_name.data, registration_form.seller_email.data,
@@ -510,7 +513,8 @@ def register(): #create
         print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
               appForm.get_application_id())
         print("last id--",last_id)
-        last_id = max(application_form.keys())
+        if application_form.keys():
+            last_id = max(application_form.keys())
         db['Id'] = last_id
         db.close()
         return redirect(url_for('respond'))
@@ -558,11 +562,11 @@ def approve_form(seller_id): # create
             break
     send_mail(approved.get_email(),True,approved.get_name(),password)
     approved.set_password(password)
-    print(approved.get_password())
-    passwords.append(password)
     # storing approved seller
     approved_sellers[approved.get_application_id()] = approved
     approved_db['Approved_sellers'] = approved_sellers
+    for key,seller in approved_db['Approved_sellers'].items():
+        passwords.append(seller.get_password())
     approved_db.close()
     print(passwords)
     return redirect(url_for('retrieveApplicationForms'))
