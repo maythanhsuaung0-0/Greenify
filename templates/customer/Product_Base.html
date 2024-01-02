@@ -1,75 +1,70 @@
 {% extends "customer/Customer_Base.html" %}
-{% from "includes/_formHelper.html" import render_field %}
 
 {% block body %}
-<div class="container-fluid">
-  <div>
-    <h1>{% block product_name %}{% endblock %}</h1>
-  </div>
-  <div class="image container">
-    <div id="carouselIndicators" class="carousel slide">
-      <div class="carousel-indicators">
-        {% block carousel_indicator %}
-        {% endblock %}
-      </div>
-      <div class="carousel-inner">
-        {% block carousel_multimedia %}
-        {% endblock %}
-      </div>
-      <button class="carousel-control-prev" type="button" data-bs-target="#carouselIndicators"
-        data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Previous</span>
-      </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#carouselIndicators"
-        data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Next</span>
-      </button>
-    </div>
-  </div>
-
-  <form method="post">
-    <div class="product-selection">
-      <h3>Product Options</h3>
-      {% block options %}
-      {% endblock %}
-
-      <h5>Qty</h5>
-      <i class="bi bi-plus-lg" id="increment"></i>
-      <span id="qty-count">1</span>
-      <i class="bi bi-dash-lg" id="decrement"></i>
-
-      <div>
-        <h5 id="price">{% block price %}{% endblock %}</h5>
-      </div>
-
-      <div>
-        <button type="button" class="btn btn-secondary" id="addCart" onclick="addToCart({{ product.get_product_id() }}, 'seller' )">Add to Cart</button>
-      </div>
-
-    </div>
-  </form>
-
-
-  <div class="product-desp">
-    <h3>Product Description</h3>
-    {% block product_desp %}
-    {% endblock %}
-  </div>
-
-  <div class="product-review">
-    <h3>Product Review</h3>
-    {% block product_review %}
-    {% endblock %}
-  </div>
-
-
+<div>
+  <h1>{% block product_name %}{% endblock %}</h1>
 </div>
+<div class="image container">
+  <div id="carouselIndicators" class="carousel slide">
+    <div class="carousel-indicators">
+      {% block carousel_indicator %}
+      {% endblock %}
+    </div>
+    <div class="carousel-inner">
+      {% block carousel_multimedia %}
+      {% endblock %}
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#carouselIndicators"
+      data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#carouselIndicators"
+      data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+</div>
+
+<form method="post">
+  <div class="product-selection">
+    <h3>Product Options</h3>
+    {% block options %}
+    {% endblock %}
+
+    <h5>Qty</h5>
+    <i class="bi bi-plus-lg" id="increment"></i>
+    <span id="qty-count">1</span>
+    <i class="bi bi-dash-lg" id="decrement"></i>
+
+    <div>
+      <h5 id="price">{% block price %}{% endblock %}</h5>
+    </div>
+
+    <div>
+      <button type="button" class="btn btn-secondary" id="addCart" onclick="addToCart({{ product.get_product_id() }}, {{ seller_id }}, '{{ seller }}' )">Add to Cart</button>
+    </div>
+
+  </div>
+</form>
+
+
+<div class="product-desp">
+  <h3>Product Description</h3>
+  {% block product_desp %}
+  {% endblock %}
+</div>
+
+<div class="product-review">
+  <h3>Product Review</h3>
+  {% block product_review %}
+  {% endblock %}
+</div>
+
 
 {% endblock %}
 
 {% block End_JS_CSS %}
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="{{ url_for('static', filename='JS/product_base.js') }}"></script>
 {% endblock %}
