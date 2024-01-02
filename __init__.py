@@ -307,15 +307,15 @@ def retrieve_users():
     return render_template('retrieveUsers.html', count=len(users_list), users_list=users_list)
 
 
-@app.route('/updateUser/<int:id>/', methods=['GET', 'POST'])
-def update_user(id):
+@app.route('/updateUser/<string:email>/', methods=['GET', 'POST'])
+def update_user(email):
     update_user_form = CreateUserForm(request.form)
     if request.method == 'POST' and update_user_form.validate():
         users_dict = {}
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
-        user = users_dict.get(id)
+        user = users_dict.get(email)
         user.set_email(update_user_form.email.data)
         user.set_password(update_user_form.password.data)
 
@@ -329,20 +329,20 @@ def update_user(id):
         users_dict = db['Users']
         db.close()
 
-        user = users_dict.get(id)
+        user = users_dict.get(email)
         update_user_form.email.data = user.get_email()
         update_user_form.password.data = user.get_password()
 
         return render_template('updateUser.html', form=update_user_form)
 
 
-@app.route('/deleteUser/<int:id>', methods=['POST'])
-def delete_user(id):
+@app.route('/deleteUser/<string:email>', methods=['POST'])
+def delete_user(email):
     users_dict = {}
     db = shelve.open('user.db', 'w')
     users_dict = db['Users']
 
-    users_dict.pop(id)
+    users_dict.pop(email)
 
     db['Users'] = users_dict
     db.close()
