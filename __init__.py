@@ -284,17 +284,33 @@ def login():
     login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
         users_dict = {}
+        user = User.User(login_form.email.data, login_form.password.data)
         db = shelve.open('user.db', 'r')
+        passwords = []
+        for user_id, user_instance in db['Users'].items():
+            passwords.append(user_instance.get_password())
         try:
             if 'Users' in db:
                 users_dict = db["Users"]
-                if login_form.email.data in users_dict:
-                    return redirect(url_for('home'))
+                if login_form.email.data in users_dict and login_form.password.data in passwords:
+                    key = get_key(login_form.password.data, db['Users'])
+                    if key == user.get_email():
+                        return redirect(url_for('home'))
+                    else:
+                        return render_template('login_failed.html')
+                else:
+                    return render_template('login_failed.html')
             else:
                 return render_template('createUser.html')
         except:
             print("Error in opening user.db")
     return render_template('login.html', form=login_form)
+
+
+def get_key(val,users_dict):
+    for key, value in users_dict.items():
+        if val == value.get_password():
+            return key
 
 
 @app.route('/retrieveUsers')
