@@ -329,7 +329,7 @@ def login():
                 if login_form.email.data in users_dict and login_form.password.data in passwords:
                     key = get_key(login_form.password.data, db['Users'])
                     if key == user.get_email():
-                        return redirect(url_for('home'))
+                        return redirect(url_for('retrieve_user'))
                     else:
                         return render_template('login_failed.html')
                 else:
@@ -347,8 +347,23 @@ def get_key(val,users_dict):
             return key
 
 
-@app.route('/retrieveUsers')
-def retrieve_users():
+# @app.route('/retrieveUsers')
+# def retrieve_users():
+#     users_dict = {}
+#     db = shelve.open('user.db', 'r')
+#     users_dict = db['Users']
+#     db.close()
+#
+#     users_list = []
+#     for key in users_dict:
+#         user = users_dict.get(key)
+#         users_list.append(user)
+#
+#     return render_template('retrieveUsers.html', count=len(users_list), users_list=users_list)
+
+
+@app.route('/retrieveUser')
+def retrieve_user():
     users_dict = {}
     db = shelve.open('user.db', 'r')
     users_dict = db['Users']
@@ -359,8 +374,7 @@ def retrieve_users():
         user = users_dict.get(key)
         users_list.append(user)
 
-    return render_template('retrieveUsers.html', count=len(users_list), users_list=users_list)
-
+    return render_template('settings.html', count=len(users_list), users_list=users_list)
 
 @app.route('/updateUser/<string:email>/', methods=['GET', 'POST'])
 def update_user(email):
@@ -377,7 +391,7 @@ def update_user(email):
         db['Users'] = users_dict
         db.close()
 
-        return redirect(url_for('retrieve_users'))
+        return redirect(url_for('retrieve_user'))
     else:
         users_dict = {}
         db = shelve.open('user.db', 'r')
@@ -402,7 +416,7 @@ def delete_user(email):
     db['Users'] = users_dict
     db.close()
 
-    return redirect(url_for('retrieve_users'))
+    return "Your account has successfully been deleted."
 
 
 @app.route('/stafflogin', methods=['GET', 'POST'])

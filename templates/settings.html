@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<h1 class="display-4">Account Information</h1>
+<table class="table table-striped">
+<thead>
+<tr>
+<th>Email</th>
+<th>Password</th>
+</tr>
+</thead>
+<tbody>
+{% for user in users_list %}
+<tr>
+<td>{{ user.get_email() }}</td>
+<td>{{ user.get_password() }}</td>
+<td><a href="/updateUser/{{user.get_email()}}" class="btn btn-warning">Update</a></td>
+<td>
+<form action="{{url_for('delete_user', email=user.get_email())}}" method="POST">
+<!--<input type="submit" value="Delete" class="btn btn-danger" onclick="return confirm('Are you sure you-->
+<!--want to delete {{user.get_email()}}?');">-->
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{{user.get_email()}}">
+Delete
+</button>
+<!-- The Modal -->
+<div class="modal" id="myModal_{{user.get_email()}}">
+<div class="modal-dialog">
+<div class="modal-content">
+<!-- Modal Header -->
+<div class="modal-header">
+<h4 class="modal-title">Delete Confirmation</h4>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<!-- Modal body -->
+<div class="modal-body">
+Are you sure you want to delete your account?
+</div>
+<!-- Modal footer -->
+<div class="modal-footer">
+<input type="submit" value="Delete" class="btn btn-danger">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+</div>
+</div>
+</div>
+</div>
+</form>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+<div>
+    Note: If you are done making changes or do not want to make any changes, you may proceed to our webpage <a href="/">here</a>.
+</div>
+{% endblock %}
