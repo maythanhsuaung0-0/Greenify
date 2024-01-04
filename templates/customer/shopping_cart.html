@@ -9,7 +9,7 @@
 
     <div class="product-showcase">
         {% for product in display_shopping_cart %}
-            <div class="product-container">
+            <div class="product-container" id="product-{{ display_shopping_cart.index(product) }}">
                 <img src="{{ product['product'].get_image() }}" alt="image of {{ product['product'].get_product_name() }}">
                 <h5><a href=" {{ url_for('product', seller=product['seller_name'], product_id=product['product'].get_product_id()) }}">{{ product['product'].get_product_name() }}</a></h5>
                 <h5>selected option</h5>
@@ -19,7 +19,30 @@
                     <i class="bi bi-plus-lg" onclick="increment({{ display_shopping_cart.index(product) }}, {{ product['product'].get_product_price() }}, '{{ product['seller_name'] }}', {{ product['product'].get_product_id() }})"></i>
                     <span id="qty-count-{{ display_shopping_cart.index(product) }}">{{ product['product_qty'] }}</span>
                     <i class="bi bi-dash-lg" onclick="decrement({{ display_shopping_cart.index(product) }}, {{ product['product'].get_product_price() }}, '{{ product['seller_name'] }}', {{ product['product'].get_product_id() }})"></i>
-                    <button class="btn btn-danger">Delete</button>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modal-{{ display_shopping_cart.index(product) }}">
+                      Delete
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="modal-{{ display_shopping_cart.index(product) }}" tabindex="-1" aria-labelledby="modalLabel-{{ display_shopping_cart.index(product) }}" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="modalLabel-{{ display_shopping_cart.index(product) }}">Confirmation</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body fs-3">
+                            Do you really want to remove product?
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-success" data-bs-dismiss="modal" onclick="removeProduct({{ display_shopping_cart.index(product) }}, '{{ product['seller_name'] }}', {{ product['product'].get_product_id() }})">Yes</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                 </div>
                 <div class="indv-total-price">Total - $<span id="price-{{ display_shopping_cart.index(product) }}">{{ "%.2f"|format(product['product_qty'] * product['product'].get_product_price())     }}</span></div>
             </div>

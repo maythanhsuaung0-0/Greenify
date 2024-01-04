@@ -32,23 +32,20 @@ $("document").ready(function(){
 function addToCart(product_id, seller_id, seller) {
     var product_qty = $("#qty-count").text();
     product_qty = parseInt(product_qty.trim());
-    var cart_item_qty = $("#cart-item-qty").text().trim();
-    cart_item_qty = parseInt(cart_item_qty);
-    cart_item_qty += 1;
+
     $.ajax({
             url: '',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({
+            "request_type" : "add_cart",
             "seller" : seller,
             "seller_id" : seller_id,
             "product_id" : product_id,
-            "product_qty": product_qty,
-            "cart_item_qty" : cart_item_qty
+            "product_qty": product_qty
             }),
             success: function(response) {
             if (response.result) {
-                localStorage.setItem("cart_qty", response.data)
                 $("#cart-item-qty").text(response.data)
             } else {
                 $(".content").text("FAIL")
