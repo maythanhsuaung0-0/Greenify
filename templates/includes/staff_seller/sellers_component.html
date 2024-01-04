@@ -10,14 +10,19 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components.css') }}">
     {% block JS_CSS %}{% endblock %}
 </head>
-{% macro dataComponent(id,name,desc,filename, filepath, docs) -%}
+{% macro dataComponent(id,name,desc,filename, filepath, docs,date) -%}
 <div class="card">
     <div
     class="row card-body">
     <div class="col-1 text-center">{{id}}</div>
     <div class="col-2 text-center">{{name}}</div>
-    <div class="col-4 text-center text-truncate">{{desc}}</div>
-    <div class="col-2 text-center">certificate</div>
+    <div class="col-3 text-center text-truncate">{{desc}}</div>
+    {% if docs == None %}
+          <div class="col-1 text-center">-</div>
+          {% else %}
+          <div class="col-1 text-center"><i class="fa-solid fa-check"></i></div>
+          {% endif %}
+       <div class="col-2 text-center">{{date}}</div>
     <div class="col-2 text-center">
         <form class="d-inline" action="{{url_for('delete_form', id = id)}}" method="post">
             <input  type="submit" class="btn btn-danger btn-sm" name="id" value="Delete" onclick="return confirm('Are you sure you want to delete {{name}}?')"/>

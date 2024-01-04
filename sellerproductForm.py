@@ -7,3 +7,4 @@ class CreateProductForm(Form):
     product_stock = IntegerField('Stock', [validators.NumberRange(min=20), validators.DataRequired()])
     image = FileField('Product Image', [validators.DataRequired(), validators.regexp(r'^[^/\\]*\.(jpg|png)$', message='Only JPG or PNG files are accepted')])
     description = TextAreaField('Product Description', [validators.Optional()])
+
