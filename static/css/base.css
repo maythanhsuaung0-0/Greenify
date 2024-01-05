@@ -1,3 +1,7 @@
+@import url(./common.css);
+.custom-nav{
+    background-color: var(--theme-color) !important;
+}
 .w-small{
     width: 100%;
 }

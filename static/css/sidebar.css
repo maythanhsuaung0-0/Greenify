@@ -1,15 +1,17 @@
-:root{
-    --unactive-color: rgb(123, 123, 123);
+@import url(./common.css);
+
+.brand{
+  font-size:2.3em ;
 }
 
 body {
     margin: 0;
-    font-family: "Lato", sans-serif;
+    font-family: var(--inter-font);
   }
   .sidebar {
     margin: 0;
     width: 18%;
-    background-color: #f1f1f1;
+    background-color: var(--theme-color);
     position: fixed;
     height: 100%;
     overflow: auto;
@@ -33,17 +35,17 @@ body {
    
   .active {
     font-weight: bold;
-    color: black;
+    color: var(--theme-black);
   }
   
   .side-nav-link:hover:not(.active) {
-    background-color: #555;
-    color: white;
+    background-color: var(--theme-color-light);
+    color: var(--theme-white);
   }
   
   div.content {
     margin-left: 18%;
-    padding:1em 2em;
+    padding:1.5em 2em;
     height: 1000px;
   }
   /* for staff side card */

@@ -459,10 +459,14 @@ def delete_form(id): # delete
     delete_folder(deleted_item)
     return redirect(url_for('retrieveSellers'))
 
-# @app.route('/staff/dashboard')
-# def dashboard():
-#     return render_template('staff/dashboard')
 
+@app.route('/staff/dashboard')
+def dashboard():
+    return render_template('staff/dashboard.html')
+
+@app.route('/seller/<int:seller_id>/dashboard')
+def seller_dashboard(seller_id):
+    return render_template('/seller/dashboard.html')
 
 if __name__ == "__main__":
     app.run(debug=True)
