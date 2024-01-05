@@ -1,12 +1,23 @@
+@import url(./common.css);
+
+.custom-nav{
+    background-color: var(--theme-color) !important;
+    font-family:var(--inter-font);
+}
 #offcanvasNavbar ul li{
     list-style-type: none;
 }
 
 div.offcanvas-body ul li a {
-    color: black;
+    color: var(--theme-black);
     text-decoration: none;
     margin: auto 50px;
+    font-size: 16px;
 }
+input.search{
+    font-size: 16px;
+}
+
 
 div.offcanvas-body ul li {
     margin: 30px auto
@@ -14,12 +25,12 @@ div.offcanvas-body ul li {
 
 .navbar .bi-person-circle {
     font-size: 1.5em;
-    color: black;
+    color: var(--theme-black);
 }
 
 .navbar .bi-bag {
     font-size: 1.5em;
-    color: black;
+    color: var(--theme-black);
     position: absolute;
     top: 20px;
     right: 25px;
