@@ -716,8 +716,9 @@ def approve_form(seller_id): # create
     # storing approved seller
     approved_sellers[approved.get_application_id()] = approved
     approved_db['Approved_sellers'] = approved_sellers
-    for key,seller in approved_db['Approved_sellers'].items():
-        passwords.append(seller.get_password())
+    if approved_db['Approved_sellers']:
+        for key, seller in approved_db['Approved_sellers'].items():
+            passwords.append(seller.get_password())
     approved_db.close()
     print(passwords)
     return redirect(url_for('retrieveApplicationForms'))
@@ -768,21 +769,6 @@ def dashboard():
 def seller_dashboard(seller_id):
     return render_template('/seller/dashboard.html')
 
-
-@app.route('/retrieveSeller')
-def retrieve_seller_profile():
-    approved_sellers = {}
-    approved_db = shelve.open('approved_sellers.db', 'r')
-    approved_sellers = approved_db['Approved_sellers']
-    approved_db.close()
-
-    sellers = []
-    for key in approved_sellers:
-        seller = approved_sellers.get(key)
-        sellers.append(seller)
-    return render_template('/seller/profile.html', count=len(sellers), sellers=sellers)
-
-
 # @app.route('/retrieveUpdatedSeller')
 # def updated_seller_profile():
 #     updated_sellers = {}
@@ -811,7 +797,7 @@ def retrieve_seller_profile():
 #     return render_template('/seller/profile.html')
 
 
-@app.route('/updateSeller/<int:seller_id>/', methods=['GET', 'POST'])
+@app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
 def update_seller(seller_id):
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
