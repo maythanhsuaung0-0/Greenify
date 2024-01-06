@@ -24,10 +24,12 @@ def extracting(my_db, db_key, id):  #function for deleting and taking out the de
     form_dict = {}
     db = shelve.open(my_db, 'w')
     form_dict = db[db_key]
-    item = form_dict.pop(id)
-    db[db_key] = form_dict
-    db.close()
-    return item
+    if form_dict:
+        item = form_dict.pop(id)
+        db[db_key] = form_dict
+        db.close()
+        return item
+    return form_dict
 
 
 def delete_folder(item):
@@ -670,7 +672,10 @@ def display_image(filename,filepath):
 def retrieveApplicationForms():
     app_dict = {}
     db = shelve.open('application.db', 'r')
-    app_dict = db['Application']
+    try:
+        app_dict = db['Application']
+    except:
+        print("Error in receiving db")
     db.close()
 
     app_list = []
@@ -729,7 +734,10 @@ def retrieveUpdateForms(): # approving updates
 def retrieveSellers(): # read
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
-    approved_sellers = approved_db['Approved_sellers']
+    try:
+        approved_sellers = approved_db['Approved_sellers']
+    except:
+        print("Error in retrieving sellers")
     approved_db.close()
 
     sellers_list = []
@@ -745,10 +753,29 @@ def delete_form(id): # delete
     return redirect(url_for('retrieveSellers'))
 
 
-# @app.route('/staff/dashboard')
-# def dashboard():
-#     return render_template('staff/dashboard')
+@app.route('/staff/dashboard')
+def dashboard():
+    return render_template('staff/dashboard.html')
 
+
+
+@app.route('/seller/<int:seller_id>/dashboard')
+def seller_dashboard(seller_id):
+    return render_template('/seller/dashboard.html')
+
+
+@app.route('/seller/<int:seller_id>/profile')
+def seller_profile(seller_id):
+    approved_sellers = {}
+    approved_db = shelve.open('approved_sellers.db', 'r')
+    try:
+        approved_sellers = approved_db['Approved_sellers']
+    except:
+        print("Error in retrieving sellers")
+    if seller_id in approved_sellers:
+        print(approved_sellers[seller_id].get_email())
+    approved_db.close()
+    return render_template('/seller/profile.html')
 
 if __name__ == "__main__":
     app.run(debug=True)

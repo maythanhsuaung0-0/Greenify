@@ -1,0 +1,32 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter&display=swap');
+@font-face {
+    font-family: 'Voga';
+    src: url('../brand_font/Voga-Medium.otf') format('opentype');
+}
+:root{
+    --theme-color: #959D90;
+    --theme-color-light: #a4aba0;
+    --theme-black:#1c1c1c;
+    --theme-white:#f3f2f2;
+    --unactive-color: #464646;
+    --inter-font: 'Inter', sans-serif;
+    --brand-font: 'Voga', serif;
+
+}
+.brand{
+    font-family: var(--brand-font);
+    font-size: 2em;
+    color: #fff;
+    text-transform: uppercase;
+}
+.theme-background-light{
+    background-color: var(--theme-color-light);
+}
+.custom-btn{
+    background-color: var(--theme-black);
+    color: var(--theme-white);
+}
+.custom-btn:hover{
+    background-color: #000;
+    color: var(--theme-white);
+}

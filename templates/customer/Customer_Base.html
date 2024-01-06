@@ -14,10 +14,11 @@
     <title>{% block title %}{% endblock%}</title>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom border-bottom-dark sticky-top">
+    <nav class="custom-nav navbar navbar-expand-lg bg-body-tertiary border-bottom border-bottom-dark sticky-top">
         <div class="container-fluid px-5">
             <a class="navbar-brand col-1" href="#">
-                <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="Greenify Trademark" class="trademark">
+                <!-- <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="Greenify Trademark" class="trademark"> -->
+                <span class="brand">Greenify</span>
             </a>
 
             <!-- Hamburg Icon -->
@@ -48,8 +49,8 @@
             <!-- Search Engine -->
             <div>
                 <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success" type="submit">Search</button>
+                    <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-sm custom-btn" type="submit">Search</button>
                 </form>
             </div>
 
