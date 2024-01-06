@@ -63,8 +63,6 @@ def seller_id_search(seller_name):
     except:
         return False
     for id in approved_sellers:
-        print(approved_sellers[id].get_name())
-        print(approved_sellers[id].get_id())
         if seller_name == approved_sellers[id].get_name():
             seller_id = approved_sellers[id].get_id()
             return seller_id
@@ -114,12 +112,32 @@ def product(seller, product_id):
     seller_product_db.close()
 
 
-    # Received AJAX Request for Add To Cart
+    # Received AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
 
+        #Check Product Stock
+        if sent_data["request_type"] == "product_stock":
+            seller_products = {}
+            seller_product_info = {}
+            seller_product_db = shelve.open('seller-product.db', 'c')
+            try:
+                seller_product_info = seller_product_db[str(seller_id)]
+                seller_products = seller_product_info['products']
+            except:
+                print("Product is not found")
+                return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+
+            product = seller_products[product_id]
+            product_stock = product.get_product_stock()
+            seller_product_db.close()
+
+            return json.jsonify({"stock" : product_stock})
+
+        #Add to Cart
         if sent_data["request_type"] == "add_cart":
             product = json.loads(request.data)
+            del product["request_type"]
 
             #Saving Shopping Cart Items
             #Dummy User (User persistent Log In not Developed)
@@ -136,16 +154,38 @@ def product(seller, product_id):
 
             user_selected_products = {}
 
+            # Check Stock
+            seller_products = {}
+            seller_product_info = {}
+            seller_product_db = shelve.open('seller-product.db', 'c')
+            try:
+                seller_product_info = seller_product_db[str(seller_id)]
+                seller_products = seller_product_info['products']
+            except:
+                print("Product is not found")
+                return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+
+            seller_saved_product = seller_products[product_id]
+            product_stock = seller_saved_product.get_product_stock()
+
+            seller_product_db.close()
+
             #Check if Product has been added before
             try:
                 saved_product = user_selected_product[product["seller"] + str(product["product_id"])]
                 saved_product["product_qty"] += product["product_qty"]
+                if saved_product["product_qty"] > product_stock:
+                    return json.jsonify({"result" : False, "reason":"added more than stock"})
                 user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
                 users_shopping_cart["selected_product"] = user_selected_product
                 shopping_cart_db["hi@gmail.com"] = users_shopping_cart
             except:
+                if product["product_qty"] > product_stock:
+                    return json.jsonify({"result": False, "reason": "added more than stock"})
                 user_selected_product[product["seller"] + str(product["product_id"])] = product
                 users_shopping_cart["selected_product"] = user_selected_product
+
+
 
             #Update Cart Qty
             saved_cart_qty = 0
@@ -232,8 +272,6 @@ def shopping_cart(user):
         #Request to Update Cart Qty
         if sent_data["request_type"] == "update_cart_qty":
 
-            updated_cart_qty = sent_data["cart_qty"]
-            updated_product_qty = sent_data["product_qty"]
             seller_name = sent_data["seller_name"]
             product_id = sent_data["product_id"]
 

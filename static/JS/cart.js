@@ -9,11 +9,6 @@ function increment(cart_item_id, product_price, seller_name, product_id) {
     var product_price_update = product_qty * product_price;
     $("#price-" + cart_item_id).text(product_price_update.toFixed(2));
 
-    //Update Cart Icon Qty
-    var cart_qty = $('#cart-item-qty').text().trim();
-    cart_qty = parseInt(cart_qty);
-    cart_qty += 1;
-    $('#cart-item-qty').text(cart_qty);
     $.ajax({
         url: '',
         type: 'POST',
@@ -22,9 +17,7 @@ function increment(cart_item_id, product_price, seller_name, product_id) {
             "request_type" : "update_cart_qty",
             "type" : "increment",
             "seller_name" : seller_name,
-            "product_id" : product_id,
-            "product_qty" : product_qty,
-            "cart_qty" : cart_qty
+            "product_id" : product_id
         })
     })
     subtotal();
@@ -41,11 +34,6 @@ function decrement(cart_item_id, product_price, seller_name, product_id) {
         var product_price_update = product_qty * product_price;
         $("#price-" + cart_item_id).text(product_price_update.toFixed(2));
 
-        //Update Cart Icon Qty
-        var cart_qty = $('#cart-item-qty').text().trim();
-        cart_qty = parseInt(cart_qty);
-        cart_qty -= 1;
-        $('#cart-item-qty').text(cart_qty);
         $.ajax({
             url: '',
             type: 'POST',
@@ -54,9 +42,7 @@ function decrement(cart_item_id, product_price, seller_name, product_id) {
                 "request_type" : "update_cart_qty",
                 "type" : "decrement",
                 "seller_name" : seller_name,
-                "product_id" : product_id,
-                "product_qty" : product_qty,
-                "cart_qty" : cart_qty
+                "product_id" : product_id
             })
         })
         subtotal();
@@ -113,8 +99,28 @@ function total() {
     var promo_price = $('#promo-price').text().trim();
     promo_price = parseFloat(promo_price);
 
-    total_price = subtotal + 2 + promo_price;
+    total_price = subtotal + 2 - promo_price;
     $('#total-price').text(total_price.toFixed(2));
+}
+
+function applyPromoCode() {
+    var input_promo = $('#promo-code-input').val().toUpperCase();
+    if (input_promo == "CNY2024") {
+        promo_discount = 2
+        $('#promo-price').text(promo_discount.toFixed(2));
+        $('#promo-code-input').css('border-color', '#55aa65');
+        try {
+            $('#invalid-msg').remove();
+        } catch{}
+        total();
+    } else {
+        $('#promo-code-input').css('border-color', '#ff3b62');
+        $('#promo-code-btn').after("<div id='invalid-msg'><p class='invalid'>Invalid Promo Code</p></div>")
+    }
+}
+
+function checkout() {
+    
 }
 
 subtotal();
