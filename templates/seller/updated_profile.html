@@ -19,9 +19,9 @@
 <td>{{ seller.get_name }}</td>
 <td>{{ seller.get_desc }}</td>
 <td>{{ seller.get_doc }}</td>
-<td><a href="/updateSeller/{{seller.get_id()}}" class="btn btn-warning">Update</a></td>
+<td><a href="/updateSeller/{{seller.get_application_id()}}" class="btn btn-warning">Update</a></td>
 <td>
-<form action="{{url_for('delete_seller', seller_id=seller.get_id())}}" method="POST">
+<form action="{{url_for('delete_seller', seller_id=seller.get_application_id())}}" method="POST">
 
     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{{seller.get_email()}}">
 Delete
