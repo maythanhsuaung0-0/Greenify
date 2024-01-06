@@ -101,7 +101,11 @@
     <span>$2.00</span>
   </div>
   <div class="promo-code">
-    #promo code
+    <div class="cart-summary-label">Promo Code:</div>
+    <div>
+      <input type="text" id="promo-code-input" class="is-invalid">
+      <button class="btn btn-dark" id="promo-code-btn" onclick="applyPromoCode()">Apply</button>
+    </div>
   </div>
   <div class="cart-summary-label">Promo:</div>
   <div class="cart-summary-content">
@@ -111,7 +115,9 @@
   <div class="cart-summary-content">
     $<span id="total-price"></span>
   </div>
+  <button class="btn btn-danger" onclick="checkout()">Checkout</button>
 </div>
+
 
 {% endblock %}
 
