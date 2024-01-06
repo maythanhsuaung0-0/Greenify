@@ -3,9 +3,15 @@
 {% block title %}Application Forms{% endblock %}
 {% block content %}
 <h3>Updated forms</h3>
+
 <div class="py-3 d-flex flex-column gap-2">
+    {% if count == 0 %}
+    <div class="d-flex justify-content-center align-items-center">
+        <h4>No requests</h4>
+    </div>
+    {% elif count > 0 %}
     <div class="d-flex justify-content-between align-items-center">
-        <div class="">Requests :<b>100</b></div>
+        <div class="">Requests :<b>{{count}}</b></div>
         <div class="">
             <button class="btn btn-light">Filter by Date</button>
         </div>
@@ -26,9 +32,23 @@
             </div>
           </div>
       <div>
-            {{accordionComponent(1,'hi','hello','ha@gmail.com','null','approve_form','delete_form','changes')}}
-          </div>
-       
+      </div>
+       {% for i in waiting_list %}
+        <div>{{accordionComponent(
+               i.get_application_id(),
+         i.get_name(),
+            i.get_email(),
+         i.get_desc(),
+         i.get_doc().split('/')[0] if i.get_doc() else '',
+         i.get_doc().split('/')[1] if i.get_doc() and '/' in i.get_doc() else '',
+         i.get_doc() if i.get_doc() else '',
+         i.get_date() if i.get_date() else '',
+            'approve_updates',
+         'reject_updates', 'the changes for '
+              )}}</div>
+        {% endfor %}
     </div>
-</div>
+
+{% endif %}
+    </div>
 {% endblock %}

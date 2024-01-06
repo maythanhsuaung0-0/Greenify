@@ -11,9 +11,6 @@ class ApplicationFormFormat:
         self.__doc = None
         self.__date = None
 
-    def get_id(self):
-        return self.__id
-
     def set_name(self, name):     
         self.__name = name
 

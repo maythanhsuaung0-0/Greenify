@@ -64,7 +64,7 @@ def seller_id_search(seller_name):
         return False
     for id in approved_sellers:
         if seller_name == approved_sellers[id].get_name():
-            seller_id = approved_sellers[id].get_id()
+            seller_id = approved_sellers[id].get_application_id()
             return seller_id
 
 @app.route("/")
@@ -575,7 +575,7 @@ def respond():
 
 
 @app.route("/register", methods=['GET', 'POST'])
-def register(): #create
+def register():  # create
     global last_id
     registration_form = ApplicationForm(request.form)
     if request.method == 'POST' and registration_form.validate():
@@ -596,7 +596,7 @@ def register(): #create
                 last_id = 0
         db['Id'] = last_id
 
-        appForm = AppFormFormat(last_id,registration_form.business_name.data, registration_form.seller_email.data,
+        appForm = AppFormFormat(last_id, registration_form.business_name.data, registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
@@ -621,7 +621,7 @@ def register(): #create
         appForm = application_form[appForm.get_application_id()]
         print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
               appForm.get_application_id())
-        print("last id--",last_id)
+        print("last id--", last_id)
         if application_form.keys():
             last_id = max(application_form.keys())
         db['Id'] = last_id
@@ -631,11 +631,12 @@ def register(): #create
 
 
 @app.route('/display_image/<filename>/<filepath>')
-def display_image(filename,filepath):
-    image_url = url_for('static',filename='images/uploads/'+ filename+ '/'+ filepath)
-    return render_template('display_image.html', image_url = image_url)
+def display_image(filename, filepath):
+    image_url = url_for('static', filename='images/uploads/' + filename + '/' + filepath)
+    return render_template('display_image.html', image_url=image_url)
 
-@app.route('/staff/retrieveApplicationForms') #read
+
+@app.route('/staff/retrieveApplicationForms')  # read
 def retrieveApplicationForms():
     app_dict = {}
     db = shelve.open('application.db', 'r')
@@ -652,9 +653,8 @@ def retrieveApplicationForms():
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
-
-@app.route('/staff/approveForm/<int:seller_id>', methods = ['POST']) # for approving forms
-def approve_form(seller_id): # create
+@app.route('/staff/approveForm/<int:seller_id>', methods=['POST'])  # for approving forms
+def approve_form(seller_id):  # create
     # take the approved application
     approved = extracting('application.db', 'Application', seller_id)
     print("This user is approved", approved.get_application_id())
@@ -672,20 +672,20 @@ def approve_form(seller_id): # create
         password = "".join(secrets.choice(alphabet) for _ in range(10))
         if password not in passwords:
             break
-    send_mail(approved.get_email(),True,approved.get_name(),password)
+    send_mail(approved.get_email(), True, approved.get_name(), password)
     approved.set_password(password)
     # storing approved seller
     approved_sellers[approved.get_application_id()] = approved
     approved_db['Approved_sellers'] = approved_sellers
-    if approved_db['Approved_sellers']:
-        for key, seller in approved_db['Approved_sellers'].items():
-            passwords.append(seller.get_password())
+    for key,seller in approved_db['Approved_sellers'].items():
+        passwords.append(seller.get_password())
     approved_db.close()
     print(passwords)
     return redirect(url_for('retrieveApplicationForms'))
 
-@app.route('/staff/rejectForm/<int:seller_id>', methods =['POST']) #for rejecting forms
-def reject_form(seller_id): # delete
+
+@app.route('/staff/rejectForm/<int:seller_id>', methods=['POST'])  # for rejecting forms
+def reject_form(seller_id):  # delete
     rejected = extracting('application.db', 'Application', seller_id)
     if rejected.get_doc():
         delete_folder(rejected)
@@ -694,36 +694,79 @@ def reject_form(seller_id): # delete
 
 
 @app.route('/staff/retrieveUpdateForms')
-def retrieveUpdateForms(): # approving updates
-    return render_template('staff/retrieveUpdateForms.html')
+def retrieveUpdateForms():  # for approving updates
+    waiting_update_approval = {}
+    db = shelve.open('updated_sellers.db', 'r')
+    try:
+        waiting_update_approval = db['Updated_sellers']
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+    waiting_list = []
+    for key in waiting_update_approval:
+        data = waiting_update_approval.get(key)
+        print('data', data)
+        waiting_list.append(data)
+    print('waiting list', waiting_list)
+    db.close()
+    return render_template('staff/retrieveUpdateForms.html',count = len(waiting_list), waiting_list = waiting_list)
+
+@app.route('/staff/approveUpdates/<int:seller_id>', methods=['POST'])  # for approving updates
+def approve_updates(seller_id):  # create
+    # take the approved application
+    approved = extracting('updated_sellers.db','Updated_sellers', seller_id)
+    print("This user is approved", approved.get_application_id(), seller_id)
+    sellers = {}
+    sellers_db = shelve.open('approved_sellers.db', 'w')
+    sellers = sellers_db['Approved_sellers']
+    seller = sellers.get(seller_id)
+    seller.set_name(approved.get_name())
+    seller.set_email(approved.get_email())
+    seller.set_password(approved.get_password())
+    seller.set_desc(approved.get_desc())
+    # seller.set_doc(approved.get_doc())
+    sellers_db['Approved_sellers'] = sellers
+    sellers_db.close()
+    # store in the approved_sellers
+    return redirect(url_for('retrieveUpdateForms'))
+
+
+@app.route('/staff/rejectUpdates/<int:seller_id>', methods=['POST'])
+def reject_updates(seller_id):
+    deleted_item = extracting('updated_sellers.db', 'Updated_sellers', seller_id)
+    delete_folder(deleted_item)
+    return redirect(url_for('retrieveUpdateForms'))
 
 
 @app.route('/staff/retrieveSellers')
-def retrieveSellers(): # read
+def retrieveSellers():  # read
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
     try:
         approved_sellers = approved_db['Approved_sellers']
-    except:
-        print("Error in retrieving sellers")
-    approved_db.close()
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
     sellers_list = []
     for key in approved_sellers:
         forms = approved_sellers.get(key)
         sellers_list.append(forms)
+    approved_db.close()
     return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
 
-@app.route('/staff/deleteForm/<int:id>', methods = ['POST'])
-def delete_form(id): # delete
+
+@app.route('/staff/deleteForm/<int:id>', methods=['POST'])
+def delete_form(id):  # delete
     deleted_item = extracting('approved_sellers.db', 'Approved_sellers', id)
     delete_folder(deleted_item)
     return redirect(url_for('retrieveSellers'))
 
 
+
 @app.route('/staff/dashboard')
 def dashboard():
     return render_template('staff/dashboard.html')
+
 
 
 @app.route('/seller/<int:seller_id>/dashboard')
@@ -773,7 +816,8 @@ def update_seller(seller_id):
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
-
+         # for adding data
+        updated_sellers[seller.get_application_id()] = seller
         db['Updated_sellers'] = updated_sellers
         db.close()
 
