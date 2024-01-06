@@ -733,35 +733,42 @@ def retrieve_seller_profile():
     return render_template('/seller/profile.html', count=len(sellers), sellers=sellers)
 
 
-@app.route('/seller/<int:seller_id>/profile')
-def seller_profile(seller_id):
-    approved_sellers = {}
-    approved_db = shelve.open('approved_sellers.db', 'r')
-    try:
-        approved_sellers = approved_db['Approved_sellers']
-    except:
-        print("Error in retrieving sellers")
-    if seller_id in approved_sellers:
-        print(approved_sellers[seller_id].get_email())
-    approved_db.close()
-    return render_template('/seller/profile.html')
+# @app.route('/retrieveUpdatedSeller')
+# def updated_seller_profile():
+#     updated_sellers = {}
+#     db = shelve.open('updated_sellers.db', 'r')
+#     updated_sellers = db['Updated_sellers']
+#     db.close()
+#
+#     sellers_after_changes = []
+#     for key in updated_sellers:
+#         seller = updated_sellers.get(key)
+#         sellers_after_changes.append(seller)
+#     return render_template('/seller/updated_profile.html', count=len(sellers_after_changes), sellers_after_changes=sellers_after_changes)
+
+
+# @app.route('/seller/<int:seller_id>/profile')
+# def seller_profile(seller_id):
+#     approved_sellers = {}
+#     approved_db = shelve.open('approved_sellers.db', 'r')
+#     try:
+#         approved_sellers = approved_db['Approved_sellers']
+#     except:
+#         print("Error in retrieving sellers")
+#     if seller_id in approved_sellers:
+#         print(approved_sellers[seller_id].get_email())
+#     approved_db.close()
+#     return render_template('/seller/profile.html')
 
 
 @app.route('/updateSeller/<int:seller_id>/', methods=['GET', 'POST'])
 def update_seller(seller_id):
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
-        updated_sellers = {}
-        db = shelve.open('updated_sellers.db', 'c')
-        updated_sellers = db['Updated_sellers']
+        # updated_sellers = {}
+        # db = shelve.open('updated_sellers.db', 'c')
         approved_sellers = {}
-        approved_db = shelve.open('approved_sellers.db', 'r')
-        try:
-            approved_sellers = approved_db['Approved_sellers']
-        except:
-            print("Error in retrieving sellers")
-        if seller_id in approved_sellers:
-            print(approved_sellers[seller_id].get_email())
+        approved_db = shelve.open('approved_sellers.db', 'w')
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
@@ -770,8 +777,8 @@ def update_seller(seller_id):
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
 
-        db['Updated_sellers'] = updated_sellers
-        db.close()
+        approved_db['Approved_sellers'] = approved_sellers
+        approved_db.close()
 
         return redirect(url_for('retrieve_seller_profile'))
     else:
