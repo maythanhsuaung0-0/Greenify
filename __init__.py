@@ -409,6 +409,18 @@ def get_key(val,users_dict):
 #     return render_template('retrieveUsers.html', count=len(users_list), users_list=users_list)
 
 
+def user_search(user_email):
+    users_dict = {}
+    db = shelve.open('user.db')
+    try:
+        users_dict = db['Users']
+    except:
+        return False
+    for email in users_dict:
+        if user_email == users_dict[email].get_email():
+            user_password = users_dict[email].get_password()
+            return user_password
+
 @app.route('/retrieveUser')
 def retrieve_user():
     users_dict = {}
@@ -803,10 +815,10 @@ def retrieve_seller_profile():
 def update_seller(seller_id):
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
-        # updated_sellers = {}
-        # db = shelve.open('updated_sellers.db', 'c')
+        updated_sellers = {}
+        db = shelve.open('updated_sellers.db', 'c')
         approved_sellers = {}
-        approved_db = shelve.open('approved_sellers.db', 'w')
+        approved_db = shelve.open('approved_sellers.db', 'r')
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
@@ -815,10 +827,10 @@ def update_seller(seller_id):
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
 
-        approved_db['Approved_sellers'] = approved_sellers
-        approved_db.close()
+        db['Updated_sellers'] = updated_sellers
+        db.close()
 
-        return redirect(url_for('retrieve_seller_profile'))
+        return 'Your info will be sent to our staff for review :)'
     else:
         approved_sellers = {}
         approved_db = shelve.open('approved_sellers.db', 'r')
