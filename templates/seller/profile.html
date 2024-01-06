@@ -1,10 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Retrieve Account Information{% endblock %}
+{% block content %}
+<h1 class="display-4">Retrieve Account Information</h1>
+<div>
+<table class="table table-striped">
+<thead>
+<tr>
+<th>Email</th>
+<th>Business name</th>
+<th>Business desc</th>
+<th>Support document</th>
+</tr>
+</thead>
+<tbody>
+{% for seller in sellers %}
+<tr>
+<td>{{ seller.get_email() }}</td>
+<td>{{ seller.get_business_name }}</td>
+<td>{{ seller.get_business_desc }}</td>
+<td>{{ seller.get_support_document }}</td>
+<td><a href="/updateSeller/{{seller.get_id()}}" class="btn btn-warning">Update</a></td>
+<td>
+<form action="{{url_for('delete_seller', seller_id=seller.get_id())}}" method="POST">
 
-</body>
-</html>
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{{seller.get_email()}}">
+Delete
+</button>
+<!-- The Modal -->
+<div class="modal" id="myModal_{{seller.get_email()}}">
+<div class="modal-dialog">
+<div class="modal-content">
+<!-- Modal Header -->
+<div class="modal-header">
+<h4 class="modal-title">Delete Confirmation</h4>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<!-- Modal body -->
+<div class="modal-body">
+Are you sure you want to delete your account?
+</div>
+<!-- Modal footer -->
+<div class="modal-footer">
+<input type="submit" value="Delete" class="btn btn-danger">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+</div>
+</div>
+</div>
+</div>
+</form>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

@@ -752,10 +752,23 @@ def dashboard():
     return render_template('staff/dashboard.html')
 
 
-
 @app.route('/seller/<int:seller_id>/dashboard')
 def seller_dashboard(seller_id):
     return render_template('/seller/dashboard.html')
+
+
+@app.route('/retrieveSeller')
+def retrieve_seller_profile():
+    approved_sellers = {}
+    approved_db = shelve.open('approved_sellers.db', 'r')
+    approved_sellers = approved_db['Approved_sellers']
+    approved_db.close()
+
+    sellers = []
+    for key in approved_sellers:
+        seller = approved_sellers.get(key)
+        sellers.append(seller)
+    return render_template('/seller/profile.html', count=len(sellers), sellers=sellers)
 
 
 @app.route('/seller/<int:seller_id>/profile')
@@ -770,6 +783,63 @@ def seller_profile(seller_id):
         print(approved_sellers[seller_id].get_email())
     approved_db.close()
     return render_template('/seller/profile.html')
+
+
+@app.route('/updateSeller/<int:seller_id>/', methods=['GET', 'POST'])
+def update_seller(seller_id):
+    update_seller_form = ApplicationForm(request.form)
+    if request.method == 'POST' and update_seller_form.validate():
+        updated_sellers = {}
+        db = shelve.open('updated_sellers.db', 'c')
+        updated_sellers = db['Updated_sellers']
+        approved_sellers = {}
+        approved_db = shelve.open('approved_sellers.db', 'r')
+        try:
+            approved_sellers = approved_db['Approved_sellers']
+        except:
+            print("Error in retrieving sellers")
+        if seller_id in approved_sellers:
+            print(approved_sellers[seller_id].get_email())
+        approved_sellers = approved_db['Approved_sellers']
+
+        seller = approved_sellers.get(seller_id)
+        seller.set_email(update_seller_form.seller_email.data)
+        seller.set_name(update_seller_form.business_name.data)
+        seller.set_desc(update_seller_form.business_desc.data)
+        seller.set_doc(update_seller_form.support_document.data)
+
+        db['Updated_sellers'] = updated_sellers
+        db.close()
+
+        return redirect(url_for('retrieve_seller_profile'))
+    else:
+        approved_sellers = {}
+        approved_db = shelve.open('approved_sellers.db', 'r')
+        approved_sellers = approved_db['Approved_sellers']
+        approved_db.close()
+
+        seller = approved_sellers.get(seller_id)
+        update_seller_form.seller_email.data = seller.get_email()
+        update_seller_form.business_name.data = seller.get_name()
+        update_seller_form.business_desc.data = seller.get_desc()
+        update_seller_form.support_document.data = seller.get_doc()
+
+        return render_template('/seller/updateSeller.html', form=update_seller_form)
+
+
+@app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
+def delete_seller(seller_id):
+    updated_sellers = {}
+    db = shelve.open('updated_sellers.db', 'w')
+    updated_sellers = db['Updated_sellers']
+
+    updated_sellers.pop(seller_id)
+
+    db['Updated_sellers'] = updated_sellers
+    db.close()
+
+    return "Your account has successfully been deleted."
+
 
 if __name__ == "__main__":
     app.run(debug=True)
