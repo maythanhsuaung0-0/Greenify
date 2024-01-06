@@ -326,6 +326,7 @@ def shopping_cart(user):
 
     return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty)
 
+
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
     create_user_form = CreateUserForm(request.form)
@@ -376,7 +377,8 @@ def login():
                 if login_form.email.data in users_dict and login_form.password.data in passwords:
                     key = get_key(login_form.password.data, db['Users'])
                     if key == user.get_email():
-                        return redirect(url_for('retrieve_user'))
+                        login_status = user.set_login_status(True)
+                        return redirect(url_for('home'))
                     else:
                         return render_template('login_failed.html')
                 else:
@@ -394,47 +396,6 @@ def get_key(val,users_dict):
             return key
 
 
-# @app.route('/retrieveUsers')
-# def retrieve_users():
-#     users_dict = {}
-#     db = shelve.open('user.db', 'r')
-#     users_dict = db['Users']
-#     db.close()
-#
-#     users_list = []
-#     for key in users_dict:
-#         user = users_dict.get(key)
-#         users_list.append(user)
-#
-#     return render_template('retrieveUsers.html', count=len(users_list), users_list=users_list)
-
-
-def user_search(user_email):
-    users_dict = {}
-    db = shelve.open('user.db')
-    try:
-        users_dict = db['Users']
-    except:
-        return False
-    for email in users_dict:
-        if user_email == users_dict[email].get_email():
-            user_password = users_dict[email].get_password()
-            return user_password
-
-@app.route('/retrieveUser')
-def retrieve_user():
-    users_dict = {}
-    db = shelve.open('user.db', 'r')
-    users_dict = db['Users']
-    db.close()
-
-    users_list = []
-    for key in users_dict:
-        user = users_dict.get(key)
-        users_list.append(user)
-
-    return render_template('settings.html', count=len(users_list), users_list=users_list)
-
 @app.route('/updateUser/<string:email>/', methods=['GET', 'POST'])
 def update_user(email):
     update_user_form = CreateUserForm(request.form)
@@ -450,7 +411,7 @@ def update_user(email):
         db['Users'] = users_dict
         db.close()
 
-        return redirect(url_for('retrieve_user'))
+        return redirect(url_for('home'))
     else:
         users_dict = {}
         db = shelve.open('user.db', 'r')
@@ -480,10 +441,10 @@ def delete_user(email):
 
 @app.route('/stafflogin', methods=['GET', 'POST'])
 def staff_login():
-    stafflogin_form = StaffLoginForm(request.form)
-    if request.method == 'POST' and stafflogin_form.validate():
+    staff_login_form = StaffLoginForm(request.form)
+    if request.method == 'POST' and staff_login_form.validate():
         return redirect(url_for('retrieveApplicationForms'))
-    return render_template('staff/staff_login.html', form=stafflogin_form)
+    return render_template('staff/staff_login.html', form=staff_login_form)
 
 
 @app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
@@ -834,14 +795,14 @@ def update_seller(seller_id):
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
 def delete_seller(seller_id):
-    updated_sellers = {}
-    db = shelve.open('updated_sellers.db', 'w')
-    updated_sellers = db['Updated_sellers']
+    approved_sellers = {}
+    approved_db = shelve.open('approved_sellers.db', 'w')
+    approved_sellers = approved_db['Approved_sellers']
 
-    updated_sellers.pop(seller_id)
+    approved_sellers.pop(seller_id)
 
-    db['Updated_sellers'] = updated_sellers
-    db.close()
+    approved_db['Approved_sellers'] = approved_sellers
+    approved_db.close()
 
     return "Your account has successfully been deleted."
 
