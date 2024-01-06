@@ -61,17 +61,65 @@ def seller_id_search(seller_name):
     except:
         return False
     for id in approved_sellers:
+        print(approved_sellers[id].get_name())
+        print(approved_sellers[id].get_id())
         if seller_name == approved_sellers[id].get_name():
             seller_id = approved_sellers[id].get_id()
             return seller_id
 
 @app.route("/")
 def home():
+    seller_products = {}
+    # New
+    seller_product_info = {}
+    #
+    seller_product_db = shelve.open('seller-product.db', 'c')
+
+    try:
+        # New
+        seller_product_info = seller_product_db["1"]
+        seller_products = seller_product_info['products']
+        #
+
+    except:
+        print("Error in retrieving products from seller-product.db.")
+
+    # New
+    # Getting a new Product Id
+    try:
+        seller_product_id = seller_product_info["id"]
+    except KeyError:
+        seller_product_id = 1
+    #
+
+    create_product = SellerProduct.SellerProduct("500ml",
+                                                 8,
+                                                 100,
+                                                 "bottle.png",
+                                                 "Best 500ml bottle")
+
+    # New
+    # Assigning product with id
+    create_product.set_product_id(seller_product_id)
+    seller_product_id += 1
+    #
+
+    # create dict with product id as key and create_product as value; dict name is seller_products
+    seller_products[create_product.get_product_id()] = create_product
+    # store seller_products(dict) in seller_product_db, with seller_id as key and seller_products as value
+    # New
+    seller_product_info["products"] = seller_products
+    seller_product_info["id"] = seller_product_id
+    seller_product_db["1"] = seller_product_info
+    #
+    seller_product_db.close()
     return render_template("customer/homepage.html")
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
 def product(seller, product_id):
+
+
     def cart_qty(user):
         saved_cart_qty = 0
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -88,16 +136,20 @@ def product(seller, product_id):
     seller_id = seller_id_search(seller)
 
     if seller_id == False:
+        print("Seller_id not found")
         return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+
 
 
     #Retrieving Product for html to display
     seller_products = {}
+    seller_product_info = {}
     seller_product_db = shelve.open('seller-product.db', 'c')
     try:
-        seller_products = seller_product_db[str(seller_id)]
-
+        seller_product_info = seller_product_db[str(seller_id)]
+        seller_products = seller_product_info['products']
     except:
+        print("Product is not found")
         return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
 
     product = seller_products[product_id]
@@ -154,7 +206,7 @@ def product(seller, product_id):
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
 
-    return render_template("customer/test_product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"))
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"))
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
@@ -183,8 +235,6 @@ def shopping_cart(user):
 
     display_shopping_cart = []
 
-    print(user_selected_product)
-
     if len(user_selected_product) != 0:
         for product_selected_name in user_selected_product:
             product_selected = user_selected_product[product_selected_name]
@@ -193,7 +243,8 @@ def shopping_cart(user):
             seller_product = {}
             seller_product_db = shelve.open("seller-product.db")
 
-            seller_product = seller_product_db[str(product_selected["seller_id"])]
+            seller_product_info = seller_product_db[str(product_selected["seller_id"])]
+            seller_product = seller_product_info['products']
             product = seller_product[product_selected["product_id"]]
 
             # Getting Product Qty
@@ -439,23 +490,48 @@ def create_product(seller_id):
     create_product_form = CreateProductForm(request.form)
     if request.method == 'POST' and create_product_form.validate():
         seller_products = {}
+        #New
+        seller_product_info = {}
+        #
         seller_product_db = shelve.open('seller-product.db', 'c')
 
         try:
-            seller_products = seller_product_db[str(seller_id)]
+            # New
+            seller_product_info = seller_product_db[str(seller_id)]
+            seller_products = seller_product_info['products']
+            #
 
         except:
             print("Error in retrieving products from seller-product.db.")
+
+        #New
+        #Getting a new Product Id
+        try:
+            seller_product_id = seller_product_info["id"]
+        except KeyError:
+            seller_product_id = 1
+        #
+
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
                                                      create_product_form.product_stock.data,
                                                      create_product_form.image.data,
                                                      create_product_form.description.data)
 
+        #New
+        #Assigning product with id
+        create_product.set_product_id(seller_product_id)
+        seller_product_id += 1
+        #
+
         # create dict with product id as key and create_product as value; dict name is seller_products
         seller_products[create_product.get_product_id()] = create_product
         # store seller_products(dict) in seller_product_db, with seller_id as key and seller_products as value
-        seller_product_db[str(seller_id)] = seller_products
+        # New
+        seller_product_info["products"] = seller_products
+        seller_product_info["id"] = seller_product_id
+        seller_product_db[str(seller_id)] = seller_product_info
+        #
         seller_product_db.close()
 
         return redirect(url_for('retrieve_product', seller_id=seller_id))

@@ -85,3 +85,10 @@ function removeProduct(cart_item_id, seller_name, product_id) {
         }
     })
 }
+
+function subtotal() {
+    var product_price_list = $(".indv-total-price").text().trim();
+    console.log(product_price_list);
+}
+
+subtotal();

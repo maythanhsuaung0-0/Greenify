@@ -1,14 +1,14 @@
 class SellerProduct:
-    count_id = 0
-
     def __init__(self, product_name, product_price, product_stock, image, description):
-        SellerProduct.count_id += 1
-        self.__product_id = SellerProduct.count_id
+        self.__product_id = None
         self.__product_name = product_name
         self.__product_price = product_price
         self.__product_stock = product_stock
         self.__image = image
         self.__description = description
+
+    def set_product_id(self, id):
+        self.__product_id = id
 
     def get_product_id(self):
         return self.__product_id
@@ -42,4 +42,3 @@ class SellerProduct:
 
     def get_description(self):
         return self.__description
-
