@@ -6,7 +6,7 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
-# from set_image import create_image_set
+from set_image import create_image_set
 import secrets
 import shutil
 from werkzeug.utils import secure_filename
@@ -596,13 +596,13 @@ def register(): #create
             filename = secure_filename(support_docs.filename)
             img_id = secrets.token_hex(16)
             # Create
-            # os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id))
-            # support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id, filename))
-            # image_dir = os.path.join(app.config["UPLOAD_DIRECTORY"], img_id)
-            # create_image_set(image_dir, filename)
-            # message = f"{img_id}/{filename.split('.')[0]}.webp"
-            # appForm.set_doc(message)
-            # print(message)
+            os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id))
+            support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id, filename))
+            image_dir = os.path.join(app.config["UPLOAD_DIRECTORY"], img_id)
+            create_image_set(image_dir, filename)
+            message = f"{img_id}/{filename.split('.')[0]}.webp"
+            appForm.set_doc(message)
+            print(message)
 
         db['Application'] = application_form
         # testing
@@ -730,7 +730,6 @@ def retrieve_seller_profile():
     for key in approved_sellers:
         seller = approved_sellers.get(key)
         sellers.append(seller)
-    print(sellers)
     return render_template('/seller/profile.html', count=len(sellers), sellers=sellers)
 
 
@@ -743,7 +742,7 @@ def seller_profile(seller_id):
     except:
         print("Error in retrieving sellers")
     if seller_id in approved_sellers:
-        print(approved_sellers[seller_id].get_email(), approved_sellers[seller_id].get_id())
+        print(approved_sellers[seller_id].get_email())
     approved_db.close()
     return render_template('/seller/profile.html')
 
@@ -754,6 +753,7 @@ def update_seller(seller_id):
     if request.method == 'POST' and update_seller_form.validate():
         updated_sellers = {}
         db = shelve.open('updated_sellers.db', 'c')
+        updated_sellers = db['Updated_sellers']
         approved_sellers = {}
         approved_db = shelve.open('approved_sellers.db', 'r')
         try:
@@ -762,7 +762,6 @@ def update_seller(seller_id):
             print("Error in retrieving sellers")
         if seller_id in approved_sellers:
             print(approved_sellers[seller_id].get_email())
-        approved_db.close()
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
@@ -774,20 +773,20 @@ def update_seller(seller_id):
         db['Updated_sellers'] = updated_sellers
         db.close()
 
-        return redirect(url_for('seller_profile'))
+        return redirect(url_for('retrieve_seller_profile'))
     else:
-        updated_sellers = {}
-        db = shelve.open('updated_sellers.db', 'c')
-        updated_sellers = db['Updated_sellers']
-        db.close()
+        approved_sellers = {}
+        approved_db = shelve.open('approved_sellers.db', 'r')
+        approved_sellers = approved_db['Approved_sellers']
+        approved_db.close()
 
-        seller = updated_sellers.get(seller_id)
+        seller = approved_sellers.get(seller_id)
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
 
-        return render_template('updateSeller.html', form=update_seller_form)
+        return render_template('/seller/updateSeller.html', form=update_seller_form)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
