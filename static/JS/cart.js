@@ -27,6 +27,8 @@ function increment(cart_item_id, product_price, seller_name, product_id) {
             "cart_qty" : cart_qty
         })
     })
+    subtotal();
+    total();
 }
 
 function decrement(cart_item_id, product_price, seller_name, product_id) {
@@ -57,6 +59,8 @@ function decrement(cart_item_id, product_price, seller_name, product_id) {
                 "cart_qty" : cart_qty
             })
         })
+        subtotal();
+        total();
     }
 }
 
@@ -81,6 +85,8 @@ function removeProduct(cart_item_id, seller_name, product_id) {
                     document.getElementById("content-body").innerHTML = `<h1>Your Shopping Cart is Empty</h1>`;
 
                 }
+                subtotal();
+                total();
             }
         }
     })
@@ -88,7 +94,28 @@ function removeProduct(cart_item_id, seller_name, product_id) {
 
 function subtotal() {
     var product_price_list = $(".indv-total-price").text().trim();
-    console.log(product_price_list);
+    product_price_list = product_price_list.slice(1).split('$');
+    subtotal_price = 0
+    for (var i = 0; i < product_price_list.length; i++) {
+        price = product_price_list[i];
+        price = parseFloat(price);
+
+        subtotal_price += price;
+    }
+
+    $("#subtotal").text(subtotal_price.toFixed(2))
+}
+
+function total() {
+    var subtotal = $("#subtotal").text().trim();
+    subtotal = parseFloat(subtotal);
+
+    var promo_price = $('#promo-price').text().trim();
+    promo_price = parseFloat(promo_price);
+
+    total_price = subtotal + 2 + promo_price;
+    $('#total-price').text(total_price.toFixed(2));
 }
 
 subtotal();
+total()
