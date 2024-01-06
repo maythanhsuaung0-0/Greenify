@@ -6,7 +6,7 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
-from set_image import create_image_set
+# from set_image import create_image_set
 import secrets
 import shutil
 from werkzeug.utils import secure_filename
@@ -596,13 +596,13 @@ def register(): #create
             filename = secure_filename(support_docs.filename)
             img_id = secrets.token_hex(16)
             # Create
-            os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id))
-            support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id, filename))
-            image_dir = os.path.join(app.config["UPLOAD_DIRECTORY"], img_id)
-            create_image_set(image_dir, filename)
-            message = f"{img_id}/{filename.split('.')[0]}.webp"
-            appForm.set_doc(message)
-            print(message)
+            # os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id))
+            # support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id, filename))
+            # image_dir = os.path.join(app.config["UPLOAD_DIRECTORY"], img_id)
+            # create_image_set(image_dir, filename)
+            # message = f"{img_id}/{filename.split('.')[0]}.webp"
+            # appForm.set_doc(message)
+            # print(message)
 
         db['Application'] = application_form
         # testing
@@ -714,10 +714,24 @@ def dashboard():
     return render_template('staff/dashboard.html')
 
 
-
 @app.route('/seller/<int:seller_id>/dashboard')
 def seller_dashboard(seller_id):
     return render_template('/seller/dashboard.html')
+
+
+@app.route('/retrieveSeller')
+def retrieve_seller_profile():
+    approved_sellers = {}
+    approved_db = shelve.open('approved_sellers.db', 'r')
+    approved_sellers = approved_db['Approved_sellers']
+    approved_db.close()
+
+    sellers = []
+    for key in approved_sellers:
+        seller = approved_sellers.get(key)
+        sellers.append(seller)
+    print(sellers)
+    return render_template('/seller/profile.html', count=len(sellers), sellers=sellers)
 
 
 @app.route('/seller/<int:seller_id>/profile')
@@ -729,9 +743,66 @@ def seller_profile(seller_id):
     except:
         print("Error in retrieving sellers")
     if seller_id in approved_sellers:
-        print(approved_sellers[seller_id].get_email())
+        print(approved_sellers[seller_id].get_email(), approved_sellers[seller_id].get_id())
     approved_db.close()
     return render_template('/seller/profile.html')
+
+
+@app.route('/updateSeller/<int:seller_id>/', methods=['GET', 'POST'])
+def update_seller(seller_id):
+    update_seller_form = ApplicationForm(request.form)
+    if request.method == 'POST' and update_seller_form.validate():
+        updated_sellers = {}
+        db = shelve.open('updated_sellers.db', 'c')
+        approved_sellers = {}
+        approved_db = shelve.open('approved_sellers.db', 'r')
+        try:
+            approved_sellers = approved_db['Approved_sellers']
+        except:
+            print("Error in retrieving sellers")
+        if seller_id in approved_sellers:
+            print(approved_sellers[seller_id].get_email())
+        approved_db.close()
+        approved_sellers = approved_db['Approved_sellers']
+
+        seller = approved_sellers.get(seller_id)
+        seller.set_email(update_seller_form.seller_email.data)
+        seller.set_name(update_seller_form.business_name.data)
+        seller.set_desc(update_seller_form.business_desc.data)
+        seller.set_doc(update_seller_form.support_document.data)
+
+        db['Updated_sellers'] = updated_sellers
+        db.close()
+
+        return redirect(url_for('seller_profile'))
+    else:
+        updated_sellers = {}
+        db = shelve.open('updated_sellers.db', 'c')
+        updated_sellers = db['Updated_sellers']
+        db.close()
+
+        seller = updated_sellers.get(seller_id)
+        update_seller_form.seller_email.data = seller.get_email()
+        update_seller_form.business_name.data = seller.get_name()
+        update_seller_form.business_desc.data = seller.get_desc()
+        update_seller_form.support_document.data = seller.get_doc()
+
+        return render_template('updateSeller.html', form=update_seller_form)
+
+
+@app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
+def delete_seller(seller_id):
+    updated_sellers = {}
+    db = shelve.open('updated_sellers.db', 'w')
+    updated_sellers = db['Updated_sellers']
+
+    updated_sellers.pop(seller_id)
+
+    db['Updated_sellers'] = updated_sellers
+    db.close()
+
+    return "Your account has successfully been deleted."
+
 
 if __name__ == "__main__":
     app.run(debug=True)
