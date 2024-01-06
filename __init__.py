@@ -71,50 +71,6 @@ def seller_id_search(seller_name):
 
 @app.route("/")
 def home():
-    seller_products = {}
-    # New
-    seller_product_info = {}
-    #
-    seller_product_db = shelve.open('seller-product.db', 'c')
-
-    try:
-        # New
-        seller_product_info = seller_product_db["1"]
-        seller_products = seller_product_info['products']
-        #
-
-    except:
-        print("Error in retrieving products from seller-product.db.")
-
-    # New
-    # Getting a new Product Id
-    try:
-        seller_product_id = seller_product_info["id"]
-    except KeyError:
-        seller_product_id = 1
-    #
-
-    create_product = SellerProduct.SellerProduct("500ml",
-                                                 8,
-                                                 100,
-                                                 "bottle.png",
-                                                 "Best 500ml bottle")
-
-    # New
-    # Assigning product with id
-    create_product.set_product_id(seller_product_id)
-    seller_product_id += 1
-    #
-
-    # create dict with product id as key and create_product as value; dict name is seller_products
-    seller_products[create_product.get_product_id()] = create_product
-    # store seller_products(dict) in seller_product_db, with seller_id as key and seller_products as value
-    # New
-    seller_product_info["products"] = seller_products
-    seller_product_info["id"] = seller_product_id
-    seller_product_db["1"] = seller_product_info
-    #
-    seller_product_db.close()
     return render_template("customer/homepage.html")
 
 
