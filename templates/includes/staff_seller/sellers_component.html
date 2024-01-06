@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components.css') }}">
     {% block JS_CSS %}{% endblock %}
 </head>
-{% macro dataComponent(id,name,desc,filename, filepath, docs,date) -%}
+{% macro dataComponent(id,name,email,desc,filename, filepath, docs,date) -%}
 <div class="card">
     <div
     class="row card-body">
@@ -46,7 +46,7 @@
            </div>
            <div>
             <h6 class="fw-bold">Business Certificates</h6>
-             {% if docs == None %}
+             {% if docs == None or docs == '' %}
              <p>No certificates</p>
             {% else %}
                <div class="row">
