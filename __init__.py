@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, json, jsonify
+from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
@@ -18,6 +18,7 @@ from send_email import send_mail
 
 app = Flask(__name__, static_url_path='/static')
 logged_in = False
+app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/images/uploads"
 
@@ -370,7 +371,7 @@ def login():
                 if login_form.email.data in users_dict and login_form.password.data in passwords:
                     key = get_key(login_form.password.data, db['Users'])
                     if key == user.get_email():
-                        logged_in = True
+                        session['logged_in'] = True
                         return redirect(url_for('home'))
                     else:
                         return render_template('login_failed.html')
@@ -380,6 +381,7 @@ def login():
                 return render_template('createUser.html')
         except:
             print("Error in opening user.db")
+    print(session.get('logged_in'))
     return render_template('login.html', form=login_form, logged_in=logged_in)
 
 
@@ -392,6 +394,13 @@ def get_key(val,users_dict):
 @app.route("/check_login")
 def check_login():
     return jsonify(logged_in)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)  # Remove 'logged_in' from session
+    print(session.get('logged_in'))
+    return redirect(url_for('home'))
 
 
 # email in the url won't change
@@ -426,8 +435,10 @@ def update_user(email):
         update_user_form.email.data = user.get_email()
         update_user_form.password.data = user.get_password()
 
+    if session.get('logged_in'):
         return render_template('updateUser.html', form=update_user_form)
-
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/deleteUser/<string:email>', methods=['POST'])
 def delete_user(email):
