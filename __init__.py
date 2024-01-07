@@ -323,8 +323,100 @@ def shopping_cart(user):
 
             return json.jsonify({"result": True, "cart_qty" : saved_cart_qty})
 
+        elif sent_data["request_type"] == "checkout":
+            payable_price = sent_data['payable_price']
+
+            shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+
+            users_shopping_cart = shopping_cart_db[user]
+            users_shopping_cart["payable"] = payable_price
+            shopping_cart_db[user] = users_shopping_cart
+
+            shopping_cart_db.close()
+
+            return json.jsonify({"redirect_link" : url_for("payment", user=user)})
+
 
     return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty)
+
+@app.route('/<user>/payment', methods=['GET', 'POST'])
+def payment(user):
+    #Receive AJAX Request
+    if request.method == "POST":
+        print('received')
+        sent_data = json.loads(request.data)
+
+        if sent_data['request_type'] == 'payment':
+            print('enter')
+            name = sent_data['name']
+            email = sent_data['email']
+            address = sent_data['address']
+
+            #Open User Shopping Cart
+            user_shopping_cart_db = shelve.open('user_shopping_cart.db')
+            users_shopping_cart = user_shopping_cart_db[email]
+            user_selected_product = users_shopping_cart["selected_product"]
+
+            #Update Qty in Seller product db
+            seller_product_db = shelve.open('seller-product.db')
+
+            for itemName in user_selected_product:
+                item = user_selected_product[itemName]
+                seller_id = item["seller_id"]
+                product_id = item["product_id"]
+                bought_qty = item["product_qty"]
+
+                #Retrieving Qty
+                seller_product_info = seller_product_db[str(seller_id)]
+                seller_products = seller_product_info['products']
+                product = seller_products[product_id]
+                product_qty = product.get_product_stock()
+                product_qty -= bought_qty
+
+                #Save Qty
+                product.set_product_stock(product_qty)
+                seller_products[product_id] = product
+                seller_product_info['products'] = seller_products
+                seller_product_db[str(seller_id)] = seller_product_info
+
+            seller_product_db.close()
+
+            #Create Order History
+            order_history = {}
+            order_history_info = {}
+            order_history_db = shelve.open('order_history.db')
+
+            #Retrieve Order History
+            try:
+                order_history_info = order_history_db[email]
+                order_history = order_history_info["order_history"]
+            except:
+                print("No Record Found")
+
+            #Retrieve Order History Id
+            try:
+                order_history_id = order_history_info["order_history_id"]
+            except KeyError:
+                order_history_id = 1
+
+            #Saving Datas
+            order_history[order_history_id] = user_selected_product
+            order_history_info["order_history"] = order_history
+            order_history_id += 1
+            order_history_info["order_history_id"] = order_history_id
+            order_history_db[email] = order_history_info
+
+            order_history_db.close()
+
+            #Deleting Items from User Shopping Cart
+            del user_shopping_cart_db[email]
+            user_shopping_cart_db.close()
+
+            print('complete')
+            return json.jsonify({'result': True})
+
+
+    return render_template("customer/payment.html")
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():

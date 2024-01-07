@@ -120,7 +120,20 @@ function applyPromoCode() {
 }
 
 function checkout() {
-    
+    var total_price = $('#total-price').text().trim().split('$');
+    total_price = parseFloat(total_price);
+    $.ajax({
+        url: '',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            "request_type" : "checkout",
+            "payable_price" : total_price
+        }),
+        success: function(response) {
+            window.location.href = response.redirect_link;
+        }
+    })
 }
 
 subtotal();
