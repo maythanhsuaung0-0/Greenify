@@ -6,14 +6,57 @@
 
 <h1 class="display-4">Update Account Details</h1>
 
-<form method="POST" action="">
+<form id="updateForm" method="POST" action="">
   <div class="form-group">
-    {{ render_field(form.email, class="form-control") }}
+    {{ render_field(form.email, class="form-control", id="emailInput") }}
   </div>
   <div class="form-group">
     {{ render_field(form.password, class="form-control") }}
   </div>
   <input type="submit" value="Update" class="btn btn-primary"/>
+</form>
+
+<!--to change email in url-->
+<script>
+    document.getElementById('updateForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        var emailValue = document.getElementById('emailInput').value; // Get the email input value
+
+        // Update the form action dynamically based on the email value
+        var form = document.getElementById('updateForm');
+        form.action = '/updateUser/' + encodeURIComponent(emailValue);
+
+        // Submit the form
+        form.submit();
+    });
+</script>
+<br>
+<form method="POST" action="{{url_for('delete_user', email=form.email.data)}}">
+  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{form.email.data}">
+Delete
+</button>
+<!-- The Modal -->
+<div class="modal" id="myModal_{form.email.date}">
+<div class="modal-dialog">
+<div class="modal-content">
+<!-- Modal Header -->
+<div class="modal-header">
+<h4 class="modal-title">Delete Confirmation</h4>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<!-- Modal body -->
+<div class="modal-body">
+Are you sure you want to delete your account?
+</div>
+<!-- Modal footer -->
+<div class="modal-footer">
+<input type="submit" value="Delete" class="btn btn-danger">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+</div>
+</div>
+</div>
+</div>
 </form>
 {% endblock %}
 

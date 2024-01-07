@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, json
+from flask import Flask, render_template, request, redirect, url_for, json, jsonify
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
@@ -17,6 +17,7 @@ import string
 from send_email import send_mail
 
 app = Flask(__name__, static_url_path='/static')
+logged_in = False
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/images/uploads"
 
@@ -354,15 +355,7 @@ def create_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # error = None
-    # if request.method == 'POST':
-    #     user_file = open('user.db', 'r')
-    #     contents = user_file.read()
-    #     if request.form['Email'] or request.form['Password'] in contents:
-    #         return redirect(url_for('home'))
-    #     else:
-    #         error = 'Invalid Credentials. Please try again.'
-    # return render_template('login.html', error=error)
+    global logged_in
     login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
         users_dict = {}
@@ -377,7 +370,7 @@ def login():
                 if login_form.email.data in users_dict and login_form.password.data in passwords:
                     key = get_key(login_form.password.data, db['Users'])
                     if key == user.get_email():
-                        login_status = user.set_login_status(True)
+                        logged_in = True
                         return redirect(url_for('home'))
                     else:
                         return render_template('login_failed.html')
@@ -387,7 +380,7 @@ def login():
                 return render_template('createUser.html')
         except:
             print("Error in opening user.db")
-    return render_template('login.html', form=login_form)
+    return render_template('login.html', form=login_form, logged_in=logged_in)
 
 
 def get_key(val,users_dict):
@@ -396,7 +389,13 @@ def get_key(val,users_dict):
             return key
 
 
-@app.route('/updateUser/<string:email>/', methods=['GET', 'POST'])
+@app.route("/check_login")
+def check_login():
+    return jsonify(logged_in)
+
+
+# email in the url won't change, cannot change email, only password
+@app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
     update_user_form = CreateUserForm(request.form)
     if request.method == 'POST' and update_user_form.validate():
@@ -405,8 +404,11 @@ def update_user(email):
         users_dict = db['Users']
 
         user = users_dict.get(email)
-        user.set_email(update_user_form.email.data)
-        user.set_password(update_user_form.password.data)
+        if user:
+            user.set_email(update_user_form.email.data)
+            user.set_password(update_user_form.password.data)
+        else:
+            return "User not found."
 
         db['Users'] = users_dict
         db.close()
