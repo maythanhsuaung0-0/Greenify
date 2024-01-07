@@ -1,52 +1,12 @@
-import React, { useState } from "react";
-import axios from "axios";
+document.getElementById('redirectLink').addEventListener('click', function(event) {
+    event.preventDefault(); // Prevent the default link behavior
 
-function check_authentication_status() {
-const App = () => {
-  const [email, set_email] = useState("");
-  const [password, set_password] = useState("");
-  const [user, set_email] = useState();
-
-  useEffect(() => {
-    const loggedInUser = localStorage.getItem("user");
-    if (loggedInUser) {
-      const foundUser = JSON.parse(loggedInUser);
-      setUser(foundUser);
-    }
-  }, []);
-
-  // logout the user
-  const handleLogout = () => {
-    setUser({});
-    set_email("");
-    set_password("");
-    localStorage.clear();
-  };
-
-  // login the user
-  const handleSubmit = async e => {
-    e.preventDefault();
-    const user = { email, password };
-    // send the username and password to the server
-    const response = await axios.post(
-      "http://127.0.0.1:5000/login",
-      user
-    );
-    // set the state of the user
-    setUser(response.data);
-    // store the user in localStorage
-    localStorage.setItem("user", JSON.stringify(response.data));
-  };
-
-  // if there's a user show the message below
-  if (user) {
-    return (
-      <div>
-        {user.name} is loggged in
-        <button onClick={handleLogout}>logout</button>
-      </div>
-    );
-  }
-}
-
-export default check_authentication_status;
+    // Check login status via AJAX
+    fetch('/check_login')
+        .then(response => response.json())
+        .then(loggedIn => {
+            const redirectUrl = loggedIn ? this.getAttribute('data-profile') : this.getAttribute('data-login');
+            window.location.href = redirectUrl; // Redirect based on the login status and link attribute
+        })
+        .catch(error => console.error('Error:', error));
+});

@@ -6,7 +6,7 @@
 
 <div class="w-small m-auto">
     <h3 class="pb-3">Update Product</h3>
-    <form class="grid-box" method="POST" action="">
+    <form class="grid-box" method="POST" action="{{ url_for('update_product', seller_id=seller_id, product_id=product_id) }}">
         <div class="form-group mb-4 fw-bold">
             {{ render_field(form.product_name, class="form-control") }}
         </div>

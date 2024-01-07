@@ -3,39 +3,31 @@
 {% block content %}
 <h1 class="display-4">Retrieve Account Information</h1>
 <div>
-{% if count == 0 %}
-<p>There are no users.</p>
-{% elif count == 1 %}
-<p>There is 1 user.</p>
-{% else %}
-<p>There are {{ count }} users.</p>
-{% endif %}
-</div>
-<div>
 <table class="table table-striped">
 <thead>
 <tr>
-<th>User ID</th>
 <th>Email</th>
-<th>Password</th>
+<th>Business name</th>
+<th>Business desc</th>
+<th>Support document</th>
 </tr>
 </thead>
 <tbody>
-{% for user in users_list %}
+{% for seller in sellers_after_changes %}
 <tr>
-<td>{{ user.get_user_id() }}</td>
-<td>{{ user.get_email() }}</td>
-<td>{{ user.get_password() }}</td>
-<td><a href="/updateUser/{{user.get_email()}}" class="btn btn-warning">Update</a></td>
+<td>{{ seller.get_email() }}</td>
+<td>{{ seller.get_name }}</td>
+<td>{{ seller.get_desc }}</td>
+<td>{{ seller.get_doc }}</td>
+<td><a href="/updateSeller/{{seller.get_application_id()}}" class="btn btn-warning">Update</a></td>
 <td>
-<form action="{{url_for('delete_user', email=user.get_email())}}" method="POST">
-<!--<input type="submit" value="Delete" class="btn btn-danger" onclick="return confirm('Are you sure you-->
-<!--want to delete {{user.get_email()}}?');">-->
-    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{{user.get_email()}}">
+<form action="{{url_for('delete_seller', seller_id=seller.get_application_id())}}" method="POST">
+
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{{seller.get_email()}}">
 Delete
 </button>
 <!-- The Modal -->
-<div class="modal" id="myModal_{{user.get_email()}}">
+<div class="modal" id="myModal_{{seller.get_email()}}">
 <div class="modal-dialog">
 <div class="modal-content">
 <!-- Modal Header -->
@@ -45,7 +37,7 @@ Delete
 </div>
 <!-- Modal body -->
 <div class="modal-body">
-Are you sure you want to delete {{user.get_email()}}?
+Are you sure you want to delete your account?
 </div>
 <!-- Modal footer -->
 <div class="modal-footer">

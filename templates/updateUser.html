@@ -13,7 +13,34 @@
   <div class="form-group">
     {{ render_field(form.password, class="form-control") }}
   </div>
-  <input type="submit" value="Submit" class="btn btn-primary"/>
+  <input type="submit" value="Update" class="btn btn-primary"/>
+</form>
+
+<form method="POST" action="{{url_for('delete_user', email=form.email.data)}}">
+  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{form.email.data}">
+Delete
+</button>
+<!-- The Modal -->
+<div class="modal" id="myModal_{form.email.date}">
+<div class="modal-dialog">
+<div class="modal-content">
+<!-- Modal Header -->
+<div class="modal-header">
+<h4 class="modal-title">Delete Confirmation</h4>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<!-- Modal body -->
+<div class="modal-body">
+Are you sure you want to delete your account?
+</div>
+<!-- Modal footer -->
+<div class="modal-footer">
+<input type="submit" value="Delete" class="btn btn-danger">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+</div>
+</div>
+</div>
+</div>
 </form>
 {% endblock %}
 
