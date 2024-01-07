@@ -6,9 +6,9 @@
 
 <h1 class="display-4">Update Account Details</h1>
 
-<form id="updateForm" method="POST" action="">
+<form method="POST" action="">
   <div class="form-group">
-    {{ render_field(form.email, class="form-control", id="emailInput") }}
+    {{ render_field(form.email, class="form-control") }}
   </div>
   <div class="form-group">
     {{ render_field(form.password, class="form-control") }}
@@ -16,22 +16,6 @@
   <input type="submit" value="Update" class="btn btn-primary"/>
 </form>
 
-<!--to change email in url-->
-<script>
-    document.getElementById('updateForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
-
-        var emailValue = document.getElementById('emailInput').value; // Get the email input value
-
-        // Update the form action dynamically based on the email value
-        var form = document.getElementById('updateForm');
-        form.action = '/updateUser/' + encodeURIComponent(emailValue);
-
-        // Submit the form
-        form.submit();
-    });
-</script>
-<br>
 <form method="POST" action="{{url_for('delete_user', email=form.email.data)}}">
   <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{form.email.data}">
 Delete

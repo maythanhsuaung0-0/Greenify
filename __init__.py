@@ -394,7 +394,7 @@ def check_login():
     return jsonify(logged_in)
 
 
-# email in the url won't change, cannot change email, only password
+# email in the url won't change
 @app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
     update_user_form = CreateUserForm(request.form)
@@ -406,6 +406,8 @@ def update_user(email):
         user = users_dict.get(email)
         if user:
             user.set_email(update_user_form.email.data)
+            # if update_user_form.email.data in users_dict:
+            #     return "This email is already used in another account"
             user.set_password(update_user_form.password.data)
         else:
             return "User not found."
