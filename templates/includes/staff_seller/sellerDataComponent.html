@@ -10,8 +10,8 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components.css') }}">
     {% block JS_CSS %}{% endblock %}
 </head>
-{% macro dataComponent(product_id,product_name,description,product_price,product_stock) -%}
-      <div class='card'>
+{% macro dataComponent(seller_id, product_id, product_name, description, product_price, product_stock) -%}
+    <div class='card'>
         <div class="row card-body">
             <div class="col-1 text-center">{{product_id}}</div>
             <div class="col-2 text-center">{{product_name}}</div>
@@ -20,46 +20,14 @@
             <div class="col-1 text-center">{{product_stock}}</div>
 
             <div class="col-2 text-center">
-                <a href="/seller/{{seller_id}}/updateProduct/{{product_id}}"><button class="btn btn-primary btn-sm">Update</button></a>
+                <a href="{{ url_for('update_product', seller_id=seller_id, product_id=product_id) }}">
+                    <button class="btn btn-primary btn-sm">Update</button>
+                </a>
                 <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal">
                     Delete
                 </button>
-                {#
-                <form action="{{url_for('delete_product', seller_id=  product_id=product_id)}}" method="POST">
-                    <!-- Button to Open the Modal -->
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{{product_id}}">
-                      Delete
-                    </button>
-
-                     <!-- The Modal -->
-                    <div class="modal" id="myModal_{{product_id}}">
-                      <div class="modal-dialog">
-                        <div class="modal-content">
-                            <!-- Modal Header -->
-                            <div class="modal-header">
-                                <h4 class="modal-title">Delete Confirmation</h4>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-
-                            <!-- Modal body -->
-                            <div class="modal-body">
-                                Are you sure you want to delete {{product_name}}?
-                            </div>
-
-                            <!-- Modal footer -->
-                            <div class="modal-footer">
-                                <input type="submit" value="Delete" class="btn btn-danger">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            </div>
-                        </div>
-                      </div>
-                    </div>
-                </form>
-                #}
             </div>
-<!--            <div class="col-1 text-center">-->
-<!--                <button class="btn btn-sm btn-light"><i class="fa-solid fa-caret-down"></i></button>-->
-<!--            </div>-->
         </div>
-      </div>
-  {%- endmacro %}
+    </div>
+{%- endmacro %}
+
