@@ -576,12 +576,12 @@ def update_product(seller_id, product_id):
 @app.route('/seller/<int:seller_id>/deleteProduct/<int:product_id>/', methods=['POST'])
 def delete_product(seller_id, product_id):
     try:
-        seller_product_db = shelve.open('seller-product.db', 'w')
+        seller_product_db = shelve.open('seller-product.db', 'c')
         seller_products = seller_product_db[str(seller_id)]
 
         # Check if the product exists
-        if product_id in seller_products['products']:
-            seller_products.pop(product_id)
+        if 'products' in seller_products and product_id in seller_products['products']:
+            seller_products['products'].pop(product_id)
             seller_product_db[str(seller_id)] = seller_products
             seller_product_db.close()
             return redirect(url_for('retrieve_product', seller_id=seller_id))
