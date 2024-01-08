@@ -531,6 +531,7 @@ def update_user(email):
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/deleteUser/<string:email>', methods=['POST'])
 def delete_user(email):
     users_dict = {}
