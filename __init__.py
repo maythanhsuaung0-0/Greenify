@@ -420,6 +420,7 @@ def payment(user):
 
     return render_template("customer/payment.html")
 
+
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
     create_user_form = CreateUserForm(request.form)
@@ -442,7 +443,7 @@ def create_user():
         db.close()
 
         return redirect(url_for('login'))
-    return render_template('createUser.html', form=create_user_form)
+    return render_template('customer/createUser.html', form=create_user_form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -465,15 +466,15 @@ def login():
                         session['logged_in'] = True
                         return redirect(url_for('home'))
                     else:
-                        return render_template('login_failed.html')
+                        return render_template('customer/login_failed.html')
                 else:
-                    return render_template('login_failed.html')
+                    return render_template('customer/login_failed.html')
             else:
-                return render_template('createUser.html')
+                return render_template('customer/createUser.html')
         except:
             print("Error in opening user.db")
     print(session.get('logged_in'))
-    return render_template('login.html', form=login_form, logged_in=logged_in)
+    return render_template('customer/login.html', form=login_form, logged_in=logged_in)
 
 
 def get_key(val, users_dict):
@@ -508,15 +509,14 @@ def update_user(email):
             user.set_email(update_user_form.email.data)
             # if update_user_form.email.data in users_dict:
             #     return "This email is already used in another account"
-
             user.set_password(update_user_form.password.data)
         else:
-            return "User not found."
+            return render_template('customer/updateFailed.html')
 
         db['Users'] = users_dict
         db.close()
 
-        return redirect("Your account information has successfully been updated.")
+        return render_template('customer/updateSuccessful.html')
     else:
         users_dict = {}
         db = shelve.open('user.db', 'r')
@@ -524,12 +524,11 @@ def update_user(email):
         db.close()
 
         user = users_dict.get(email)
-        if user is not None:
-            update_user_form.email.data = user.get_email()
-            update_user_form.password.data = user.get_password()
+        update_user_form.email.data = user.get_email()
+        update_user_form.password.data = user.get_password()
 
     if session.get('logged_in'):
-        return render_template('updateUser.html', form=update_user_form)
+        return render_template('customer/updateUser.html', form=update_user_form, email=update_user_form.email.data)
     else:
         return redirect(url_for('login'))
 
