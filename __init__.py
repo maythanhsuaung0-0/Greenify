@@ -508,6 +508,7 @@ def update_user(email):
             user.set_email(update_user_form.email.data)
             # if update_user_form.email.data in users_dict:
             #     return "This email is already used in another account"
+
             user.set_password(update_user_form.password.data)
         else:
             return "User not found."
@@ -515,7 +516,7 @@ def update_user(email):
         db['Users'] = users_dict
         db.close()
 
-        return redirect(url_for('home'))
+        return redirect("Your account information has successfully been updated.")
     else:
         users_dict = {}
         db = shelve.open('user.db', 'r')
@@ -523,8 +524,9 @@ def update_user(email):
         db.close()
 
         user = users_dict.get(email)
-        update_user_form.email.data = user.get_email()
-        update_user_form.password.data = user.get_password()
+        if user is not None:
+            update_user_form.email.data = user.get_email()
+            update_user_form.password.data = user.get_password()
 
     if session.get('logged_in'):
         return render_template('updateUser.html', form=update_user_form)
