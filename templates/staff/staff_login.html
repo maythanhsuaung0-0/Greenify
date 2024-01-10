@@ -6,6 +6,10 @@
 
 <h1 class="display-4">Please Login :)</h1>
 
+  {% if error %}
+        <p style="color: red;">{{ error }}</p>
+  {% endif %}
+
 <form method="POST" action="">
   <div class="form-group">
     {{ render_field(form.admin_email, class="form-control") }}
@@ -14,6 +18,5 @@
     {{ render_field(form.admin_password, class="form-control") }}
   </div>
   <input type="submit" value="Login" class="btn btn-primary"/>
-  <br>
 </form>
 {% endblock %}

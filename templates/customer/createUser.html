@@ -6,6 +6,10 @@
 
 <h1 class="display-4">Register an account with us today :)</h1>
 
+  {% if error %}
+        <p style="color: red;">{{ error }}</p>
+  {% endif %}
+
 <form method="POST" action="">
   <div class="form-group">
     {{ render_field(form.email, class="form-control") }}

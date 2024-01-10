@@ -423,6 +423,7 @@ def payment(user):
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
+    error = None
     create_user_form = CreateUserForm(request.form)
     if request.method == 'POST' and create_user_form.validate():
         users_dict = {}
@@ -434,7 +435,7 @@ def create_user():
             print("Error in retrieving Users from user.db.")
 
         if create_user_form.email.data in users_dict:
-            return 'An account has already been created with this email. Please Login'
+            error = 'An account has already been created with this email. Please Login'
 
         user = User.User(create_user_form.email.data, create_user_form.password.data)
         users_dict[user.get_email()] = user
@@ -443,12 +444,13 @@ def create_user():
         db.close()
 
         return redirect(url_for('login'))
-    return render_template('customer/createUser.html', form=create_user_form)
+    return render_template('customer/createUser.html', form=create_user_form, error=error)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     global logged_in
+    error = None
     login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
         users_dict = {}
@@ -466,15 +468,15 @@ def login():
                         session['logged_in'] = True
                         return redirect(url_for('home'))
                     else:
-                        return render_template('customer/login_failed.html')
+                        error = 'Login Failed, Please Try Again'
                 else:
-                    return render_template('customer/login_failed.html')
+                    error = 'Login Failed, Please Try Again'
             else:
                 return render_template('customer/createUser.html')
         except:
             print("Error in opening user.db")
     print(session.get('logged_in'))
-    return render_template('customer/login.html', form=login_form, logged_in=logged_in)
+    return render_template('customer/login.html', form=login_form, logged_in=logged_in, error=error)
 
 
 def get_key(val, users_dict):
@@ -485,7 +487,7 @@ def get_key(val, users_dict):
 
 @app.route("/check_login")
 def check_login():
-    return jsonify(logged_in)
+    return logged_in
 
 
 @app.route('/logout')
@@ -498,6 +500,7 @@ def logout():
 # email in the url won't change
 @app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
+    error = None
     update_user_form = CreateUserForm(request.form)
     if request.method == 'POST' and update_user_form.validate():
         users_dict = {}
@@ -511,7 +514,7 @@ def update_user(email):
             #     return "This email is already used in another account"
             user.set_password(update_user_form.password.data)
         else:
-            return render_template('customer/updateFailed.html')
+            error = 'Update Unsuccessful, please try again.'
 
         db['Users'] = users_dict
         db.close()
@@ -528,7 +531,8 @@ def update_user(email):
         update_user_form.password.data = user.get_password()
 
     if session.get('logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, email=update_user_form.email.data)
+        return render_template('customer/updateUser.html', form=update_user_form, email=update_user_form.email.data,
+                               error=error)
     else:
         return redirect(url_for('login'))
 
@@ -549,10 +553,14 @@ def delete_user(email):
 
 @app.route('/stafflogin', methods=['GET', 'POST'])
 def staff_login():
+    error = None
     staff_login_form = StaffLoginForm(request.form)
     if request.method == 'POST' and staff_login_form.validate():
-        return redirect(url_for('retrieveApplicationForms'))
-    return render_template('staff/staff_login.html', form=staff_login_form)
+        if staff_login_form.admin_email.data == 'admin@gmail.com' and staff_login_form.admin_password.data == 'admin_password':
+            return redirect(url_for('retrieveApplicationForms'))
+        else:
+            error = 'Invalid Credentials. Please try again.'
+    return render_template('staff/staff_login.html', form=staff_login_form, error=error)
 
 
 @app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])

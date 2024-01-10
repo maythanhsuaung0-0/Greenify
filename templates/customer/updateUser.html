@@ -16,6 +16,10 @@
   <input type="submit" value="Update" class="btn btn-primary"/>
 </form>
 
+  {% if error %}
+        <p style="color: red;">{{ error }}</p>
+  {% endif %}
+
 <form method="POST" action="{{url_for('delete_user', email=form.email.data)}}">
   <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{form.email.data}">
 Delete
