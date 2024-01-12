@@ -3,4 +3,26 @@
 {% block title %}Application Forms{% endblock %}
 {% block content %}
 <h3>Staff's Dashboard</h3>
+<div class="row mt-4">
+    <div class="col-md-3">
+        <div class="card" >
+          <div class="card-body">
+            <small class="text-sm">Total number of Sellers</small>
+              <h3 class="card-title mt-2">{{sellers_count}}</h3>
+          </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+         <div class="card">
+          <div class="card-body">
+            <small>Total number of Users</small>
+              <h3 class="card-title mt-2">{{users_count}}</h3>
+          </div>
+        </div>
+    </div>
+    <div class="col-md-6"></div>
+</div>
+<!--<canvas id="myChart" style="width:100%;max-width:700px"></canvas>-->
 {% endblock %}
+
+

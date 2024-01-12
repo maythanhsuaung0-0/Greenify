@@ -15,24 +15,13 @@ from urllib.parse import quote
 # for sending mail
 import string
 from send_email import send_mail
+from crud_functions import *
 
 app = Flask(__name__, static_url_path='/static')
 logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/images/uploads"
-
-
-def extracting(my_db, db_key, id):  # function for deleting and taking out the deleted value
-    form_dict = {}
-    db = shelve.open(my_db, 'w')
-    form_dict = db[db_key]
-    if form_dict:
-        item = form_dict.pop(id)
-        db[db_key] = form_dict
-        db.close()
-        return item
-    return form_dict
 
 
 def delete_folder(item):
@@ -43,6 +32,7 @@ def delete_folder(item):
     if os.path.exists(full_folder_path):
         shutil.rmtree(full_folder_path)
         print(f"folder deleted: {full_folder_path}")
+
 
 
 # Returning the qty for the cart icon
@@ -768,18 +758,7 @@ def display_image(filename, filepath):
 
 @app.route('/staff/retrieveApplicationForms')  # read
 def retrieveApplicationForms():
-    app_dict = {}
-    db = shelve.open('application.db', 'r')
-    try:
-        app_dict = db['Application']
-    except:
-        print("Error in receiving db")
-    db.close()
-
-    app_list = []
-    for key in app_dict:
-        forms = app_dict.get(key)
-        app_list.append(forms)
+    app_list = retrieve_db('application.db','Application')
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
@@ -825,20 +804,8 @@ def reject_form(seller_id):  # delete
 
 @app.route('/staff/retrieveUpdateForms')
 def retrieveUpdateForms():  # for approving updates
-    waiting_update_approval = {}
-    db = shelve.open('updated_sellers.db', 'r')
-    try:
-        waiting_update_approval = db['Updated_sellers']
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
-    waiting_list = []
-    for key in waiting_update_approval:
-        data = waiting_update_approval.get(key)
-        print('data', data)
-        waiting_list.append(data)
+    waiting_list = retrieve_db('updated_sellers.db','Updated_sellers')
     print('waiting list', waiting_list)
-    db.close()
     return render_template('staff/retrieveUpdateForms.html', count=len(waiting_list), waiting_list=waiting_list)
 
 
@@ -850,11 +817,14 @@ def approve_updates(seller_id):  # create
     sellers = {}
     sellers_db = shelve.open('approved_sellers.db', 'w')
     sellers = sellers_db['Approved_sellers']
-    seller = sellers.get(seller_id)
-    seller.set_name(approved.get_name())
-    seller.set_email(approved.get_email())
-    seller.set_password(approved.get_password())
-    seller.set_desc(approved.get_desc())
+    if seller_id in sellers:
+        seller = sellers.get(seller_id)
+        seller.set_name(approved.get_name())
+        seller.set_email(approved.get_email())
+        seller.set_password(approved.get_password())
+        seller.set_desc(approved.get_desc())
+    else:
+        pass
     # seller.set_doc(approved.get_doc())
     sellers_db['Approved_sellers'] = sellers
     sellers_db.close()
@@ -865,41 +835,37 @@ def approve_updates(seller_id):  # create
 @app.route('/staff/rejectUpdates/<int:seller_id>', methods=['POST'])
 def reject_updates(seller_id):
     deleted_item = extracting('updated_sellers.db', 'Updated_sellers', seller_id)
-    delete_folder(deleted_item)
+    if deleted_item.get_doc():
+        delete_folder(deleted_item)
     return redirect(url_for('retrieveUpdateForms'))
 
 
 @app.route('/staff/retrieveSellers')
 def retrieveSellers():  # read
-    approved_sellers = {}
-    approved_db = shelve.open('approved_sellers.db', 'r')
-    try:
-        approved_sellers = approved_db['Approved_sellers']
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
-    sellers_list = []
-    for key in approved_sellers:
-        forms = approved_sellers.get(key)
-        sellers_list.append(forms)
-    approved_db.close()
+    sellers_list = retrieve_db('approved_sellers.db','Approved_sellers')
     return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
 
+#
+# @app.route('/staff/deleteForm/<int:id>', methods=['POST'])
+# def delete_form(id):  # delete
+#     deleted_item = extracting('approved_sellers.db', 'Approved_sellers', id)
+#     if deleted_item.get_doc():
+#         delete_folder(deleted_item)
+#     return redirect(url_for('retrieveSellers'))
+#
 
-@app.route('/staff/deleteForm/<int:id>', methods=['POST'])
-def delete_form(id):  # delete
-    deleted_item = extracting('approved_sellers.db', 'Approved_sellers', id)
-    delete_folder(deleted_item)
-    return redirect(url_for('retrieveSellers'))
 
 
 @app.route('/staff/dashboard')
 def dashboard():
-    return render_template('staff/dashboard.html')
+    sellers = retrieve_db('approved_sellers.db','Approved_sellers')
+    users = retrieve_db('user.db','Users')
+    return render_template('staff/dashboard.html', sellers_count = len(sellers), users_count = len(users))
 
 
 @app.route('/seller/<int:seller_id>/dashboard')
 def seller_dashboard(seller_id):
+
     return render_template('/seller/dashboard.html')
 
 

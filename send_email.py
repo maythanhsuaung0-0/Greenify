@@ -41,21 +41,23 @@ def send_mail(to_email, approve, seller_name, seller_password):
         subject = "Rejection of Seller Account Registration"
         body = """
 
-        Dear Seller,
+        Dear Seller,<br/>
         
-        We hope this email finds you well. Thank you for your interest in becoming a seller on our platform. After careful consideration of your application, we regret to inform you that your seller account registration has been declined.
-        
-        Our platform is dedicated to promoting businesses that prioritize sustainability, and we appreciate your initiative to be a part of this community. However, based on our evaluation, it seems that the products you intend to sell or the description provided does not sufficiently demonstrate a commitment to sustainability, which is a priority for our website.
-        
-        We encourage you to review your product offerings and provide a more detailed description of how your business aligns with sustainable practices. If you make the necessary adjustments, we invite you to reapply for a seller account in the future.
-        
+        <p>We hope this email finds you well. Thank you for your interest in becoming a seller on our platform. After careful consideration of your application, we regret to inform you that your seller account registration has been declined.
+        </p>
+        <p>Our platform is dedicated to promoting businesses that prioritize sustainability, and we appreciate your initiative to be a part of this community. However, based on our evaluation, it seems that the products you intend to sell or the description provided does not sufficiently demonstrate a commitment to sustainability, which is a priority for our website.
+        </p>
+        <p>We encourage you to review your product offerings and provide a more detailed description of how your business aligns with sustainable practices. If you make the necessary adjustments, we invite you to reapply for a seller account in the future.
+        </p>
+        <p>
         Thank you for your understanding. If you have any questions or would like further clarification, please feel free to reach out to our support team at this email address.
-        
+        </p>
+        <p>
         We appreciate your interest in our platform and wish you success in your endeavors.
+        </p>
+        <p>Best regards,</p>
         
-        Best regards,
-        
-        Greenify"""
+        <i>Greenify</i>"""
     message['From'] = from_email
     message['To'] = to_email
     message['Subject'] = subject

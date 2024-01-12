@@ -18,16 +18,11 @@
     <div class="col-2 text-center">{{name}}</div>
     <div class="col-3 text-center text-truncate">{{desc}}</div>
     {% if docs == None %}
-          <div class="col-1 text-center">-</div>
+          <div class="col-2 text-center">-</div>
           {% else %}
-          <div class="col-1 text-center"><i class="fa-solid fa-check"></i></div>
+          <div class="col-2 text-center"><i class="fa-solid fa-check"></i></div>
           {% endif %}
-       <div class="col-2 text-center">{{date}}</div>
-    <div class="col-2 text-center">
-        <form class="d-inline" action="{{url_for('delete_form', id = id)}}" method="post">
-            <input  type="submit" class="btn btn-danger btn-sm" name="id" value="Delete" onclick="return confirm('Are you sure you want to delete {{name}}?')"/>
-       </form>
-    </div>
+       <div class="col-3 text-center">{{date}}</div>
     <div class="col-1">
       <a class="btn btn-sm btn-light" data-bs-toggle="collapse" href="#collapse{{id}}" role="button" aria-expanded="false" aria-controls="collapse{{id}}"> <i class="fa-solid fa-caret-down"></i> </a>
     </div>
