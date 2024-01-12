@@ -494,7 +494,7 @@ def check_login():
 def logout():
     session.pop('logged_in', None)  # Remove 'logged_in' from session
     print(session.get('logged_in'))
-    return redirect(url_for('home'))
+    return "You have successfully logged out from your account."
 
 
 # email in the url won't change
