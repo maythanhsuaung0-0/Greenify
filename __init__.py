@@ -416,8 +416,6 @@ def payment(user):
 
             print('complete')
             return json.jsonify({'result': True})
-
-
     return render_template("customer/payment.html")
 
 
@@ -436,14 +434,13 @@ def create_user():
 
         if create_user_form.email.data in users_dict:
             error = 'An account has already been created with this email. Please Login'
-
-        user = User.User(create_user_form.email.data, create_user_form.password.data)
-        users_dict[user.get_email()] = user
-        db['Users'] = users_dict
+        else:
+            user = User.User(create_user_form.email.data, create_user_form.password.data)
+            users_dict[user.get_email()] = user
+            db['Users'] = users_dict
+            return redirect(url_for('login'))
 
         db.close()
-
-        return redirect(url_for('login'))
     return render_template('customer/createUser.html', form=create_user_form, error=error)
 
 

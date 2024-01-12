@@ -6,7 +6,7 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/profile_page.css') }}">
 <div class="main">
-<h1 class="sign" align="center">Profile Page</h1>
+<h1 class="header" align="center">Profile Page</h1>
 
 <form method="POST" action="{{url_for('update_user', email=form.email.data)}}">
   <div class="form-group" id="email">
@@ -23,9 +23,7 @@
   {% endif %}
 
 <form method="POST" action="{{url_for('delete_user', email=form.email.data)}}">
-  <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{form.email.data}">
-Delete
-</button>
+  <input value="Delete" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{form.email.data}" align="center" id="delete"/>
 <!-- The Modal -->
 <div class="modal" id="myModal_{form.email.data}">
 <div class="modal-dialog">
@@ -49,9 +47,7 @@ Are you sure you want to delete your account?
 </div>
 </form>
 <form method="GET" action="{{url_for('logout')}}">
-  <button type="submit" class="btn btn-danger" data-bs-target="#myModal_{form.email.data}">
-Logout
-</button>
+  <input value="Logout" type="submit" class="btn btn-danger" data-bs-target="#myModal_{form.email.data}" id="logout"/>
 </form>
 </div>
 {% endblock %}

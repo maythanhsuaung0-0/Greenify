@@ -4,22 +4,25 @@
 {% block content %}
 {% from "includes/_formHelper.html" import render_field %}
 
-<h1 class="display-4">Register an account with us today :)</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create_user.css') }}">
+<div class="main">
+<h1 class="header" align="center">Register an account with us today :)</h1>
 
   {% if error %}
         <p style="color: red;">{{ error }}</p>
   {% endif %}
 
 <form method="POST" action="">
-  <div class="form-group">
+  <div class="form-group" id="email">
     {{ render_field(form.email, class="form-control") }}
   </div>
-  <div class="form-group">
+  <div class="form-group" id="password">
     {{ render_field(form.password, class="form-control") }}
   </div>
-  <input type="submit" value="Sign Up" class="btn btn-primary"/>
+  <input type="submit" value="Sign Up" class="btn btn-primary" id="SignUp"/>
   <br>
   Already have an account? Login <a href="/login">here</a>
 </form>
+</div>
 {% endblock %}
 
