@@ -8,6 +8,10 @@
 <div class="main">
 <h1 class="header" align="center">Profile Page</h1>
 
+  {% if error %}
+        <p style="color: red; text-align: center;">{{ error }}</p>
+  {% endif %}
+
 <form method="POST" action="{{url_for('update_user', email=form.email.data)}}">
   <div class="form-group" id="email">
     {{ render_field(form.email, class="form-control") }}
@@ -17,10 +21,6 @@
   </div>
   <input type="submit" value="Update" class="btn btn-primary" align="center" id="update"/>
 </form>
-
-  {% if error %}
-        <p style="color: red;">{{ error }}</p>
-  {% endif %}
 
 <form method="POST" action="{{url_for('delete_user', email=form.email.data)}}">
   <input value="Delete" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{form.email.data}" align="center" id="delete"/>

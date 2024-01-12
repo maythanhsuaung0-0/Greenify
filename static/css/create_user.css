@@ -39,7 +39,20 @@
         padding-bottom: 10px;
         padding-top: 10px;
         margin-left: 35%;
-        margin-bottom:20px;
+        margin-bottom:21px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
+
+.login-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
+
+.info {
+    text-align: center;
+}

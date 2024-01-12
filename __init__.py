@@ -433,7 +433,7 @@ def create_user():
             print("Error in retrieving Users from user.db.")
 
         if create_user_form.email.data in users_dict:
-            error = 'An account has already been created with this email. Please Login'
+            error = 'An account has already been created with this email. Please Login.'
         else:
             user = User.User(create_user_form.email.data, create_user_form.password.data)
             users_dict[user.get_email()] = user
@@ -510,13 +510,13 @@ def update_user(email):
             # if update_user_form.email.data in users_dict:
             #     return "This email is already used in another account"
             user.set_password(update_user_form.password.data)
+            error = "Update Successful"
         else:
             error = 'Update Unsuccessful, please try again.'
 
         db['Users'] = users_dict
         db.close()
 
-        return render_template('customer/updateSuccessful.html')
     else:
         users_dict = {}
         db = shelve.open('user.db', 'r')
