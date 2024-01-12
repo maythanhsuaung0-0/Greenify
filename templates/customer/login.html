@@ -6,10 +6,10 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 <div class="main">
-<h1 class="header" align="center">Please Login :)</h1>
+<h1 class="header" align="center">Login</h1>
 
   {% if error %}
-        <p style="color: red;">{{ error }}</p>
+        <p style="color: red; text-align: center;">{{ error }}</p>
   {% endif %}
 
 <form method="POST" action="">
@@ -21,6 +21,6 @@
   </div>
   <input type="submit" value="Login" class="btn btn-primary" align="center" id="login"/>
   <br>
-  Don't have an account? Sign Up <a href="/createUser">here</a>
+  <p class="info">Don't have an account? Sign Up <a href="/createUser" class="SignUp-link">here</a></p>
 </form>
 {% endblock %}
