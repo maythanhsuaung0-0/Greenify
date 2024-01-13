@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session
+from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
+    send_from_directory
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
@@ -21,7 +22,7 @@ app = Flask(__name__, static_url_path='/static')
 logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/images/uploads"
+app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
 
 def delete_folder(item):
@@ -689,6 +690,10 @@ def delete_product(seller_id, product_id):
         return "Error in deleting product from seller-product db"
 
 
+@app.route('/seller/<int:seller_id>/orders')
+def orders(seller_id):
+    return render_template('seller/orders.html')
+
 @app.route('/respond')
 def respond():
     return render_template('sellers_application/respondPage.html')
@@ -721,19 +726,18 @@ def register():  # create
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
         appForm.set_date(today)
-        # saving image
-        support_docs = request.files.get('support_document')
-        if support_docs:
-            filename = secure_filename(support_docs.filename)
-            img_id = secrets.token_hex(16)
-            # Create
-            os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id))
-            support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], img_id, filename))
-            image_dir = os.path.join(app.config["UPLOAD_DIRECTORY"], img_id)
-            create_image_set(image_dir, filename)
-            message = f"{img_id}/{filename.split('.')[0]}.webp"
-            appForm.set_doc(message)
-            print(message)
+        if 'support_document' in request.files:
+            support_docs = request.files['support_document']
+            if support_docs:
+                filename = support_docs.filename
+                pdf_id = secrets.token_hex(16)
+                print('filename', filename)
+                os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id))
+                support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id, filename))
+                os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id)
+                message = f"{pdf_id}/{filename.split('.')[0]}.pdf"
+                print('message', message)
+                appForm.set_doc(message)
 
         db['Application'] = application_form
         # testing
@@ -749,12 +753,16 @@ def register():  # create
         return redirect(url_for('respond'))
     return render_template('sellers_application/registration.html', form=registration_form)
 
+@app.route('/view/<path:pdf>')
+def view_pdf(pdf):
+    pdf_path = os.path.join(app.config["UPLOAD_DIRECTORY"], pdf)
+    return send_from_directory(os.path.dirname(pdf_path), os.path.basename(pdf_path), as_attachment=False)
 
-@app.route('/display_image/<filename>/<filepath>')
-def display_image(filename, filepath):
-    image_url = url_for('static', filename='images/uploads/' + filename + '/' + filepath)
-    return render_template('display_image.html', image_url=image_url)
-
+# @app.route('/display_image/<filename>/<filepath>')
+# def display_image(filename, filepath):
+#     image_url = url_for('static', filename='images/uploads/' + filename + '/' + filepath)
+#     return render_template('display_image.html', image_url=image_url)
+#
 
 @app.route('/staff/retrieveApplicationForms')  # read
 def retrieveApplicationForms():
@@ -845,14 +853,14 @@ def retrieveSellers():  # read
     sellers_list = retrieve_db('approved_sellers.db','Approved_sellers')
     return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
 
-#
-# @app.route('/staff/deleteForm/<int:id>', methods=['POST'])
-# def delete_form(id):  # delete
-#     deleted_item = extracting('approved_sellers.db', 'Approved_sellers', id)
-#     if deleted_item.get_doc():
-#         delete_folder(deleted_item)
-#     return redirect(url_for('retrieveSellers'))
-#
+
+@app.route('/staff/deleteForm/<int:id>', methods=['POST'])
+def delete_form(id):  # delete
+    deleted_item = extracting('approved_sellers.db', 'Approved_sellers', id)
+    if deleted_item.get_doc():
+        delete_folder(deleted_item)
+    return redirect(url_for('retrieveSellers'))
+
 
 
 
@@ -865,7 +873,6 @@ def dashboard():
 
 @app.route('/seller/<int:seller_id>/dashboard')
 def seller_dashboard(seller_id):
-
     return render_template('/seller/dashboard.html')
 
 

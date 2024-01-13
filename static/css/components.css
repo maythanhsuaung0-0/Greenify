@@ -10,3 +10,29 @@
     border-radius: 50%;
     object-fit: cover;
 }
+.pdf-thumbnail{
+    width: 150px;
+    height: 150px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    display: grid;
+    grid-template-rows: 80% auto;
+}
+
+.thumbnail-cover{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--unactive-color);
+    font-size: 30px;
+}
+.thumbnail-cover:hover{
+    background-color: var(--theme-light-gray);
+    color: var(--unactive-dark-color);
+}  
+.thumbnail-text{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--theme-black);
+} 
