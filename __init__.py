@@ -455,9 +455,9 @@ def login():
                         session['logged_in'] = True
                         return redirect(url_for('home'))
                     else:
-                        error = 'Login Failed, Please Try Again'
+                        error = 'Email or Password is incorrect, please try again.'
                 else:
-                    error = 'Login Failed, Please Try Again'
+                    error = 'Email or Password is incorrect, please try again.'
             else:
                 return render_template('customer/createUser.html')
         except:
