@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
+from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, \
     send_from_directory
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
@@ -33,7 +33,6 @@ def delete_folder(item):
     if os.path.exists(full_folder_path):
         shutil.rmtree(full_folder_path)
         print(f"folder deleted: {full_folder_path}")
-
 
 
 # Returning the qty for the cart icon
@@ -80,17 +79,14 @@ def product(seller, product_id):
 
         return saved_cart_qty
 
-
-    #Search for Seller Id
+    # Search for Seller Id
     seller_id = seller_id_search(seller)
 
     if seller_id == False:
         print("Seller_id not found")
         return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
 
-
-
-    #Retrieving Product for html to display
+    # Retrieving Product for html to display
     seller_products = {}
     seller_product_info = {}
     seller_product_db = shelve.open('seller-product.db', 'c')
@@ -104,12 +100,11 @@ def product(seller, product_id):
     product = seller_products[product_id]
     seller_product_db.close()
 
-
     # Received AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
 
-        #Check Product Stock
+        # Check Product Stock
         if sent_data["request_type"] == "product_stock":
             seller_products = {}
             seller_product_info = {}
@@ -125,15 +120,15 @@ def product(seller, product_id):
             product_stock = product.get_product_stock()
             seller_product_db.close()
 
-            return json.jsonify({"stock" : product_stock})
+            return json.jsonify({"stock": product_stock})
 
-        #Add to Cart
+        # Add to Cart
         if sent_data["request_type"] == "add_cart":
             product = json.loads(request.data)
             del product["request_type"]
 
-            #Saving Shopping Cart Items
-            #Dummy User (User persistent Log In not Developed)
+            # Saving Shopping Cart Items
+            # Dummy User (User persistent Log In not Developed)
             users_shopping_cart = {}
             user_selected_product = {}
             shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -163,12 +158,12 @@ def product(seller, product_id):
 
             seller_product_db.close()
 
-            #Check if Product has been added before
+            # Check if Product has been added before
             try:
                 saved_product = user_selected_product[product["seller"] + str(product["product_id"])]
                 saved_product["product_qty"] += product["product_qty"]
                 if saved_product["product_qty"] > product_stock:
-                    return json.jsonify({"result" : False, "reason":"added more than stock"})
+                    return json.jsonify({"result": False, "reason": "added more than stock"})
                 user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
                 users_shopping_cart["selected_product"] = user_selected_product
                 shopping_cart_db["hi@gmail.com"] = users_shopping_cart
@@ -178,9 +173,7 @@ def product(seller, product_id):
                 user_selected_product[product["seller"] + str(product["product_id"])] = product
                 users_shopping_cart["selected_product"] = user_selected_product
 
-
-
-            #Update Cart Qty
+            # Update Cart Qty
             saved_cart_qty = 0
             try:
                 saved_cart_qty = users_shopping_cart["cart_qty"]
@@ -190,14 +183,14 @@ def product(seller, product_id):
             saved_cart_qty = len(user_selected_product)
             users_shopping_cart["cart_qty"] = saved_cart_qty
 
-            #Saving new info into db
+            # Saving new info into db
             shopping_cart_db["hi@gmail.com"] = users_shopping_cart
             shopping_cart_db.close()
 
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"))
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
+                           saved_cart_qty=cart_qty("hi@gmail.com"))
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
@@ -211,7 +204,6 @@ def shopping_cart(user):
         except:
             print("Error in loading cart qty db")
         return saved_cart_qty
-
 
     users_shopping_cart = {}
     user_selected_product = {}
@@ -244,11 +236,11 @@ def shopping_cart(user):
             # Getting Seller
             seller_name = product_selected["seller"]
 
-            #Making a dictionary of each product (product, product_qty, seller_name)
+            # Making a dictionary of each product (product, product_qty, seller_name)
             product_dict = {
-                "product" : product,
-                "product_qty" : product_qty,
-                "seller_name" : seller_name
+                "product": product,
+                "product_qty": product_qty,
+                "seller_name": seller_name
             }
             display_shopping_cart.append(product_dict)
 
@@ -256,19 +248,17 @@ def shopping_cart(user):
     else:
         return render_template("customer/error_msg.html", msg="Your Shopping Cart is Empty")
 
-
-    #Receive AJAX Request
+    # Receive AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
 
-
-        #Request to Update Cart Qty
+        # Request to Update Cart Qty
         if sent_data["request_type"] == "update_cart_qty":
 
             seller_name = sent_data["seller_name"]
             product_id = sent_data["product_id"]
 
-            #Searching for Seller id
+            # Searching for Seller id
             seller_id = seller_id_search(seller_name)
 
             # Update Product Qty into db
@@ -288,7 +278,7 @@ def shopping_cart(user):
             shopping_cart_db.close()
 
 
-        #Request to Delete Item
+        # Request to Delete Item
         elif sent_data["request_type"] == "delete_product":
             seller_name = sent_data["seller_name"]
             seller_name = sent_data["seller_name"]
@@ -297,24 +287,24 @@ def shopping_cart(user):
             # Searching for Seller id
             seller_id = seller_id_search(seller_name)
 
-            #Open Shopping Cart db
+            # Open Shopping Cart db
             shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
             users_shopping_cart = shopping_cart_db[user]
 
-            #Remove Item from Cart
+            # Remove Item from Cart
             user_selected_product = users_shopping_cart["selected_product"]
             del user_selected_product[seller_name + str(product_id)]
 
-            #Update Saved Cart Qty
+            # Update Saved Cart Qty
             saved_cart_qty = users_shopping_cart["cart_qty"]
             saved_cart_qty -= 1
             users_shopping_cart["cart_qty"] = saved_cart_qty
 
-            #Close Shopping Cart db
+            # Close Shopping Cart db
             shopping_cart_db[user] = users_shopping_cart
             shopping_cart_db.close()
 
-            return json.jsonify({"result": True, "cart_qty" : saved_cart_qty})
+            return json.jsonify({"result": True, "cart_qty": saved_cart_qty})
 
         elif sent_data["request_type"] == "checkout":
             payable_price = sent_data['payable_price']
@@ -327,14 +317,15 @@ def shopping_cart(user):
 
             shopping_cart_db.close()
 
-            return json.jsonify({"redirect_link" : url_for("payment", user=user)})
+            return json.jsonify({"redirect_link": url_for("payment", user=user)})
 
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user,
+                           saved_cart_qty=saved_cart_qty)
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty)
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
-    #Receive AJAX Request
+    # Receive AJAX Request
     if request.method == "POST":
         print('received')
         sent_data = json.loads(request.data)
@@ -345,12 +336,12 @@ def payment(user):
             email = sent_data['email']
             address = sent_data['address']
 
-            #Open User Shopping Cart
+            # Open User Shopping Cart
             user_shopping_cart_db = shelve.open('user_shopping_cart.db')
             users_shopping_cart = user_shopping_cart_db[email]
             user_selected_product = users_shopping_cart["selected_product"]
 
-            #Update Qty in Seller product db
+            # Update Qty in Seller product db
             seller_product_db = shelve.open('seller-product.db')
 
             for itemName in user_selected_product:
@@ -359,14 +350,14 @@ def payment(user):
                 product_id = item["product_id"]
                 bought_qty = item["product_qty"]
 
-                #Retrieving Qty
+                # Retrieving Qty
                 seller_product_info = seller_product_db[str(seller_id)]
                 seller_products = seller_product_info['products']
                 product = seller_products[product_id]
                 product_qty = product.get_product_stock()
                 product_qty -= bought_qty
 
-                #Save Qty
+                # Save Qty
                 product.set_product_stock(product_qty)
                 seller_products[product_id] = product
                 seller_product_info['products'] = seller_products
@@ -374,25 +365,25 @@ def payment(user):
 
             seller_product_db.close()
 
-            #Create Order History
+            # Create Order History
             order_history = {}
             order_history_info = {}
             order_history_db = shelve.open('order_history.db')
 
-            #Retrieve Order History
+            # Retrieve Order History
             try:
                 order_history_info = order_history_db[email]
                 order_history = order_history_info["order_history"]
             except:
                 print("No Record Found")
 
-            #Retrieve Order History Id
+            # Retrieve Order History Id
             try:
                 order_history_id = order_history_info["order_history_id"]
             except KeyError:
                 order_history_id = 1
 
-            #Saving Datas
+            # Saving Datas
             order_history[order_history_id] = user_selected_product
             order_history_info["order_history"] = order_history
             order_history_id += 1
@@ -401,7 +392,7 @@ def payment(user):
 
             order_history_db.close()
 
-            #Deleting Items from User Shopping Cart
+            # Deleting Items from User Shopping Cart
             del user_shopping_cart_db[email]
             user_shopping_cart_db.close()
 
@@ -496,12 +487,12 @@ def update_user(email):
         users_dict = db['Users']
 
         user = users_dict.get(email)
-        if user:
+
+        if update_user_form.email.data not in users_dict:
             user.set_email(update_user_form.email.data)
-            # if update_user_form.email.data in users_dict:
-            #     return "This email is already used in another account"
             user.set_password(update_user_form.password.data)
-            error = "Update Successful"
+            error = "Update Successful."
+
         else:
             error = 'Update Unsuccessful, please try again.'
 
@@ -547,8 +538,40 @@ def staff_login():
         if staff_login_form.admin_email.data == 'admin@gmail.com' and staff_login_form.admin_password.data == 'admin_password':
             return redirect(url_for('retrieveApplicationForms'))
         else:
-            error = 'Invalid Credentials. Please try again.'
+            error = 'Email or Password is incorrect, please try again.'
     return render_template('staff/staff_login.html', form=staff_login_form, error=error)
+
+
+@app.route('/seller/login', methods=['GET', 'POST'])
+def seller_login():
+    global logged_in
+    error = None
+    login_form = CreateUserForm(request.form)
+    if request.method == 'POST' and login_form.validate():
+        approved_sellers = {}
+        user = User.User(login_form.email.data, login_form.password.data)
+        approved_db = shelve.open('approved_sellers.db', 'w')
+        passwords = []
+        for seller_id, seller_instance in approved_db['Approved_sellers'].items():
+            passwords.append(seller_instance.get_password())
+        try:
+            if 'Approved_sellers' in approved_db:
+                approved_sellers = approved_db['Approved_sellers']
+                if login_form.email.data in approved_sellers and login_form.password.data in passwords:
+                    key = get_key(login_form.password.data, approved_db['Approved_sellers'])
+                    if key == user.get_email():
+                        session['logged_in'] = True
+                        return redirect(url_for('home'))
+                    else:
+                        error = 'Email or Password is incorrect, please try again.'
+                else:
+                    error = 'Email or Password is incorrect, please try again.'
+            else:
+                return redirect(url_for('register'))
+        except:
+            print("Error in opening approved_sellers.db")
+    print(session.get('logged_in'))
+    return render_template('customer/login.html', form=login_form, logged_in=logged_in, error=error)
 
 
 @app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
@@ -631,7 +654,8 @@ def retrieve_product(seller_id):
     for product_id, product in seller_products.items():
         product_list.append(product)
 
-    return render_template('seller/retrieveProducts.html', seller_id=seller_id, count=len(product_list), product_list=product_list)
+    return render_template('seller/retrieveProducts.html', seller_id=seller_id, count=len(product_list),
+                           product_list=product_list)
 
 
 @app.route('/seller/<int:seller_id>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
@@ -667,7 +691,7 @@ def update_product(seller_id, product_id):
             update_product_form.description.data = sellerProduct.get_description()
 
             return render_template('/seller/updateProduct.html', form=update_product_form, seller_id=seller_id,
-                               product_id=product_id)
+                                   product_id=product_id)
     return "Product not found"
 
 
@@ -754,20 +778,21 @@ def register():  # create
         return redirect(url_for('respond'))
     return render_template('sellers_application/registration.html', form=registration_form)
 
+
 @app.route('/view/<path:pdf>')
 def view_pdf(pdf):
     pdf_path = os.path.join(app.config["UPLOAD_DIRECTORY"], pdf)
     return send_from_directory(os.path.dirname(pdf_path), os.path.basename(pdf_path), as_attachment=False)
 
 
-@app.route('/staff/retrieveApplicationForms',  methods = ['POST','GET'])  # read
+@app.route('/staff/retrieveApplicationForms', methods=['POST', 'GET'])  # read
 def retrieveApplicationForms():
-    app_list = retrieve_db('application.db','Application')
+    app_list = retrieve_db('application.db', 'Application')
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for rejecting the form
         if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'],"rejected")
+            print(data_to_modify['id'], "rejected")
             rejected = extracting('application.db', 'Application', data_to_modify['id'])
             if rejected.get_doc():
                 delete_folder(rejected)
@@ -803,15 +828,15 @@ def retrieveApplicationForms():
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
-@app.route('/staff/retrieveUpdateForms', methods = ['POST','GET'])
+@app.route('/staff/retrieveUpdateForms', methods=['POST', 'GET'])
 def retrieveUpdateForms():  # for approving updates
-    waiting_list = retrieve_db('updated_sellers.db','Updated_sellers')
+    waiting_list = retrieve_db('updated_sellers.db', 'Updated_sellers')
     print('waiting list', waiting_list)
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for rejecting the update form
         if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'],"rejected")
+            print(data_to_modify['id'], "rejected")
             deleted_item = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -834,14 +859,14 @@ def retrieveUpdateForms():  # for approving updates
     return render_template('staff/retrieveUpdateForms.html', count=len(waiting_list), waiting_list=waiting_list)
 
 
-@app.route('/staff/retrieveSellers', methods = ['POST','GET'])
+@app.route('/staff/retrieveSellers', methods=['POST', 'GET'])
 def retrieveSellers():  # read
-    sellers_list = retrieve_db('approved_sellers.db','Approved_sellers')
+    sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for removing
         if data_to_modify['request_type'] == 'delete':
-            print(data_to_modify['id'],"deleted")
+            print(data_to_modify['id'], "deleted")
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -850,9 +875,9 @@ def retrieveSellers():  # read
 
 @app.route('/staff/dashboard')
 def dashboard():
-    sellers = retrieve_db('approved_sellers.db','Approved_sellers')
-    users = retrieve_db('user.db','Users')
-    return render_template('staff/dashboard.html', sellers_count = len(sellers), users_count = len(users))
+    sellers = retrieve_db('approved_sellers.db', 'Approved_sellers')
+    users = retrieve_db('user.db', 'Users')
+    return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
 
 
 @app.route('/seller/<int:seller_id>/dashboard')
