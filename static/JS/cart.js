@@ -18,10 +18,17 @@ function increment(cart_item_id, product_price, seller_name, product_id) {
             "type" : "increment",
             "seller_name" : seller_name,
             "product_id" : product_id
-        })
+        }),
+        success: function(response) {
+            if (response.result) {
+                subtotal();
+                total();
+            }
+            else {
+                alert("Error In Increment")
+            }
+        }
     })
-    subtotal();
-    total();
 }
 
 function decrement(cart_item_id, product_price, seller_name, product_id) {
@@ -43,7 +50,16 @@ function decrement(cart_item_id, product_price, seller_name, product_id) {
                 "type" : "decrement",
                 "seller_name" : seller_name,
                 "product_id" : product_id
-            })
+            }),
+            success: function(response) {
+                if (response.result) {
+                    subtotal();
+                    total();
+                }
+                else {
+                    alert("Error In Decrement")
+                }
+            }
         })
         subtotal();
         total();

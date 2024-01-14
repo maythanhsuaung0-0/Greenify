@@ -15,6 +15,7 @@ from urllib.parse import quote
 # for sending mail
 import string
 from send_email import send_mail
+import uuid
 
 app = Flask(__name__, static_url_path='/static')
 logged_in = False
@@ -73,6 +74,8 @@ def seller_id_search(seller_name):
 
 @app.route("/")
 def home():
+    db = shelve.open('order_history.db')
+    print(db['hi@gmail.com'])
     return render_template("customer/homepage.html")
 
 
@@ -104,7 +107,9 @@ def product(seller, product_id):
     seller_product_info = {}
     seller_product_db = shelve.open('seller-product.db', 'c')
     try:
+        print(seller_id)
         seller_product_info = seller_product_db[str(seller_id)]
+        print(seller_product_info)
         seller_products = seller_product_info['products']
     except:
         print("Product is not found")
@@ -178,12 +183,14 @@ def product(seller, product_id):
                 saved_product["product_qty"] += product["product_qty"]
                 if saved_product["product_qty"] > product_stock:
                     return json.jsonify({"result" : False, "reason":"added more than stock"})
+
                 user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
                 users_shopping_cart["selected_product"] = user_selected_product
                 shopping_cart_db["hi@gmail.com"] = users_shopping_cart
             except:
                 if product["product_qty"] > product_stock:
                     return json.jsonify({"result": False, "reason": "added more than stock"})
+
                 user_selected_product[product["seller"] + str(product["product_id"])] = product
                 users_shopping_cart["selected_product"] = user_selected_product
 
@@ -296,6 +303,7 @@ def shopping_cart(user):
             shopping_cart_db[user] = users_shopping_cart
             shopping_cart_db.close()
 
+            return json.jsonify({'result': True})
 
         #Request to Delete Item
         elif sent_data["request_type"] == "delete_product":
@@ -345,11 +353,9 @@ def shopping_cart(user):
 def payment(user):
     #Receive AJAX Request
     if request.method == "POST":
-        print('received')
         sent_data = json.loads(request.data)
 
         if sent_data['request_type'] == 'payment':
-            print('enter')
             name = sent_data['name']
             email = sent_data['email']
             address = sent_data['address']
@@ -358,6 +364,7 @@ def payment(user):
             user_shopping_cart_db = shelve.open('user_shopping_cart.db')
             users_shopping_cart = user_shopping_cart_db[email]
             user_selected_product = users_shopping_cart["selected_product"]
+            amt_paid = users_shopping_cart["payable"]
 
             #Update Qty in Seller product db
             seller_product_db = shelve.open('seller-product.db')
@@ -385,36 +392,31 @@ def payment(user):
 
             #Create Order History
             order_history = {}
-            order_history_info = {}
+            user_order_history = {}
             order_history_db = shelve.open('order_history.db')
 
             #Retrieve Order History
             try:
-                order_history_info = order_history_db[email]
-                order_history = order_history_info["order_history"]
+                user_order_history = order_history_db[email]
             except:
                 print("No Record Found")
 
-            #Retrieve Order History Id
-            try:
-                order_history_id = order_history_info["order_history_id"]
-            except KeyError:
-                order_history_id = 1
+            order_history_id = uuid.uuid4()
+            print(order_history_id)
 
             #Saving Datas
-            order_history[order_history_id] = user_selected_product
-            order_history_info["order_history"] = order_history
-            order_history_id += 1
-            order_history_info["order_history_id"] = order_history_id
-            order_history_db[email] = order_history_info
+            order_history['items'] = user_selected_product
+            order_history['shipping_info'] = {'name': name, 'address': address}
+            order_history['amt_paid'] = amt_paid
 
+            user_order_history[str(order_history_id)] = order_history
+            order_history_db[email] = user_order_history
             order_history_db.close()
 
             #Deleting Items from User Shopping Cart
             del user_shopping_cart_db[email]
             user_shopping_cart_db.close()
 
-            print('complete')
             return json.jsonify({'result': True})
 
 
