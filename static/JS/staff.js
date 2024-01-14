@@ -1,8 +1,7 @@
 function handleButton(id,name,action) {
     console.log(id, name, 'worked')
     var opt_to_handle = confirm(`Are you sure you want to ${action} ${name}?`);
-     var id_to_handle = parseInt(id);
-     console.log('worked')
+    var id_to_handle = parseInt(id);
      if (opt_to_handle) {
          $.ajax({
              url: '',
@@ -21,7 +20,7 @@ function handleButton(id,name,action) {
                  console.error("Error:", error);
              }
          });
-
+           $('#card-'+id).remove()
      }
-     $('#card-'+id).remove()
+
 }

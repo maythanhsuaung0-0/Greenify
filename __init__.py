@@ -35,6 +35,21 @@ def delete_folder(item):
         print(f"folder deleted: {full_folder_path}")
 
 
+# generate random secure pwd for giving the seller the very first password
+def generate_password(length):
+    password = (
+            secrets.choice(string.ascii_uppercase) +
+            secrets.choice(string.ascii_lowercase) +
+            secrets.choice(string.digits)
+    )
+    remaining_length = length - 4
+    alphabet = string.ascii_letters + string.digits
+    password += ''.join(secrets.choice(alphabet) for _ in range(remaining_length))
+    password_list = list(password)
+    secrets.SystemRandom().shuffle(password_list)
+    return ''.join(password_list)
+
+
 
 # Returning the qty for the cart icon
 def cart_qty(user):
@@ -786,9 +801,8 @@ def retrieveApplicationForms():
                 print("Error in retrieving sellers from application.db")
 
             passwords = []
-            alphabet = string.ascii_letters + string.digits + string.punctuation
             while True:
-                password = "".join(secrets.choice(alphabet) for _ in range(10))
+                password = generate_password(14)
                 if password not in passwords:
                     break
             send_mail(approved.get_email(), True, approved.get_name(), password)
