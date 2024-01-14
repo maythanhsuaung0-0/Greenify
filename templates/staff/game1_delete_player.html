@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Delete Player Score</title>
+    <script>
+        function deleteScore() {
+            var playerName = document.getElementById("playerName").value;
+            fetch('/delete_score', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ player_name: playerName })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById("message").textContent = data.message;
+                    document.getElementById("playerName").value = ""; // Clear the input
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById("message").textContent = 'Error: ' + error.message;
+                });
+        }
+
+    </script>
+</head>
+
+<body>
+    <div id="message"></div>
+    <h2>Delete Player Score</h2>
+    <input type="text" id="playerName" placeholder="Enter Player Name">
+    <button onclick="deleteScore()">Delete Score</button>
+    <div id="deleteConfirmation"></div>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, \
-    send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, json, session, send_file,\
+    send_from_directory, jsonify
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
@@ -450,6 +450,7 @@ def login():
                 if login_form.email.data in users_dict and login_form.password.data in passwords:
                     key = get_key(login_form.password.data, db['Users'])
                     if key == user.get_email():
+                        session['user_id'] = user_id
                         session['logged_in'] = True
                         return redirect(url_for('home'))
                     else:
@@ -939,6 +940,81 @@ def delete_seller(seller_id):
     approved_db.close()
 
     return "Your account has successfully been deleted."
+
+
+#game1
+@app.route('/submit_score', methods=['POST'])
+def submit_score():
+    data = request.get_json()
+    print("Received data:", data)
+    player_name = session['user_id']
+    # player_name = data['player_name']
+    score = data['score']
+
+    with shelve.open('game_scores.db') as db:
+        db[player_name] = score
+        print("Current database contents:", dict(db))
+
+    return jsonify({'message': 'Score submitted successfully!'})
+
+
+@app.route('/view_scores')
+def view_scores():
+    with shelve.open('game_scores.db') as db:
+        scores = dict(db)
+    return jsonify(scores)
+
+@app.route('/get_scores')
+def get_scores():
+    with shelve.open('game_scores.db') as db:
+        scores = dict(db)
+    return jsonify(scores)
+    
+
+@app.route('/get_score/<player_name>')
+def get_score(player_name):
+    with shelve.open('game_scores.db') as db:
+        score = db.get(player_name, "Player not found")
+    return jsonify({player_name: score})
+
+@app.route('/update_score', methods=['POST'])
+def update_score():
+    data = request.get_json()
+    player_name = data['player_name']
+    new_score = data['score']
+    with shelve.open('game_scores.db', writeback=True) as db:
+        db[player_name] = new_score
+    return jsonify({'message': 'Score updated successfully!'})
+
+@app.route('/delete_score', methods=['POST'])
+def delete_score():
+    data = request.get_json()
+    player_name = data['player_name']
+
+    with shelve.open('game_scores.db', writeback=True) as db:
+        if player_name in db:
+            del db[player_name]
+            message = "Player score deleted successfully."
+        else:
+            message = "Player not found."
+
+    return jsonify({'message': message})
+
+@app.route('/delete_score_page')
+def delete_score_page():
+    return render_template('/staff/game1_delete_player.html')
+
+
+@app.route('/')
+def dummy_index():
+    message = 'To test the game1 route, append /game1 at the end of the URL string'
+    return message
+
+@app.route('/game1')
+def game1():
+    user_id = session.get('user_id', 'Unknown Player')
+    return render_template('/games/game1.html', user_id = user_id)
+
 
 
 if __name__ == "__main__":
