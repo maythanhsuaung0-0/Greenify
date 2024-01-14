@@ -694,6 +694,7 @@ def delete_product(seller_id, product_id):
 def orders(seller_id):
     return render_template('seller/orders.html')
 
+
 @app.route('/respond')
 def respond():
     return render_template('sellers_application/respondPage.html')
@@ -758,110 +759,93 @@ def view_pdf(pdf):
     pdf_path = os.path.join(app.config["UPLOAD_DIRECTORY"], pdf)
     return send_from_directory(os.path.dirname(pdf_path), os.path.basename(pdf_path), as_attachment=False)
 
-# @app.route('/display_image/<filename>/<filepath>')
-# def display_image(filename, filepath):
-#     image_url = url_for('static', filename='images/uploads/' + filename + '/' + filepath)
-#     return render_template('display_image.html', image_url=image_url)
-#
 
-@app.route('/staff/retrieveApplicationForms')  # read
+@app.route('/staff/retrieveApplicationForms',  methods = ['POST','GET'])  # read
 def retrieveApplicationForms():
     app_list = retrieve_db('application.db','Application')
+    if request.method == 'POST':
+        data_to_modify = json.loads(request.data)
+        # for rejecting the form
+        if data_to_modify['request_type'] == 'reject':
+            print(data_to_modify['id'],"rejected")
+            rejected = extracting('application.db', 'Application', data_to_modify['id'])
+            if rejected.get_doc():
+                delete_folder(rejected)
+            send_mail(rejected.get_email(), False, rejected.get_name(), '')
+        if data_to_modify['request_type'] == 'approve':
+            print(data_to_modify['id'], "approved")
+            # take the approved application
+            approved = extracting('application.db', 'Application', data_to_modify['id'])
+            print("This user is approved", approved.get_application_id())
+            # store in the approved_sellers
+            approved_sellers = {}
+            approved_db = shelve.open('approved_sellers.db', 'c')
+            try:
+                approved_sellers = approved_db['Approved_sellers']
+            except:
+                print("Error in retrieving sellers from application.db")
+
+            passwords = []
+            alphabet = string.ascii_letters + string.digits + string.punctuation
+            while True:
+                password = "".join(secrets.choice(alphabet) for _ in range(10))
+                if password not in passwords:
+                    break
+            send_mail(approved.get_email(), True, approved.get_name(), password)
+            approved.set_password(password)
+            # storing approved seller
+            approved_sellers[approved.get_application_id()] = approved
+            approved_db['Approved_sellers'] = approved_sellers
+            for key, seller in approved_db['Approved_sellers'].items():
+                passwords.append(seller.get_password())
+            approved_db.close()
+            print(passwords)
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
-@app.route('/staff/approveForm/<int:seller_id>', methods=['POST'])  # for approving forms
-def approve_form(seller_id):  # create
-    # take the approved application
-    approved = extracting('application.db', 'Application', seller_id)
-    print("This user is approved", approved.get_application_id())
-    # store in the approved_sellers
-    approved_sellers = {}
-    approved_db = shelve.open('approved_sellers.db', 'c')
-    try:
-        approved_sellers = approved_db['Approved_sellers']
-    except:
-        print("Error in retrieving sellers from application.db")
-
-    passwords = []
-    alphabet = string.ascii_letters + string.digits + string.punctuation
-    while True:
-        password = "".join(secrets.choice(alphabet) for _ in range(10))
-        if password not in passwords:
-            break
-    send_mail(approved.get_email(), True, approved.get_name(), password)
-    approved.set_password(password)
-    # storing approved seller
-    approved_sellers[approved.get_application_id()] = approved
-    approved_db['Approved_sellers'] = approved_sellers
-    for key, seller in approved_db['Approved_sellers'].items():
-        passwords.append(seller.get_password())
-    approved_db.close()
-    print(passwords)
-    return redirect(url_for('retrieveApplicationForms'))
-
-
-@app.route('/staff/rejectForm/<int:seller_id>', methods=['POST'])  # for rejecting forms
-def reject_form(seller_id):  # delete
-    rejected = extracting('application.db', 'Application', seller_id)
-    if rejected.get_doc():
-        delete_folder(rejected)
-    send_mail(rejected.get_email(), False, rejected.get_name(), '')
-    return redirect(url_for('retrieveApplicationForms'))
-
-
-@app.route('/staff/retrieveUpdateForms')
+@app.route('/staff/retrieveUpdateForms', methods = ['POST','GET'])
 def retrieveUpdateForms():  # for approving updates
     waiting_list = retrieve_db('updated_sellers.db','Updated_sellers')
     print('waiting list', waiting_list)
+    if request.method == 'POST':
+        data_to_modify = json.loads(request.data)
+        # for rejecting the update form
+        if data_to_modify['request_type'] == 'reject':
+            print(data_to_modify['id'],"rejected")
+            deleted_item = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
+            if deleted_item.get_doc():
+                delete_folder(deleted_item)
+        # for approving the update
+        if data_to_modify['request_type'] == 'approve':
+            approved = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
+            print("This user is approved", approved.get_application_id(), data_to_modify['id'])
+            sellers = {}
+            sellers_db = shelve.open('approved_sellers.db', 'w')
+            sellers = sellers_db['Approved_sellers']
+            if data_to_modify['id'] in sellers:
+                seller = sellers.get(data_to_modify['id'])
+                seller.set_name(approved.get_name())
+                seller.set_email(approved.get_email())
+                seller.set_password(approved.get_password())
+                seller.set_desc(approved.get_desc())
+            # seller.set_doc(approved.get_doc())
+            sellers_db['Approved_sellers'] = sellers
+            sellers_db.close()
     return render_template('staff/retrieveUpdateForms.html', count=len(waiting_list), waiting_list=waiting_list)
 
 
-@app.route('/staff/approveUpdates/<int:seller_id>', methods=['POST'])  # for approving updates
-def approve_updates(seller_id):  # create
-    # take the approved application
-    approved = extracting('updated_sellers.db', 'Updated_sellers', seller_id)
-    print("This user is approved", approved.get_application_id(), seller_id)
-    sellers = {}
-    sellers_db = shelve.open('approved_sellers.db', 'w')
-    sellers = sellers_db['Approved_sellers']
-    if seller_id in sellers:
-        seller = sellers.get(seller_id)
-        seller.set_name(approved.get_name())
-        seller.set_email(approved.get_email())
-        seller.set_password(approved.get_password())
-        seller.set_desc(approved.get_desc())
-    else:
-        pass
-    # seller.set_doc(approved.get_doc())
-    sellers_db['Approved_sellers'] = sellers
-    sellers_db.close()
-    # store in the approved_sellers
-    return redirect(url_for('retrieveUpdateForms'))
-
-
-@app.route('/staff/rejectUpdates/<int:seller_id>', methods=['POST'])
-def reject_updates(seller_id):
-    deleted_item = extracting('updated_sellers.db', 'Updated_sellers', seller_id)
-    if deleted_item.get_doc():
-        delete_folder(deleted_item)
-    return redirect(url_for('retrieveUpdateForms'))
-
-
-@app.route('/staff/retrieveSellers')
+@app.route('/staff/retrieveSellers', methods = ['POST','GET'])
 def retrieveSellers():  # read
     sellers_list = retrieve_db('approved_sellers.db','Approved_sellers')
+    if request.method == 'POST':
+        data_to_modify = json.loads(request.data)
+        # for removing
+        if data_to_modify['request_type'] == 'delete':
+            print(data_to_modify['id'],"deleted")
+            deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
+            if deleted_item.get_doc():
+                delete_folder(deleted_item)
     return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
-
-
-@app.route('/staff/deleteForm/<int:id>', methods=['POST'])
-def delete_form(id):  # delete
-    deleted_item = extracting('approved_sellers.db', 'Approved_sellers', id)
-    if deleted_item.get_doc():
-        delete_folder(deleted_item)
-    return redirect(url_for('retrieveSellers'))
-
-
 
 
 @app.route('/staff/dashboard')
@@ -874,34 +858,6 @@ def dashboard():
 @app.route('/seller/<int:seller_id>/dashboard')
 def seller_dashboard(seller_id):
     return render_template('/seller/dashboard.html')
-
-
-# @app.route('/retrieveUpdatedSeller')
-# def updated_seller_profile():
-#     updated_sellers = {}
-#     db = shelve.open('updated_sellers.db', 'r')
-#     updated_sellers = db['Updated_sellers']
-#     db.close()
-#
-#     sellers_after_changes = []
-#     for key in updated_sellers:
-#         seller = updated_sellers.get(key)
-#         sellers_after_changes.append(seller)
-#     return render_template('/seller/updated_profile.html', count=len(sellers_after_changes), sellers_after_changes=sellers_after_changes)
-
-
-# @app.route('/seller/<int:seller_id>/profile')
-# def seller_profile(seller_id):
-#     approved_sellers = {}
-#     approved_db = shelve.open('approved_sellers.db', 'r')
-#     try:
-#         approved_sellers = approved_db['Approved_sellers']
-#     except:
-#         print("Error in retrieving sellers")
-#     if seller_id in approved_sellers:
-#         print(approved_sellers[seller_id].get_email())
-#     approved_db.close()
-#     return render_template('/seller/profile.html')
 
 
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
