@@ -23,8 +23,8 @@
   />
   {% block JS_CSS %}{% endblock %}
 </head>
-{% macro accordionComponent(id,name,email,desc,file_name,docs,date,action1,action2,msg) %}
-<div class="card">
+{% macro accordionComponent(id,name,escaped_name,email,desc,file_name,docs,date) %}
+<div class="card" id="card-{{id}}">
       <div
       class="row card-body">
       <div class="col-1 text-center">{{id}}</div>
@@ -37,32 +37,8 @@
           {% endif %}
        <div class="col-2 text-center">{{date}}</div>
       <div class="col-2 text-center">
-        <form
-          class="d-inline"
-          action="{{url_for(action1, seller_id= id)}}"
-          method="post"
-        >
-          <input
-            type="submit"
-            class="btn btn-primary btn-sm"
-            name="id"
-            value="Approve"
-            onclick="return confirm('Are you sure you want to approve {{name}}?')"
-          />
-        </form>
-        <form
-        class="d-inline"
-        action="{{url_for(action2, seller_id= id)}}"
-        method="post"
-      >
-        <input
-          type="submit"
-          class="btn btn-danger btn-sm"
-          name="id"
-          value="Reject"
-          onclick="return confirm('Are you sure you want to reject {{msg}}{{name}}?')"
-        />
-      </form>
+       <button class="btn btn-primary btn-sm" onclick="handleButton('{{id}}','{{escaped_name}}','approve')">Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="handleButton('{{id}}','{{escaped_name}}','reject')">Reject</button>
       </div>
       <div class="col-1">
         <a class="btn btn-sm btn-light" data-bs-toggle="collapse" href="#collapse{{id}}" role="button" aria-expanded="false" aria-controls="collapse{{id}}"> <i class="fa-solid fa-caret-down"></i> </a>
