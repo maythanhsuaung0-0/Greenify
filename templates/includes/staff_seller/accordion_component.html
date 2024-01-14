@@ -23,8 +23,8 @@
   />
   {% block JS_CSS %}{% endblock %}
 </head>
-{% macro accordionComponent(id,name,email,desc,filename,filepath,img_link,date,action1,action2,msg) %}
-<div class="card">
+{% macro accordionComponent(id,name,escaped_name,email,desc,file_name,docs,date) %}
+<div class="card" id="card-{{id}}">
       <div
       class="row card-body">
       <div class="col-1 text-center">{{id}}</div>
@@ -37,32 +37,8 @@
           {% endif %}
        <div class="col-2 text-center">{{date}}</div>
       <div class="col-2 text-center">
-        <form
-          class="d-inline"
-          action="{{url_for(action1, seller_id= id)}}"
-          method="post"
-        >
-          <input
-            type="submit"
-            class="btn btn-primary btn-sm"
-            name="id"
-            value="Approve"
-            onclick="return confirm('Are you sure you want to approve {{name}}?')"
-          />
-        </form>
-        <form
-        class="d-inline"
-        action="{{url_for(action2, seller_id= id)}}"
-        method="post"
-      >
-        <input
-          type="submit"
-          class="btn btn-danger btn-sm"
-          name="id"
-          value="Reject"
-          onclick="return confirm('Are you sure you want to reject {{msg}}{{name}}?')"
-        />
-      </form>
+       <button class="btn btn-primary btn-sm" onclick="handleButton('{{id}}','{{escaped_name}}','approve')">Approve</button>
+          <button class="btn btn-danger btn-sm" onclick="handleButton('{{id}}','{{escaped_name}}','reject')">Reject</button>
       </div>
       <div class="col-1">
         <a class="btn btn-sm btn-light" data-bs-toggle="collapse" href="#collapse{{id}}" role="button" aria-expanded="false" aria-controls="collapse{{id}}"> <i class="fa-solid fa-caret-down"></i> </a>
@@ -82,13 +58,26 @@
              </div>
              <div>
                 <h6 class="fw-bold">Business Certificates</h6>
-           {% if img_link == None or img_link == '' %}
+           {% if docs == None or docs == '' %}
              <p>No certificates</p>
             {% else %}
-                <div class="row">
-                   <a href="{{url_for('display_image', filename = filename, filepath = filepath)}}" class="col-2" target="_blank">
-                        <img class="img-thumbnail fixed-height-30" src="{{ url_for('static', filename='images/uploads/' + img_link) }}" alt="Application Image">
-                   </a>
+                 <div class="row">
+                        <div class="row">
+                       <div class="col-2">
+                           <a href="/view/{{docs}}" target="_blank" class="badge badge-dark">
+                           <div class="pdf-thumbnail">
+                             <div class="thumbnail-cover"><i class="fa-solid fa-file-pdf"></i></div>
+                               <div class="thumbnail-text">
+                                   {% if file_name|length < 20 %}
+                                   {{file_name}}
+                                   {% else %}
+                                   {{file_name[:10]+'....'+'.pdf'}}
+                                   {% endif %}
+                               </div>
+                           </div>
+                       </a>
+                       </div>
+                </div>
                 </div>
             {% endif %}
 

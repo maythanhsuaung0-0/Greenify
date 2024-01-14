@@ -6,7 +6,7 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
 <div class="main">
-<h1 class="header" align="center">Please Login :)</h1>
+<h1 class="header" align="center">Login</h1>
 
   {% if error %}
         <p style="color: red; text-align: center;">{{ error }}</p>
@@ -14,12 +14,14 @@
 
 <form method="POST" action="">
   <div class="form-group" id="email">
-    {{ render_field(form.admin_email, class="form-control") }}
+    {{ render_field(form.email, class="form-control") }}
   </div>
   <div class="form-group" id="password">
-    {{ render_field(form.admin_password, class="form-control") }}
+    {{ render_field(form.password, class="form-control") }}
   </div>
   <input type="submit" value="Login" class="btn btn-primary" align="center" id="login"/>
+  <br>
+  <p class="info">Don't have an account? Sign Up <a href="/createUser" class="SignUp-link">here</a></p>
 </form>
 </div>
 {% endblock %}
