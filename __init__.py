@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, json, sess
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
+from reviewForm import CreateReviewsForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
@@ -103,6 +104,15 @@ def product(seller, product_id):
     product = seller_products[product_id]
     seller_product_db.close()
 
+    # Creating review
+    create_ratings_form = CreateReviewsForm(request.form)
+    if request.method == 'POST' and create_ratings_form.validate():
+        customer_reviews = {}
+        reviews_db = shelve.open('reviews.db', 'c')
+        try:
+            customer_reviews = reviews_db['Reviews']
+        except:
+            print("Error in retrieving reviews from reviews.db.")
 
     # Received AJAX Request
     if request.method == "POST":
@@ -198,7 +208,7 @@ def product(seller, product_id):
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
 
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"))
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"), form=create_ratings_form)
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
