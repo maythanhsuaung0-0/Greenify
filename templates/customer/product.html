@@ -4,6 +4,8 @@
 
 {% block body %}
 {% from "includes/_formHelper.html" import render_field %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/starrating.css') }}">
+
 <div>
   <h1>{{ product.get_product_name() }}</h1>
 </div>
@@ -62,19 +64,31 @@
 
   </div>
 </form>
-
+<br>
 
 <div class="product-desp">
   <h3>Product Description</h3>
-    <h5>{{ product.get_description() }}</h5>
+    <p>{{ product.get_description() }}</p>
 </div>
+<br>
 
 <div class="product-review">
   <h3>Product Review</h3>
-    <p>Rating:</p>
-    <div class="form-group mb-4 fw-bold">
+    <div class="form-group mb-4">
+          <div class="rating-wrapper">
+              <p>My Rating:</p>
+              <img id="1" src="{{url_for('static', filename='images/star.png')}}" width="20">
+              <img id="2" src="{{url_for('static', filename='images/star.png')}}" width="20">
+              <img id="3" src="{{url_for('static', filename='images/star.png')}}" width="20">
+              <img id="4" src="{{url_for('static', filename='images/star.png')}}" width="20">
+              <img id="5" src="{{url_for('static', filename='images/star.png')}}" width="20">
+              <button>Clear</button>
+          </div>
+          <input type="hidden" value="">
+    </div>
+    <div class="form-group mb-4">
             {{ render_field(form.review, class="form-control") }}
-        </div>
+    </div>
 </div>
 
 
@@ -82,4 +96,5 @@
 
 {% block End_JS_CSS %}
   <script type="text/javascript" src="{{ url_for('static', filename='JS/product_base.js') }}"></script>
+
 {% endblock %}
