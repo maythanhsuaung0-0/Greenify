@@ -434,7 +434,7 @@ def create_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global logged_in
+    global logged_in, user_id
     error = None
     login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
@@ -558,13 +558,10 @@ def seller_login():
         approved_sellers = {}
         user = User.User(login_form.email.data, login_form.password.data)
         approved_db = shelve.open('approved_sellers.db', 'w')
-        passwords = []
-        for seller_id, seller_instance in approved_db['Approved_sellers'].items():
-            passwords.append(seller_instance.get_password())
         try:
             if 'Approved_sellers' in approved_db:
                 approved_sellers = approved_db['Approved_sellers']
-                if login_form.email.data in approved_sellers and login_form.password.data in passwords:
+                if login_form.email.data in approved_sellers and login_form.password.data in AppFormFormat.get_passwords:
                     key = get_key(login_form.password.data, approved_db['Approved_sellers'])
                     if key == user.get_email():
                         session['logged_in'] = True
