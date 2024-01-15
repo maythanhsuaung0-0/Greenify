@@ -21,10 +21,9 @@
     <div class="sidebar">
         <div class="side-nav">
             <div class="logo" id="mylogo">
-                <!-- <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="logo"> -->
-                <span class="brand">greenify</span>
+                 <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="logo">
             </div>
-            <a class="side-nav-link" id="dashboard" href="/seller/dashboard">
+            <a class="side-nav-link" id="dashboard" href="/seller/{{seller_id}}/dashboard">
                 <i class="fa-solid fa-chart-line"></i>
                 <span class="nav-link-text">Dashboard</span>
             </a>
@@ -33,11 +32,11 @@
                 <i class="fa-solid fa-users"></i>
                 <span class="nav-link-text">Products</span>
             </a>
-            <a class="side-nav-link" id="orders" href="/seller/orders">
+            <a class="side-nav-link" id="orders" href="/seller/{{seller_id}}/orders">
                 <i class="fa-solid fa-list"></i>
                 <span class="nav-link-text">Orders</span>
             </a>
-            <a class="side-nav-link" id="setting" href="/staff/profileSetting">
+            <a class="side-nav-link" id="setting" href="/seller/{{seller_id}}/profile">
                 <i class="fa-solid fa-gear"></i>
                 <span class="nav-link-text">Profile</span>
             </a>

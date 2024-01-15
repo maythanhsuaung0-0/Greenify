@@ -749,6 +749,11 @@ def orders(seller_id):
     return render_template('seller/orders.html')
 
 
+@app.route('/seller/<int:seller_id>/dashboard')
+def seller_dashboard(seller_id):
+    return render_template('seller/dashboard.html')
+
+
 @app.route('/respond')
 def respond():
     return render_template('sellers_application/respondPage.html')
@@ -776,7 +781,7 @@ def register():  # create
                 last_id = 0
         db['Id'] = last_id
 
-        appForm = AppFormFormat(last_id, registration_form.business_name.data, registration_form.seller_email.data,
+        appForm = AppFormFormat(last_id,registration_form.name.data, registration_form.business_name.data, registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
@@ -826,7 +831,8 @@ def retrieveApplicationForms():
             rejected = extracting('application.db', 'Application', data_to_modify['id'])
             if rejected.get_doc():
                 delete_folder(rejected)
-            send_mail(rejected.get_email(), False, rejected.get_name(), '')
+            send_mail(rejected.get_email(), False, rejected.get_seller_name(), '')
+            return json.jsonify({'success': True})
         if data_to_modify['request_type'] == 'approve':
             print(data_to_modify['id'], "approved")
             # take the approved application
@@ -845,7 +851,7 @@ def retrieveApplicationForms():
                 password = generate_password(14)
                 if password not in passwords:
                     break
-            send_mail(approved.get_email(), True, approved.get_name(), password)
+            send_mail(approved.get_email(), True, approved.get_seller_name(), password)
             approved.set_password(password)
             # storing approved seller
             approved_sellers[approved.get_application_id()] = approved
@@ -854,6 +860,7 @@ def retrieveApplicationForms():
                 passwords.append(seller.get_password())
             approved_db.close()
             print(passwords)
+            return json.jsonify({'result': True})
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
@@ -869,6 +876,7 @@ def retrieveUpdateForms():  # for approving updates
             deleted_item = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
+            return json.jsonify({'result': True})
         # for approving the update
         if data_to_modify['request_type'] == 'approve':
             approved = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
@@ -885,6 +893,7 @@ def retrieveUpdateForms():  # for approving updates
             # seller.set_doc(approved.get_doc())
             sellers_db['Approved_sellers'] = sellers
             sellers_db.close()
+            return json.jsonify({'result': True})
     return render_template('staff/retrieveUpdateForms.html', count=len(waiting_list), waiting_list=waiting_list)
 
 
@@ -899,6 +908,7 @@ def retrieveSellers():  # read
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
+        return json.jsonify({'result': True})
     return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
 
 
@@ -909,9 +919,6 @@ def dashboard():
     return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
 
 
-@app.route('/seller/<int:seller_id>/dashboard')
-def seller_dashboard(seller_id):
-    return render_template('/seller/dashboard.html')
 
 
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
@@ -925,6 +932,7 @@ def update_seller(seller_id):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
+        seller.set_seller_name(update_seller_form.seller_name.data)
         seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
@@ -942,6 +950,7 @@ def update_seller(seller_id):
         approved_db.close()
 
         seller = approved_sellers.get(seller_id)
+        update_seller_form.seller_name.data = seller.get_seller_name()
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()

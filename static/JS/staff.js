@@ -11,9 +11,11 @@ function handleButton(id,name,action) {
                  "request_type": action,
                  "id": id_to_handle,
              }),
-             success: function (data) {
+             success: function (response) {
                  // Handle success if needed
-                 console.log("Delete successful");
+                 if(response.result){
+                 console.log(response.result,"Delete successful");
+                 alert('Successfully '+ action+'d '+name)}
              },
              error: function (xhr, status, error) {
                  // Handle error if needed

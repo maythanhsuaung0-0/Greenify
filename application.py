@@ -1,15 +1,19 @@
 class ApplicationFormFormat:
     id = 0
-    def __init__(self,id, name, email, desc):
+    def __init__(self,id,s_name,name, email, desc):
         ApplicationFormFormat.id = id
         ApplicationFormFormat.id += 1
         self.__id = ApplicationFormFormat.id
+        self.__seller_name = s_name
         self.__name = name
         self.__email = email
         self.__password = None
         self.__desc = desc
         self.__doc = None
         self.__date = None
+
+    def set_seller_name(self,n):
+        self.__seller_name = n
 
     def set_name(self, name):     
         self.__name = name
@@ -28,6 +32,9 @@ class ApplicationFormFormat:
 
     def set_date(self,date):
         self.__date = date
+
+    def get_seller_name(self):
+        return self.__seller_name
 
     def get_name(self):
         return self.__name
