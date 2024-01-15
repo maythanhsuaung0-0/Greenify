@@ -479,10 +479,7 @@ def login():
                         session['user_id'] = user_id
                         session['logged_in'] = True
                         return redirect(url_for('home'))
-                    else:
-                        error = 'Email or Password is incorrect, please try again.'
-                else:
-                    error = 'Email or Password is incorrect, please try again.'
+                error = 'Email or Password is incorrect, please try again.'
             else:
                 return render_template('customer/createUser.html')
         except:
@@ -575,33 +572,31 @@ def staff_login():
     return render_template('staff/staff_login.html', form=staff_login_form, error=error)
 
 
-@app.route('/seller/login', methods=['GET', 'POST'])
+@app.route('/sellerlogin', methods=['GET', 'POST'])
 def seller_login():
     global logged_in
     error = None
     login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
         approved_sellers = {}
+        sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
         user = User.User(login_form.email.data, login_form.password.data)
-        approved_db = shelve.open('approved_sellers.db', 'w')
+        approved_db = shelve.open('approved_sellers.db', 'r')
         try:
             if 'Approved_sellers' in approved_db:
                 approved_sellers = approved_db['Approved_sellers']
-                if login_form.email.data in approved_sellers and login_form.password.data in AppFormFormat.get_passwords:
+                if login_form.email.data in approved_sellers and login_form.password.data in approved_sellers.get_password():
                     key = get_key(login_form.password.data, approved_db['Approved_sellers'])
                     if key == user.get_email():
                         session['logged_in'] = True
                         return redirect(url_for('home'))
-                    else:
-                        error = 'Email or Password is incorrect, please try again.'
-                else:
-                    error = 'Email or Password is incorrect, please try again.'
+                error = 'Email or Password is incorrect, please try again.'
             else:
                 return redirect(url_for('register'))
         except:
             print("Error in opening approved_sellers.db")
     print(session.get('logged_in'))
-    return render_template('customer/login.html', form=login_form, logged_in=logged_in, error=error)
+    return render_template('seller/seller_login.html', form=login_form, logged_in=logged_in, error=error)
 
 
 @app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
