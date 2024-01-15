@@ -9,5 +9,3 @@ class CreateUserForm(Form):
 class StaffLoginForm(Form):
     admin_email = EmailField('Email', [validators.DataRequired(), validators.Email()])
     admin_password = PasswordField('Password', [validators.DataRequired(), validators.length(min=8, max=30)])
-
-
