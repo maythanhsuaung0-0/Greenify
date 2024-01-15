@@ -72,3 +72,22 @@ function addToCart(product_id, seller_id, seller) {
             }
         })
 }
+
+//star rating
+document.querySelector('.rating-wrapper').addEventListener('click', updateStarRating);
+
+function updateStarRating(evt) {
+  const stars = document.querySelectorAll('.rating-wrapper img');
+
+  // Remove 'rating-checked' class from all stars
+  stars.forEach(star => star.classList.remove('rating-checked'));
+
+  // Add 'rating-checked' class to clicked star and previous stars
+  const clickedStarIndex = parseInt(evt.target.id) - 1;
+  for (let i = 0; i <= clickedStarIndex; i++) {
+    stars[i].classList.add('rating-checked');
+  }
+
+  // Update the hidden input field with the selected rating
+  document.querySelector('#rating').value = evt.target.id;
+}
