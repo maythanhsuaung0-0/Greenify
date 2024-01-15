@@ -575,7 +575,7 @@ def staff_login():
     return render_template('staff/staff_login.html', form=staff_login_form, error=error)
 
 
-@app.route('/seller/login', methods=['GET', 'POST'])
+@app.route('/sellerlogin', methods=['GET', 'POST'])
 def seller_login():
     global logged_in
     error = None
@@ -587,7 +587,7 @@ def seller_login():
         try:
             if 'Approved_sellers' in approved_db:
                 approved_sellers = approved_db['Approved_sellers']
-                if login_form.email.data in approved_sellers and login_form.password.data in AppFormFormat.get_passwords:
+                if login_form.email.data in approved_sellers and login_form.password.data in approved_sellers.get_passwords:
                     key = get_key(login_form.password.data, approved_db['Approved_sellers'])
                     if key == user.get_email():
                         session['logged_in'] = True
