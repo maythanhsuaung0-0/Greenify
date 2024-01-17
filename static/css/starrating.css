@@ -1,0 +1,8 @@
+.rating-wrapper img {
+  filter: invert(99%) sepia(1%) saturate(0%) hue-rotate(161deg) brightness(101%) contrast(104%);
+  padding-right: 3px;
+}
+
+.rating-checked {
+  filter: none!important;
+}

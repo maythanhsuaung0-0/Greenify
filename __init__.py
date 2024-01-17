@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, redirect, url_for, json, sess
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
+from reviewForm import CreateReviewsForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
@@ -34,6 +35,22 @@ def delete_folder(item):
     if os.path.exists(full_folder_path):
         shutil.rmtree(full_folder_path)
         print(f"folder deleted: {full_folder_path}")
+
+
+# generate random secure pwd for giving the seller the very first password
+def generate_password(length):
+    password = (
+            secrets.choice(string.ascii_uppercase) +
+            secrets.choice(string.ascii_lowercase) +
+            secrets.choice(string.digits)
+    )
+    remaining_length = length - 4
+    alphabet = string.ascii_letters + string.digits
+    password += ''.join(secrets.choice(alphabet) for _ in range(remaining_length))
+    password_list = list(password)
+    secrets.SystemRandom().shuffle(password_list)
+    return ''.join(password_list)
+
 
 
 # Returning the qty for the cart icon
@@ -103,6 +120,15 @@ def product(seller, product_id):
     product = seller_products[product_id]
     seller_product_db.close()
 
+    # Creating review
+    create_ratings_form = CreateReviewsForm(request.form)
+    if request.method == 'POST' and create_ratings_form.validate():
+        customer_reviews = {}
+        reviews_db = shelve.open('reviews.db', 'c')
+        try:
+            customer_reviews = reviews_db['Reviews']
+        except:
+            print("Error in retrieving reviews from reviews.db.")
 
     # Received AJAX Request
     if request.method == "POST":
@@ -198,7 +224,7 @@ def product(seller, product_id):
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
 
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"))
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"), form=create_ratings_form)
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
@@ -434,7 +460,7 @@ def create_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global logged_in
+    global logged_in, user_id
     error = None
     login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
@@ -453,10 +479,7 @@ def login():
                         session['user_id'] = user_id
                         session['logged_in'] = True
                         return redirect(url_for('home'))
-                    else:
-                        error = 'Email or Password is incorrect, please try again.'
-                else:
-                    error = 'Email or Password is incorrect, please try again.'
+                error = 'Email or Password is incorrect, please try again.'
             else:
                 return render_template('customer/createUser.html')
         except:
@@ -549,36 +572,31 @@ def staff_login():
     return render_template('staff/staff_login.html', form=staff_login_form, error=error)
 
 
-@app.route('/seller/login', methods=['GET', 'POST'])
+@app.route('/sellerlogin', methods=['GET', 'POST'])
 def seller_login():
     global logged_in
     error = None
     login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
         approved_sellers = {}
+        sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
         user = User.User(login_form.email.data, login_form.password.data)
-        approved_db = shelve.open('approved_sellers.db', 'w')
-        passwords = []
-        for seller_id, seller_instance in approved_db['Approved_sellers'].items():
-            passwords.append(seller_instance.get_password())
+        approved_db = shelve.open('approved_sellers.db', 'r')
         try:
             if 'Approved_sellers' in approved_db:
                 approved_sellers = approved_db['Approved_sellers']
-                if login_form.email.data in approved_sellers and login_form.password.data in passwords:
+                if login_form.email.data in approved_sellers and login_form.password.data in approved_sellers.get_password():
                     key = get_key(login_form.password.data, approved_db['Approved_sellers'])
                     if key == user.get_email():
                         session['logged_in'] = True
                         return redirect(url_for('home'))
-                    else:
-                        error = 'Email or Password is incorrect, please try again.'
-                else:
-                    error = 'Email or Password is incorrect, please try again.'
+                error = 'Email or Password is incorrect, please try again.'
             else:
                 return redirect(url_for('register'))
         except:
             print("Error in opening approved_sellers.db")
     print(session.get('logged_in'))
-    return render_template('customer/login.html', form=login_form, logged_in=logged_in, error=error)
+    return render_template('seller/seller_login.html', form=login_form, logged_in=logged_in, error=error)
 
 
 @app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
@@ -818,9 +836,8 @@ def retrieveApplicationForms():
                 print("Error in retrieving sellers from application.db")
 
             passwords = []
-            alphabet = string.ascii_letters + string.digits + string.punctuation
             while True:
-                password = "".join(secrets.choice(alphabet) for _ in range(10))
+                password = generate_password(14)
                 if password not in passwords:
                     break
             send_mail(approved.get_email(), True, approved.get_name(), password)
