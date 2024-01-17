@@ -972,16 +972,15 @@ def delete_seller(seller_id):
 @app.route('/submit_score', methods=['POST'])
 def submit_score():
     data = request.get_json()
-    print("Received data:", data)
-    player_name = session['user_id']
-    # player_name = data['player_name']
-    score = data['score']
+    player_name = session.get('user_id', 'Unknown Player')
+    new_score = data['score']
 
-    with shelve.open('game_scores.db') as db:
-        db[player_name] = score
-        print("Current database contents:", dict(db))
+    with shelve.open('game_scores.db', writeback=True) as db:
+        current_high_score = db.get(player_name, 0)
+        if new_score > current_high_score:
+            db[player_name] = new_score
 
-    return jsonify({'message': 'Score submitted successfully!'})
+    return jsonify({'message': 'Score received'})
 
 
 @app.route('/view_scores')
@@ -1038,10 +1037,11 @@ def dummy_index():
 
 @app.route('/game1')
 def game1():
-    user_id = session.get('user_id', 'Unknown Player')
-    return render_template('/games/game1.html', user_id = user_id)
-
-
+    user_id = session.get('user_id', 'Unknown Player') 
+    if session.get('logged_in'):
+        return render_template('/games/game1.html', user_id=user_id)  
+    else:
+        return redirect(url_for('login'))
 
 if __name__ == "__main__":
     app.run(debug=True)
