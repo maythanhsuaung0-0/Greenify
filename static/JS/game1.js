@@ -14,11 +14,11 @@ interact('#drag1, #drag2, #drag3, #drag4, #drag5, #drag6')
 
 function dragMoveListener(event) {
   var target = event.target,
-      x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-      y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+    x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+    y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
   target.style.webkitTransform =
-  target.style.transform =
+    target.style.transform =
     'translate(' + x + 'px, ' + y + 'px)';
 
   target.setAttribute('data-x', x);
@@ -35,14 +35,14 @@ function setupDropzone(dropzoneId, correctMaterialType) {
   interact(dropzoneId).dropzone({
     accept: '#drag1, #drag2, #drag3, #drag4, #drag5, #drag6',
     overlap: 0.75,
-    
-    ondropactivate: function(event) {
+
+    ondropactivate: function (event) {
       event.target.classList.add('drop-active');
     },
     ondrop: function (event) {
       var droppedElementId = event.relatedTarget.id;
       var materialType = document.getElementById(droppedElementId).getAttribute('materialtype');
-    
+
       if (materialType == correctMaterialType) {
         document.getElementById('dropSoundCorrect').play();
         score++;  // Score increments for correct drops
@@ -71,34 +71,33 @@ setupDropzone('#dropzone3', 'paper');
 
 // Function to send the score to the server
 function sendScoreToServer(score) {
-    // var playerName = document.getElementById('playerName').value || 'Unknown Player';
-    fetch('/submit_score', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ player_name: playerName, score: score })
-    })
+  fetch('/submit_score', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ player_name: playerName, score: score })
+  })
     .then(response => response.json())
     .then(data => {
-        console.log('Score submission successful:', data);
-        getUpdatedScores();
+      console.log('Score submission successful:', data);
+      getUpdatedScores();
     })
     .catch((error) => {
-        console.error('Error:', error);
+      console.error('Error:', error);
     });
 }
 
 // Function to get updated scores
 function getUpdatedScores() {
   fetch('/get_scores')
-  .then(response => response.json())
-  .then(data => {
-    updateScoreDisplay(data);
-  })
-  .catch((error) => {
-    console.error('Error:', error);
-  });
+    .then(response => response.json())
+    .then(data => {
+      updateScoreDisplay(data);
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
 }
 
 // Function to update the score display
