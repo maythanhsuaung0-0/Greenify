@@ -798,7 +798,7 @@ def register():  # create
         # testing
         application_form = db['Application']
         appForm = application_form[appForm.get_application_id()]
-        print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
+        print(appForm.get_name(), appForm.get_email(), "was stored in application.db successfully with user_id ==",
               appForm.get_application_id())
         print("last id--", last_id)
         if application_form.keys():
@@ -827,13 +827,12 @@ def retrieveApplicationForms():
             if rejected.get_doc():
                 delete_folder(rejected)
             send_mail(rejected.get_email(), False, rejected.get_seller_name(), '')
-            return json.jsonify({'success': True})
         if data_to_modify['request_type'] == 'approve':
-            print(data_to_modify['id'], "approved")
+            print(data_to_modify['id'], "approved from AJAX")
             # take the approved application
             approved = extracting('application.db', 'Application', data_to_modify['id'])
             print("This user is approved", approved.get_application_id())
-            # store in the approved_sellers
+            # open the approved_sellers
             approved_sellers = {}
             approved_db = shelve.open('approved_sellers.db', 'c')
             try:
@@ -842,20 +841,23 @@ def retrieveApplicationForms():
                 print("Error in retrieving sellers from application.db")
 
             passwords = []
+
+            for key, seller in approved_db['Approved_sellers'].items():
+                passwords.append(seller.get_password())
+
+            print(passwords)
             while True:
                 password = generate_password(14)
                 if password not in passwords:
                     break
-            send_mail(approved.get_email(), True, approved.get_seller_name(), password)
+
             approved.set_password(password)
+
             # storing approved seller
             approved_sellers[approved.get_application_id()] = approved
             approved_db['Approved_sellers'] = approved_sellers
-            for key, seller in approved_db['Approved_sellers'].items():
-                passwords.append(seller.get_password())
             approved_db.close()
-            print(passwords)
-            return json.jsonify({'result': True})
+            send_mail(approved.get_email(), True, approved.get_seller_name(), password)
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
@@ -871,7 +873,6 @@ def retrieveUpdateForms():  # for approving updates
             deleted_item = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
-            return json.jsonify({'result': True})
         # for approving the update
         if data_to_modify['request_type'] == 'approve':
             approved = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
@@ -888,22 +889,21 @@ def retrieveUpdateForms():  # for approving updates
             # seller.set_doc(approved.get_doc())
             sellers_db['Approved_sellers'] = sellers
             sellers_db.close()
-            return json.jsonify({'result': True})
     return render_template('staff/retrieveUpdateForms.html', count=len(waiting_list), waiting_list=waiting_list)
 
 
 @app.route('/staff/retrieveSellers', methods=['POST', 'GET'])
 def retrieveSellers():  # read
-    sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
+    sellers_list = retrieve_db('approved_sellers.db','Approved_sellers')
+    print("sellers", sellers_list)
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for removing
         if data_to_modify['request_type'] == 'delete':
-            print(data_to_modify['id'], "deleted")
+            print(data_to_modify['id'],"deleted")
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
-        return json.jsonify({'result': True})
     return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
 
 
