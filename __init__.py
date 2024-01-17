@@ -19,6 +19,7 @@ import string
 from send_email import send_mail
 import uuid
 from crud_functions import *
+from seller_order import SellerOrder
 
 app = Flask(__name__, static_url_path='/static')
 logged_in = False
@@ -109,9 +110,7 @@ def product(seller, product_id):
     seller_product_info = {}
     seller_product_db = shelve.open('seller-product.db', 'c')
     try:
-        print(seller_id)
         seller_product_info = seller_product_db[str(seller_id)]
-        print(seller_product_info)
         seller_products = seller_product_info['products']
     except:
         print("Product is not found")
@@ -191,6 +190,7 @@ def product(seller, product_id):
             #Check if Product has been added before
             try:
                 saved_product = user_selected_product[product["seller"] + str(product["product_id"])]
+
                 saved_product["product_qty"] += product["product_qty"]
                 if saved_product["product_qty"] > product_stock:
                     return json.jsonify({"result" : False, "reason":"added more than stock"})
@@ -377,34 +377,51 @@ def payment(user):
             user_selected_product = users_shopping_cart["selected_product"]
             amt_paid = users_shopping_cart["payable"]
 
-            #Update Qty in Seller product db
-            seller_product_db = shelve.open('seller-product.db')
+            #Accessing Info of each individual product bought
+            order_history_db = shelve.open('order_history.db')
 
             for itemName in user_selected_product:
+                seller_product_db = shelve.open('seller-product.db')
+
                 item = user_selected_product[itemName]
                 seller_id = item["seller_id"]
                 product_id = item["product_id"]
                 bought_qty = item["product_qty"]
 
-                #Retrieving Qty
+                #Updating Qty
                 seller_product_info = seller_product_db[str(seller_id)]
                 seller_products = seller_product_info['products']
                 product = seller_products[product_id]
                 product_qty = product.get_product_stock()
                 product_qty -= bought_qty
 
-                #Save Qty
+                #Saving Qty
                 product.set_product_stock(product_qty)
                 seller_products[product_id] = product
                 seller_product_info['products'] = seller_products
                 seller_product_db[str(seller_id)] = seller_product_info
+                seller_product_db.close()
 
-            seller_product_db.close()
+                #Creating a Seller Order
+                seller_orders = {}
+                seller_order_db = shelve.open('seller_order.db')
+                try:
+                    seller_orders = seller_order_db[str(seller_id)]
+                    order = seller_orders[email]
+                    order.set_order_products(product_id, bought_qty)
+
+                except KeyError:
+                    order = SellerOrder(name, email, address)
+                    order.set_order_products(product_id, bought_qty)
+
+
+                seller_orders[email] = order
+                seller_order_db[str(seller_id)] = seller_orders
+                seller_order_db.close()
 
             #Create Order History
             order_history = {}
             user_order_history = {}
-            order_history_db = shelve.open('order_history.db')
 
             #Retrieve Order History
             try:
@@ -413,7 +430,6 @@ def payment(user):
                 print("No Record Found")
 
             order_history_id = uuid.uuid4()
-            print(order_history_id)
 
             #Saving Datas
             order_history['items'] = user_selected_product
@@ -428,10 +444,14 @@ def payment(user):
             del user_shopping_cart_db[email]
             user_shopping_cart_db.close()
 
-            return json.jsonify({'result': True})
+            return json.jsonify({'result': True, 'redirect_link': url_for('success_payment')})
 
 
     return render_template("customer/payment.html")
+
+@app.route('/success')
+def success_payment():
+    return render_template('customer/success_payment.html')
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
