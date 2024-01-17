@@ -572,29 +572,36 @@ def staff_login():
     return render_template('staff/staff_login.html', form=staff_login_form, error=error)
 
 
-@app.route('/sellerlogin', methods=['GET', 'POST'])
+@app.route('/seller/login', methods=['GET', 'POST'])
 def seller_login():
-    global logged_in
+    global logged_in, seller_password
     error = None
     login_form = CreateUserForm(request.form)
     if request.method == 'POST' and login_form.validate():
         approved_sellers = {}
-        sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
         user = User.User(login_form.email.data, login_form.password.data)
-        approved_db = shelve.open('approved_sellers.db', 'r')
-        try:
-            if 'Approved_sellers' in approved_db:
-                approved_sellers = approved_db['Approved_sellers']
-                if login_form.email.data in approved_sellers and login_form.password.data in approved_sellers.get_password():
-                    key = get_key(login_form.password.data, approved_db['Approved_sellers'])
-                    if key == user.get_email():
-                        session['logged_in'] = True
-                        return redirect(url_for('home'))
-                error = 'Email or Password is incorrect, please try again.'
+        sellers = []
+        seller_password = []
+        seller_email = []
+        sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
+        seller_data = {}
+        for i in sellers_list:
+            seller_data['id'] = i.get_application_id()
+            seller_data['email'] = i.get_email()
+            seller_data['pw'] = i.get_password()
+            sellers.append(seller_data)
+        print(sellers)
+        for j in sellers_list:
+            seller_email.append(j.get_email())
+        print(seller_email)
+        for i in sellers:
+            print(i)
+            if login_form.email.data == i["email"] and login_form.password.data == i["pw"]:
+                seller_id = i['id']
+                session['logged_in'] = True
+                return redirect(url_for('seller_dashboard', seller_id=seller_id))
             else:
-                return redirect(url_for('register'))
-        except:
-            print("Error in opening approved_sellers.db")
+                error = 'Email or Password is incorrect, please try again.'
     print(session.get('logged_in'))
     return render_template('seller/seller_login.html', form=login_form, logged_in=logged_in, error=error)
 
