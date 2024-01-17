@@ -751,6 +751,11 @@ def orders(seller_id):
     return render_template('seller/orders.html')
 
 
+@app.route('/seller/<int:seller_id>/dashboard')
+def seller_dashboard(seller_id):
+    return render_template('seller/dashboard.html')
+
+
 @app.route('/respond')
 def respond():
     return render_template('sellers_application/respondPage.html')
@@ -778,7 +783,7 @@ def register():  # create
                 last_id = 0
         db['Id'] = last_id
 
-        appForm = AppFormFormat(last_id, registration_form.business_name.data, registration_form.seller_email.data,
+        appForm = AppFormFormat(last_id,registration_form.name.data, registration_form.business_name.data, registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
@@ -800,7 +805,7 @@ def register():  # create
         # testing
         application_form = db['Application']
         appForm = application_form[appForm.get_application_id()]
-        print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
+        print(appForm.get_name(), appForm.get_email(), "was stored in application.db successfully with user_id ==",
               appForm.get_application_id())
         print("last id--", last_id)
         if application_form.keys():
@@ -828,13 +833,13 @@ def retrieveApplicationForms():
             rejected = extracting('application.db', 'Application', data_to_modify['id'])
             if rejected.get_doc():
                 delete_folder(rejected)
-            send_mail(rejected.get_email(), False, rejected.get_name(), '')
+            send_mail(rejected.get_email(), False, rejected.get_seller_name(), '')
         if data_to_modify['request_type'] == 'approve':
-            print(data_to_modify['id'], "approved")
+            print(data_to_modify['id'], "approved from AJAX")
             # take the approved application
             approved = extracting('application.db', 'Application', data_to_modify['id'])
             print("This user is approved", approved.get_application_id())
-            # store in the approved_sellers
+            # open the approved_sellers
             approved_sellers = {}
             approved_db = shelve.open('approved_sellers.db', 'c')
             try:
@@ -843,19 +848,23 @@ def retrieveApplicationForms():
                 print("Error in retrieving sellers from application.db")
 
             passwords = []
+
+            for key, seller in approved_db['Approved_sellers'].items():
+                passwords.append(seller.get_password())
+
+            print(passwords)
             while True:
                 password = generate_password(14)
                 if password not in passwords:
                     break
-            send_mail(approved.get_email(), True, approved.get_name(), password)
+
             approved.set_password(password)
+
             # storing approved seller
             approved_sellers[approved.get_application_id()] = approved
             approved_db['Approved_sellers'] = approved_sellers
-            for key, seller in approved_db['Approved_sellers'].items():
-                passwords.append(seller.get_password())
             approved_db.close()
-            print(passwords)
+            send_mail(approved.get_email(), True, approved.get_seller_name(), password)
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
@@ -892,12 +901,13 @@ def retrieveUpdateForms():  # for approving updates
 
 @app.route('/staff/retrieveSellers', methods=['POST', 'GET'])
 def retrieveSellers():  # read
-    sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
+    sellers_list = retrieve_db('approved_sellers.db','Approved_sellers')
+    print("sellers", sellers_list)
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for removing
         if data_to_modify['request_type'] == 'delete':
-            print(data_to_modify['id'], "deleted")
+            print(data_to_modify['id'],"deleted")
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -911,9 +921,6 @@ def dashboard():
     return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
 
 
-@app.route('/seller/<int:seller_id>/dashboard')
-def seller_dashboard(seller_id):
-    return render_template('/seller/dashboard.html')
 
 
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
@@ -927,6 +934,7 @@ def update_seller(seller_id):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
+        seller.set_seller_name(update_seller_form.seller_name.data)
         seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
@@ -944,6 +952,7 @@ def update_seller(seller_id):
         approved_db.close()
 
         seller = approved_sellers.get(seller_id)
+        update_seller_form.seller_name.data = seller.get_seller_name()
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
