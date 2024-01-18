@@ -42,9 +42,7 @@ function payment() {
       }),
       success: function(response) {
         if (response.result) {
-          alert(
-            `Thank You ${name} for Purchasing with Greenify. Have a nice day!`
-            )
+          window.location.href = response.redirect_link;
         }
       }
     })
