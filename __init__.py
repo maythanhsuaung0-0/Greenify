@@ -3,7 +3,6 @@ from flask import Flask, render_template, request, redirect, url_for, json, sess
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
-from reviewForm import CreateReviewsForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
