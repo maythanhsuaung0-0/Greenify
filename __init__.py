@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, \
     send_from_directory, jsonify
-from Forms import CreateUserForm, StaffLoginForm
-import shelve, User, SellerProduct, application
+from Forms import CreateUserForm, StaffLoginForm, LoginForm
+import shelve, User, SellerProduct, application, User_login
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
@@ -499,6 +499,7 @@ def payment(user):
 def success_payment():
     return render_template('customer/success_payment.html')
 
+
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
     error = None
@@ -515,7 +516,8 @@ def create_user():
         if create_user_form.email.data in users_dict:
             error = 'An account has already been created with this email. Please Login.'
         else:
-            user = User.User(create_user_form.email.data, create_user_form.password.data)
+            user = User.User(create_user_form.email.data, create_user_form.password.data, create_user_form.name.data,
+                             create_user_form.contact_number.data, create_user_form.postal_code.data, create_user_form.address.data)
             users_dict[user.get_email()] = user
             db['Users'] = users_dict
             return redirect(url_for('login'))
@@ -526,12 +528,12 @@ def create_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global logged_in, user_id
+    global logged_in, user_id, user
     error = None
-    login_form = CreateUserForm(request.form)
+    login_form = LoginForm(request.form)
     if request.method == 'POST' and login_form.validate():
         users_dict = {}
-        user = User.User(login_form.email.data, login_form.password.data)
+        user = User_login.UserLogin(login_form.email.data, login_form.password.data)
         db = shelve.open('user.db', 'r')
         passwords = []
         for user_id, user_instance in db['Users'].items():
@@ -587,6 +589,10 @@ def update_user(email):
         if update_user_form.email.data not in users_dict:
             user.set_email(update_user_form.email.data)
             user.set_password(update_user_form.password.data)
+            user.set_name(update_user_form.name.data)
+            user.set_contact_number(update_user_form.contact_number.data)
+            user.set_postal_code(update_user_form.postal_code.data)
+            user.set_address(update_user_form.address.data)
             error = "Update Successful."
 
         else:
@@ -604,10 +610,14 @@ def update_user(email):
         user = users_dict.get(email)
         update_user_form.email.data = user.get_email()
         update_user_form.password.data = user.get_password()
+        update_user_form.name.data = user.get_name()
+        update_user_form.contact_number.data = user.get_contact_number()
+        update_user_form.postal_code.data = user.get_postal_code()
+        update_user_form.address.data = user.get_address()
 
     if session.get('logged_in'):
         return render_template('customer/updateUser.html', form=update_user_form, email=update_user_form.email.data,
-                               error=error)
+                               error=error, user=user)
     else:
         return redirect(url_for('login'))
 

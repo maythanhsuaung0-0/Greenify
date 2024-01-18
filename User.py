@@ -1,11 +1,15 @@
 class User:
     count_id = 0
 
-    def __init__(self, email, password):
+    def __init__(self, email, password, name, contact_number, postal_code, address):
         User.count_id += 1
         self.__user_id = User.count_id
         self.__email = email
         self.__password = password
+        self.__name = name
+        self.__contact_number = contact_number
+        self.__postal_code = postal_code
+        self.__address = address
         self.__login = False
 
     def get_user_id(self):
@@ -31,3 +35,27 @@ class User:
 
     def set_login_status(self, login):
         self.__login = login
+
+    def get_name(self):
+        return self.__name
+
+    def get_contact_number(self):
+        return self.__contact_number
+
+    def get_postal_code(self):
+        return self.__postal_code
+
+    def get_address(self):
+        return self.__address
+
+    def set_name(self, name):
+        self.__name = name
+
+    def set_contact_number(self, contact_number):
+        self.__contact_number = contact_number
+
+    def set_postal_code(self, postal_code):
+        self.__postal_code = postal_code
+
+    def set_address(self, address):
+        self.__address = address

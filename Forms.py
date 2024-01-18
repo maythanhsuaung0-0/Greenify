@@ -1,16 +1,19 @@
-from wtforms import Form, EmailField, validators, PasswordField
+from wtforms import Form, EmailField, validators, PasswordField, StringField, TelField, IntegerField
 
 
 class CreateUserForm(Form):
     email = EmailField('Email', [validators.DataRequired(), validators.Email()])
     password = PasswordField('Password', [validators.DataRequired(), validators.length(min=8, max=30)])
-
+    name = StringField('Name', [validators.DataRequired()])
+    contact_number = TelField('Phone Number', [validators.DataRequired(), validators.length(min=8)])
+    postal_code = StringField('Postal Code', [validators.DataRequired(), validators.length(min=6)])
+    address = StringField('Address', [validators.DataRequired()])
 
 class StaffLoginForm(Form):
     admin_email = EmailField('Email', [validators.DataRequired(), validators.Email()])
     admin_password = PasswordField('Password', [validators.DataRequired(), validators.length(min=8, max=30)])
 
 
-class SellerLoginForm(Form):
-    seller_email = EmailField('Email', [validators.DataRequired(), validators.Email()])
-    seller_password = PasswordField('Password', [validators.DataRequired(), validators.length(min=8, max=30)])
+class LoginForm(Form):
+    email = EmailField('Email', [validators.DataRequired(), validators.Email()])
+    password = PasswordField('Password', [validators.DataRequired(), validators.length(min=8, max=30)])
