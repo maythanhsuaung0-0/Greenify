@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, json, session, send_file,\
+from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, \
     send_from_directory, jsonify
+
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
-from reviewForm import CreateReviewsForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
@@ -50,7 +50,6 @@ def generate_password(length):
     password_list = list(password)
     secrets.SystemRandom().shuffle(password_list)
     return ''.join(password_list)
-
 
 
 # Returning the qty for the cart icon
@@ -121,20 +120,68 @@ def product(seller, product_id):
     seller_product_db.close()
 
     # Creating review
-    create_ratings_form = CreateReviewsForm(request.form)
-    if request.method == 'POST' and create_ratings_form.validate():
-        customer_reviews = {}
-        reviews_db = shelve.open('reviews.db', 'c')
-        try:
-            customer_reviews = reviews_db['Reviews']
-        except:
-            print("Error in retrieving reviews from reviews.db.")
+    # create_ratings_form = CreateReviewsForm(request.form)
+    # if request.method == 'POST' and create_ratings_form.validate():
+    #     ratings_reviews = {}
+    #     reviews_db = shelve.open('reviews.db', 'c')
+    #     try:
+    #         ratings_reviews = reviews_db.get('Reviews', {})
+    #     except:
+    #         print("Error in retrieving reviews from reviews.db")
+    #     finally:
+    #         reviews_db.close()
+    #
+    #     # Creating review dictionary
+    #     review_data = {
+    #         'rating': create_ratings_form.rating.data,
+    #         'review': create_ratings_form.review.data
+    #     }
+    #
+    #     ratings_reviews[product_id] = review_data
+    #
+    #     reviews_db = shelve.open('reviews.db', 'c')
+    #     try:
+    #         reviews_db['Reviews'] = ratings_reviews
+    #     except:
+    #         print("Error in storing review")
+    #     finally:
+    #         reviews_db.close()
 
     # Received AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
 
-        #Check Product Stock
+        # Check Customer Feedback
+        if sent_data["request_type"] == "customer_feedback":
+            reviews_db = shelve.open('reviews.db', 'c')
+            try:
+                # Get the existing list of ratings and reviews or create a new one
+                ratings_reviews_list = reviews_db.get('Reviews', [])
+
+                # If 'Reviews' key is initially a dictionary, convert it to a list
+                if not isinstance(ratings_reviews_list, list):
+                    ratings_reviews_list = [ratings_reviews_list]
+
+                # Get the new feedback
+                new_feedback = {
+                    'rating': sent_data.get('ratings', 0),
+                    'review': sent_data.get('reviews', '')
+                }
+
+                # Add the new feedback to the list
+                ratings_reviews_list.append(new_feedback)
+                # Testing codes
+                print(ratings_reviews_list)
+
+                # Store the updated list back to the database
+                reviews_db['Reviews'] = ratings_reviews_list
+
+            except Exception as e:
+                print("Error in handling customer feedback:", str(e))
+            finally:
+                reviews_db.close()
+
+        # Check Product Stock
         if sent_data["request_type"] == "product_stock":
             seller_products = {}
             seller_product_info = {}
@@ -150,15 +197,15 @@ def product(seller, product_id):
             product_stock = product.get_product_stock()
             seller_product_db.close()
 
-            return json.jsonify({"stock" : product_stock})
+            return json.jsonify({"stock": product_stock})
 
-        #Add to Cart
+        # Add to Cart
         if sent_data["request_type"] == "add_cart":
             product = json.loads(request.data)
             del product["request_type"]
 
-            #Saving Shopping Cart Items
-            #Dummy User (User persistent Log In not Developed)
+            # Saving Shopping Cart Items
+            # Dummy User (User persistent Log In not Developed)
             users_shopping_cart = {}
             user_selected_product = {}
             shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -188,12 +235,12 @@ def product(seller, product_id):
 
             seller_product_db.close()
 
-            #Check if Product has been added before
+            # Check if Product has been added before
             try:
                 saved_product = user_selected_product[product["seller"] + str(product["product_id"])]
                 saved_product["product_qty"] += product["product_qty"]
                 if saved_product["product_qty"] > product_stock:
-                    return json.jsonify({"result" : False, "reason":"added more than stock"})
+                    return json.jsonify({"result": False, "reason": "added more than stock"})
 
                 user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
                 users_shopping_cart["selected_product"] = user_selected_product
@@ -205,9 +252,7 @@ def product(seller, product_id):
                 user_selected_product[product["seller"] + str(product["product_id"])] = product
                 users_shopping_cart["selected_product"] = user_selected_product
 
-
-
-            #Update Cart Qty
+            # Update Cart Qty
             saved_cart_qty = 0
             try:
                 saved_cart_qty = users_shopping_cart["cart_qty"]
@@ -217,14 +262,14 @@ def product(seller, product_id):
             saved_cart_qty = len(user_selected_product)
             users_shopping_cart["cart_qty"] = saved_cart_qty
 
-            #Saving new info into db
+            # Saving new info into db
             shopping_cart_db["hi@gmail.com"] = users_shopping_cart
             shopping_cart_db.close()
 
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"), form=create_ratings_form)
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
+                           saved_cart_qty=cart_qty("hi@gmail.com"))
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
@@ -238,7 +283,6 @@ def shopping_cart(user):
         except:
             print("Error in loading cart qty db")
         return saved_cart_qty
-
 
     users_shopping_cart = {}
     user_selected_product = {}
@@ -271,11 +315,11 @@ def shopping_cart(user):
             # Getting Seller
             seller_name = product_selected["seller"]
 
-            #Making a dictionary of each product (product, product_qty, seller_name)
+            # Making a dictionary of each product (product, product_qty, seller_name)
             product_dict = {
-                "product" : product,
-                "product_qty" : product_qty,
-                "seller_name" : seller_name
+                "product": product,
+                "product_qty": product_qty,
+                "seller_name": seller_name
             }
             display_shopping_cart.append(product_dict)
 
@@ -283,19 +327,17 @@ def shopping_cart(user):
     else:
         return render_template("customer/error_msg.html", msg="Your Shopping Cart is Empty")
 
-
-    #Receive AJAX Request
+    # Receive AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
 
-
-        #Request to Update Cart Qty
+        # Request to Update Cart Qty
         if sent_data["request_type"] == "update_cart_qty":
 
             seller_name = sent_data["seller_name"]
             product_id = sent_data["product_id"]
 
-            #Searching for Seller id
+            # Searching for Seller id
             seller_id = seller_id_search(seller_name)
 
             # Update Product Qty into db
@@ -316,7 +358,7 @@ def shopping_cart(user):
 
             return json.jsonify({'result': True})
 
-        #Request to Delete Item
+        # Request to Delete Item
         elif sent_data["request_type"] == "delete_product":
             seller_name = sent_data["seller_name"]
             seller_name = sent_data["seller_name"]
@@ -325,24 +367,24 @@ def shopping_cart(user):
             # Searching for Seller id
             seller_id = seller_id_search(seller_name)
 
-            #Open Shopping Cart db
+            # Open Shopping Cart db
             shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
             users_shopping_cart = shopping_cart_db[user]
 
-            #Remove Item from Cart
+            # Remove Item from Cart
             user_selected_product = users_shopping_cart["selected_product"]
             del user_selected_product[seller_name + str(product_id)]
 
-            #Update Saved Cart Qty
+            # Update Saved Cart Qty
             saved_cart_qty = users_shopping_cart["cart_qty"]
             saved_cart_qty -= 1
             users_shopping_cart["cart_qty"] = saved_cart_qty
 
-            #Close Shopping Cart db
+            # Close Shopping Cart db
             shopping_cart_db[user] = users_shopping_cart
             shopping_cart_db.close()
 
-            return json.jsonify({"result": True, "cart_qty" : saved_cart_qty})
+            return json.jsonify({"result": True, "cart_qty": saved_cart_qty})
 
         elif sent_data["request_type"] == "checkout":
             payable_price = sent_data['payable_price']
@@ -355,14 +397,15 @@ def shopping_cart(user):
 
             shopping_cart_db.close()
 
-            return json.jsonify({"redirect_link" : url_for("payment", user=user)})
+            return json.jsonify({"redirect_link": url_for("payment", user=user)})
 
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user,
+                           saved_cart_qty=saved_cart_qty)
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty)
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
-    #Receive AJAX Request
+    # Receive AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
 
@@ -371,13 +414,13 @@ def payment(user):
             email = sent_data['email']
             address = sent_data['address']
 
-            #Open User Shopping Cart
+            # Open User Shopping Cart
             user_shopping_cart_db = shelve.open('user_shopping_cart.db')
             users_shopping_cart = user_shopping_cart_db[email]
             user_selected_product = users_shopping_cart["selected_product"]
             amt_paid = users_shopping_cart["payable"]
 
-            #Update Qty in Seller product db
+            # Update Qty in Seller product db
             seller_product_db = shelve.open('seller-product.db')
 
             for itemName in user_selected_product:
@@ -386,14 +429,14 @@ def payment(user):
                 product_id = item["product_id"]
                 bought_qty = item["product_qty"]
 
-                #Retrieving Qty
+                # Retrieving Qty
                 seller_product_info = seller_product_db[str(seller_id)]
                 seller_products = seller_product_info['products']
                 product = seller_products[product_id]
                 product_qty = product.get_product_stock()
                 product_qty -= bought_qty
 
-                #Save Qty
+                # Save Qty
                 product.set_product_stock(product_qty)
                 seller_products[product_id] = product
                 seller_product_info['products'] = seller_products
@@ -401,12 +444,12 @@ def payment(user):
 
             seller_product_db.close()
 
-            #Create Order History
+            # Create Order History
             order_history = {}
             user_order_history = {}
             order_history_db = shelve.open('order_history.db')
 
-            #Retrieve Order History
+            # Retrieve Order History
             try:
                 user_order_history = order_history_db[email]
             except:
@@ -415,7 +458,7 @@ def payment(user):
             order_history_id = uuid.uuid4()
             print(order_history_id)
 
-            #Saving Datas
+            # Saving Datas
             order_history['items'] = user_selected_product
             order_history['shipping_info'] = {'name': name, 'address': address}
             order_history['amt_paid'] = amt_paid
@@ -424,14 +467,14 @@ def payment(user):
             order_history_db[email] = user_order_history
             order_history_db.close()
 
-            #Deleting Items from User Shopping Cart
+            # Deleting Items from User Shopping Cart
             del user_shopping_cart_db[email]
             user_shopping_cart_db.close()
 
             return json.jsonify({'result': True})
 
-
     return render_template("customer/payment.html")
+
 
 @app.route('/createUser', methods=['GET', 'POST'])
 def create_user():
@@ -975,7 +1018,7 @@ def delete_seller(seller_id):
     return "Your account has successfully been deleted."
 
 
-#game1
+# game1
 @app.route('/submit_score', methods=['POST'])
 def submit_score():
     data = request.get_json()
@@ -996,18 +1039,20 @@ def view_scores():
         scores = dict(db)
     return jsonify(scores)
 
+
 @app.route('/get_scores')
 def get_scores():
     with shelve.open('game_scores.db') as db:
         scores = dict(db)
     return jsonify(scores)
-    
+
 
 @app.route('/get_score/<player_name>')
 def get_score(player_name):
     with shelve.open('game_scores.db') as db:
         score = db.get(player_name, "Player not found")
     return jsonify({player_name: score})
+
 
 @app.route('/update_score', methods=['POST'])
 def update_score():
@@ -1017,6 +1062,7 @@ def update_score():
     with shelve.open('game_scores.db', writeback=True) as db:
         db[player_name] = new_score
     return jsonify({'message': 'Score updated successfully!'})
+
 
 @app.route('/delete_score', methods=['POST'])
 def delete_score():
@@ -1032,6 +1078,7 @@ def delete_score():
 
     return jsonify({'message': message})
 
+
 @app.route('/delete_score_page')
 def delete_score_page():
     return render_template('/staff/game1_delete_player.html')
@@ -1041,6 +1088,7 @@ def delete_score_page():
 def dummy_index():
     message = 'To test the game1 route, append /game1 at the end of the URL string'
     return message
+
 
 @app.route('/game1')
 def game1():

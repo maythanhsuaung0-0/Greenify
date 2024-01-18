@@ -73,21 +73,64 @@ function addToCart(product_id, seller_id, seller) {
         })
 }
 
-//star rating
-document.querySelector('.rating-wrapper').addEventListener('click', updateStarRating);
+ function updateStarRating(clickedRating) {
+        const stars = document.querySelectorAll('.rating-wrapper img');
 
-function updateStarRating(evt) {
-  const stars = document.querySelectorAll('.rating-wrapper img');
+        // Remove 'rating-checked' class from all stars
+        stars.forEach(star => star.classList.remove('rating-checked'));
 
-  // Remove 'rating-checked' class from all stars
-  stars.forEach(star => star.classList.remove('rating-checked'));
+        // Add 'rating-checked' class to clicked star and previous stars
+        for (let i = 0; i < clickedRating; i++) {
+            stars[i].classList.add('rating-checked');
+        }
 
-  // Add 'rating-checked' class to clicked star and previous stars
-  const clickedStarIndex = parseInt(evt.target.id) - 1;
-  for (let i = 0; i <= clickedStarIndex; i++) {
-    stars[i].classList.add('rating-checked');
-  }
+        // Update the hidden input field with the selected rating
+        document.getElementById('rating').value = clickedRating;
+    }
 
-  // Update the hidden input field with the selected rating
-  document.querySelector('#rating').value = evt.target.id;
-}
+    function clearStarRating() {
+        const stars = document.querySelectorAll('.rating-wrapper img');
+
+        // Remove 'rating-checked' class from all stars
+        stars.forEach(star => star.classList.remove('rating-checked'));
+
+        // Clear the hidden input field
+        document.getElementById('rating').value = '';
+    }
+
+    // Example: Handle form submission with Ajax
+    function customer_feedback() {
+        var rating = $('#rating').val();
+        var review = $('#review').val();
+
+        // Check if both fields are filled
+        if (rating.trim() === '' || review.trim() === '') {
+            alert("Please fill in both rating and review before submitting.");
+            return;
+        }
+
+
+    // Testing codes
+    console.log('Selected Rating:', rating);
+    console.log('Review:', review);
+
+        // You can proceed with your Ajax request here
+        $.ajax({
+            url: '',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                "request_type": "customer_feedback",
+                "ratings": parseInt(rating),
+                "reviews": review,
+            }),
+            success: function (response) {
+                console.log("Feedback submitted successfully");
+                alert("Your feedback has been submitted successfully");
+            },
+            error: function (error) {
+                console.error("Error submitting feedback:", error);
+                alert("An error occurred");
+            },
+        });
+    }
