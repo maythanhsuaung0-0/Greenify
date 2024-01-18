@@ -586,7 +586,7 @@ def update_user(email):
 
         user = users_dict.get(email)
 
-        if update_user_form.email.data not in users_dict:
+        if user:
             user.set_email(update_user_form.email.data)
             user.set_password(update_user_form.password.data)
             user.set_name(update_user_form.name.data)
@@ -608,12 +608,13 @@ def update_user(email):
         db.close()
 
         user = users_dict.get(email)
-        update_user_form.email.data = user.get_email()
-        update_user_form.password.data = user.get_password()
-        update_user_form.name.data = user.get_name()
-        update_user_form.contact_number.data = user.get_contact_number()
-        update_user_form.postal_code.data = user.get_postal_code()
-        update_user_form.address.data = user.get_address()
+        if user:
+            update_user_form.email.data = user.get_email()
+            update_user_form.password.data = user.get_password()
+            update_user_form.name.data = user.get_name()
+            update_user_form.contact_number.data = user.get_contact_number()
+            update_user_form.postal_code.data = user.get_postal_code()
+            update_user_form.address.data = user.get_address()
 
     if session.get('logged_in'):
         return render_template('customer/updateUser.html', form=update_user_form, email=update_user_form.email.data,
