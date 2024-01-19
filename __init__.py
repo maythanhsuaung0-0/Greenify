@@ -26,6 +26,15 @@ app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
+# New
+UPLOAD_IMAGE_FOLDER = 'static/product_image'
+app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
+
+
+@app.route('/uploads/<filename>')
+def uploaded_image(filename):
+    return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+
 
 def delete_folder(item):
     filename = item.get_doc()
@@ -50,7 +59,6 @@ def generate_password(length):
     password_list = list(password)
     secrets.SystemRandom().shuffle(password_list)
     return ''.join(password_list)
-
 
 
 # Returning the qty for the cart icon
@@ -402,7 +410,9 @@ def shopping_cart(user):
     return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user,
                            saved_cart_qty=saved_cart_qty)
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty)
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user,
+                           saved_cart_qty=saved_cart_qty)
+
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
@@ -421,7 +431,7 @@ def payment(user):
             user_selected_product = users_shopping_cart["selected_product"]
             amt_paid = users_shopping_cart["payable"]
 
-            #Accessing Info of each individual product bought
+            # Accessing Info of each individual product bought
             order_history_db = shelve.open('order_history.db')
 
             for itemName in user_selected_product:
@@ -432,21 +442,21 @@ def payment(user):
                 product_id = item["product_id"]
                 bought_qty = item["product_qty"]
 
-                #Retrieving Qty
+                # Retrieving Qty
                 seller_product_info = seller_product_db[str(seller_id)]
                 seller_products = seller_product_info['products']
                 product = seller_products[product_id]
                 product_qty = product.get_product_stock()
                 product_qty -= bought_qty
 
-                #Save Qty
+                # Save Qty
                 product.set_product_stock(product_qty)
                 seller_products[product_id] = product
                 seller_product_info['products'] = seller_products
                 seller_product_db[str(seller_id)] = seller_product_info
                 seller_product_db.close()
 
-                #Creating a Seller Order
+                # Creating a Seller Order
                 seller_orders = {}
                 seller_order_db = shelve.open('seller_order.db')
                 try:
@@ -458,17 +468,16 @@ def payment(user):
                     order = SellerOrder(name, email, address)
                     order.set_order_products(product_id, bought_qty)
 
-
                 seller_orders[email] = order
                 seller_order_db[str(seller_id)] = seller_orders
                 seller_order_db.close()
 
-            #Create Order History
+            # Create Order History
             order_history = {}
             user_order_history = {}
             order_history_db = shelve.open('order_history.db')
 
-            #Retrieve Order History
+            # Retrieve Order History
             try:
                 user_order_history = order_history_db[email]
             except:
@@ -477,7 +486,7 @@ def payment(user):
             order_history_id = uuid.uuid4()
             print(order_history_id)
 
-            #Saving Datas
+            # Saving Datas
             order_history['items'] = user_selected_product
             order_history['shipping_info'] = {'name': name, 'address': address}
             order_history['amt_paid'] = amt_paid
@@ -486,14 +495,14 @@ def payment(user):
             order_history_db[email] = user_order_history
             order_history_db.close()
 
-            #Deleting Items from User Shopping Cart
+            # Deleting Items from User Shopping Cart
             del user_shopping_cart_db[email]
             user_shopping_cart_db.close()
 
             return json.jsonify({'result': True, 'redirect_link': url_for('success_payment')})
 
-
     return render_template("customer/payment.html")
+
 
 @app.route('/success')
 def success_payment():
@@ -517,7 +526,8 @@ def create_user():
             error = 'An account has already been created with this email. Please Login.'
         else:
             user = User.User(create_user_form.email.data, create_user_form.password.data, create_user_form.name.data,
-                             create_user_form.contact_number.data, create_user_form.postal_code.data, create_user_form.address.data)
+                             create_user_form.contact_number.data, create_user_form.postal_code.data,
+                             create_user_form.address.data)
             users_dict[user.get_email()] = user
             db['Users'] = users_dict
             return redirect(url_for('login'))
@@ -712,7 +722,6 @@ def create_product(seller_id):
             seller_product_id = seller_product_info["id"]
         except KeyError:
             seller_product_id = 1
-        #
 
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
@@ -721,6 +730,13 @@ def create_product(seller_id):
                                                      create_product_form.description.data)
 
         # New
+        # Handle file upload
+        if 'image' in request.files:
+            image = request.files['image']
+            if image.filename != '':
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(image.filename)))
+                create_product.set_image(secure_filename(image.filename))
+
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
         seller_product_id += 1
@@ -860,7 +876,8 @@ def register():  # create
                 last_id = 0
         db['Id'] = last_id
 
-        appForm = AppFormFormat(last_id,registration_form.name.data, registration_form.business_name.data, registration_form.seller_email.data,
+        appForm = AppFormFormat(last_id, registration_form.name.data, registration_form.business_name.data,
+                                registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
@@ -978,13 +995,13 @@ def retrieveUpdateForms():  # for approving updates
 
 @app.route('/staff/retrieveSellers', methods=['POST', 'GET'])
 def retrieveSellers():  # read
-    sellers_list = retrieve_db('approved_sellers.db','Approved_sellers')
+    sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
     print("sellers", sellers_list)
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for removing
         if data_to_modify['request_type'] == 'delete':
-            print(data_to_modify['id'],"deleted")
+            print(data_to_modify['id'], "deleted")
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -996,8 +1013,6 @@ def dashboard():
     sellers = retrieve_db('approved_sellers.db', 'Approved_sellers')
     users = retrieve_db('user.db', 'Users')
     return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
-
-
 
 
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
@@ -1052,7 +1067,7 @@ def delete_seller(seller_id):
     return "Your account has successfully been deleted."
 
 
-#game1
+# game1
 @app.route('/submit_score', methods=['POST'])
 def submit_score():
     data = request.get_json()
@@ -1073,18 +1088,20 @@ def view_scores():
         scores = dict(db)
     return jsonify(scores)
 
+
 @app.route('/get_scores')
 def get_scores():
     with shelve.open('game_scores.db') as db:
         scores = dict(db)
     return jsonify(scores)
-    
+
 
 @app.route('/get_score/<player_name>')
 def get_score(player_name):
     with shelve.open('game_scores.db') as db:
         score = db.get(player_name, "Player not found")
     return jsonify({player_name: score})
+
 
 @app.route('/update_score', methods=['POST'])
 def update_score():
@@ -1094,6 +1111,7 @@ def update_score():
     with shelve.open('game_scores.db', writeback=True) as db:
         db[player_name] = new_score
     return jsonify({'message': 'Score updated successfully!'})
+
 
 @app.route('/delete_score', methods=['POST'])
 def delete_score():
@@ -1109,6 +1127,7 @@ def delete_score():
 
     return jsonify({'message': message})
 
+
 @app.route('/delete_score_page')
 def delete_score_page():
     return render_template('/staff/game1_delete_player.html')
@@ -1119,13 +1138,15 @@ def dummy_index():
     message = 'To test the game1 route, append /game1 at the end of the URL string'
     return message
 
+
 @app.route('/game1')
 def game1():
-    user_id = session.get('user_id', 'Unknown Player') 
+    user_id = session.get('user_id', 'Unknown Player')
     if session.get('logged_in'):
-        return render_template('/games/game1.html', user_id=user_id)  
+        return render_template('/games/game1.html', user_id=user_id)
     else:
         return redirect(url_for('login'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

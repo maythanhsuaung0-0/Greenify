@@ -1,4 +1,5 @@
 from wtforms import Form, StringField, FileField, TextAreaField, IntegerField, DecimalField, validators
+
 from set_image import create_image_set
 
 
