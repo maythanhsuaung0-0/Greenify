@@ -126,34 +126,6 @@ def product(seller, product_id):
     product = seller_products[product_id]
     seller_product_db.close()
 
-    # Creating review
-    # create_ratings_form = CreateReviewsForm(request.form)
-    # if request.method == 'POST' and create_ratings_form.validate():
-    #     ratings_reviews = {}
-    #     reviews_db = shelve.open('reviews.db', 'c')
-    #     try:
-    #         ratings_reviews = reviews_db.get('Reviews', {})
-    #     except:
-    #         print("Error in retrieving reviews from reviews.db")
-    #     finally:
-    #         reviews_db.close()
-    #
-    #     # Creating review dictionary
-    #     review_data = {
-    #         'rating': create_ratings_form.rating.data,
-    #         'review': create_ratings_form.review.data
-    #     }
-    #
-    #     ratings_reviews[product_id] = review_data
-    #
-    #     reviews_db = shelve.open('reviews.db', 'c')
-    #     try:
-    #         reviews_db['Reviews'] = ratings_reviews
-    #     except:
-    #         print("Error in storing review")
-    #     finally:
-    #         reviews_db.close()
-
     # Received AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
@@ -734,8 +706,16 @@ def create_product(seller_id):
         if 'image' in request.files:
             image = request.files['image']
             if image.filename != '':
-                image.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(image.filename)))
-                create_product.set_image(secure_filename(image.filename))
+                # Save the uploaded image
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+                image.save(image_path)
+
+                # Call the create_image_set function
+                create_image_set(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+
+                # Set the image field in your SellerProduct instance
+                create_product.set_image(filename)
 
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
