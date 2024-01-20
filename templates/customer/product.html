@@ -87,25 +87,29 @@
   </div>
 
 
-  <div class="item product-review">
-    <h3>Product Review</h3>
-    <div class="form-group mb-4">
-      <div class="rating-wrapper">
+<div class="item product-review">
+  <h3>Product Review</h3>
+  <div class="form-group mb-4">
+    <div class="rating-wrapper">
         <p>My Rating:</p>
-        <img id="1" src="{{url_for('static', filename='images/star.png')}}" width="20" />
-        <img id="2" src="{{url_for('static', filename='images/star.png')}}" width="20" />
-        <img id="3" src="{{url_for('static', filename='images/star.png')}}" width="20" />
-        <img id="4" src="{{url_for('static', filename='images/star.png')}}" width="20" />
-        <img id="5" src="{{url_for('static', filename='images/star.png')}}" width="20" />
-        <button>Clear</button>
-      </div>
-      <input type="hidden" value="" />
+        <img id="1" src="{{url_for('static', filename='images/star.png')}}" width="20" onclick="updateStarRating(1)">
+        <img id="2" src="{{url_for('static', filename='images/star.png')}}" width="20" onclick="updateStarRating(2)">
+        <img id="3" src="{{url_for('static', filename='images/star.png')}}" width="20" onclick="updateStarRating(3)">
+        <img id="4" src="{{url_for('static', filename='images/star.png')}}" width="20" onclick="updateStarRating(4)">
+        <img id="5" src="{{url_for('static', filename='images/star.png')}}" width="20" onclick="updateStarRating(5)">
+        <button onclick="clearStarRating()">Clear</button>
     </div>
-    <div class="form-group mb-4">
-      {# render_field(form.review, class="form-control") #}
-    </div>
+    <input type="hidden" id="rating" name="rating" value="">
   </div>
+  <div class="form-group">
+        <label for="review">Write your review:</label>
+        <textarea name="review" id="review" rows="5" class="form-control" placeholder="Enter your review..." required></textarea>
+    </div>
+    <div class="pt-3">
+        <button type="button" class="btn btn-secondary" id="customer_feedback" onclick="customer_feedback()">Submit</button>
+    </div>
 </div>
+
 
 
 {% endblock %} {% block End_JS_CSS %}
