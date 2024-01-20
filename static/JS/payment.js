@@ -29,14 +29,15 @@ function payment() {
   var date = $('#card-exp-date').val();
 
 
-  if (cvv.length < 3) {
+  if (cvv.length < 3 && cvv.length != 0) {
     $('#invalid-cvv').css('display', 'block');
   } else {
     $('#invalid-cvv').css('display', 'none');
   }
+
   if (date.match(/[\d]{2}\-[\d]{4}/)) {
     $('#invalid-exp-date').css('display', 'none');
-  } else {
+  } else if (date.length != 0) {
     $('#invalid-exp-date').css('display', 'block');
   }
 
@@ -64,8 +65,8 @@ function payment() {
       }
     })
   }
-  else {
-    $('#invalid-card').css('display', 'block')
+  else if (credit_card_no.length != 0){
+    $('#invalid-card').css('display', 'block');
   }
 
 }

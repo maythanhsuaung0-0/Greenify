@@ -117,6 +117,7 @@ def product(seller, product_id):
     # Search for Seller Id
     seller_id = seller_id_search(seller)
 
+
     if seller_id == False:
         print("Seller_id not found")
         return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
@@ -257,8 +258,8 @@ def product(seller, product_id):
 
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user, form=create_ratings_form)
+    print(user)
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user)
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
@@ -272,7 +273,6 @@ def shopping_cart(user):
         except:
             print("Error in loading cart qty db")
         return saved_cart_qty
-
 
     users_shopping_cart = {}
     user_selected_product = {}
@@ -481,7 +481,12 @@ def payment(user):
 
             return json.jsonify({'result': True, 'redirect_link': url_for('success_payment')})
 
-    return render_template("customer/payment.html", user=user, saved_cart_qty=cart_qty(user))
+    user_db = shelve.open('user.db')
+    user_dict = user_db['Users']
+    user_info = user_dict[user]
+    user_db.close()
+
+    return render_template("customer/payment.html", user=user, user_address=user_info.get_address(), user_name=user_info.get_name(), saved_cart_qty=cart_qty(user))
 
 
 @app.route('/success')
@@ -918,7 +923,7 @@ def retrieveApplicationForms():
 
             passwords = []
 
-            for key, seller in approved_db['Approved_sellers'].items():
+            for key, seller in approved_sellers.items():
                 passwords.append(seller.get_password())
 
             print(passwords)
