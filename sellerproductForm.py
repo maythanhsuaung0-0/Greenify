@@ -1,5 +1,4 @@
 from wtforms import Form, StringField, FileField, TextAreaField, IntegerField, DecimalField, validators
-
 from set_image import create_image_set
 
 
@@ -9,4 +8,3 @@ class CreateProductForm(Form):
     product_stock = IntegerField('Stock', [validators.NumberRange(min=100), validators.DataRequired()])
     image = FileField('Product Image', [validators.DataRequired(), validators.regexp(r'^[^/\\]*\.(jpg|png)$', message='Only JPG or PNG files are accepted')])
     description = TextAreaField('Product Description', [validators.Optional()])
-

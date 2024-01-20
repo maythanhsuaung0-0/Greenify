@@ -26,14 +26,14 @@ app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
-# New
-UPLOAD_IMAGE_FOLDER = 'static/product_image'
-app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
-
-
-@app.route('/uploads/<filename>')
-def uploaded_image(filename):
-    return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+# # New
+# UPLOAD_IMAGE_FOLDER = 'static/product_image'
+# app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
+#
+#
+# @app.route('/uploads/<filename>')
+# def uploaded_image(filename):
+#     return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
 
 
 def delete_folder(item):
@@ -694,6 +694,7 @@ def create_product(seller_id):
             seller_product_id = seller_product_info["id"]
         except KeyError:
             seller_product_id = 1
+        #
 
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
@@ -702,21 +703,6 @@ def create_product(seller_id):
                                                      create_product_form.description.data)
 
         # New
-        # Handle file upload
-        if 'image' in request.files:
-            image = request.files['image']
-            if image.filename != '':
-                # Save the uploaded image
-                filename = secure_filename(image.filename)
-                image_path = os.path.join(app.config['UPLOAD_IMAGE_FOLDER'], filename)
-                image.save(image_path)
-
-                # Call the create_image_set function
-                create_image_set(app.config['UPLOAD_IMAGE_FOLDER'], filename)
-
-                # Set the image field in your SellerProduct instance
-                create_product.set_image(filename)
-
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
         seller_product_id += 1

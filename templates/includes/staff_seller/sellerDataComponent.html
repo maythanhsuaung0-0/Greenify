@@ -18,12 +18,8 @@
             <div class="col-3 text-center">{{description}}</div>
             <div class="col-1 text-center">{{product_price}}</div>
             <div class="col-1 text-center">{{product_stock}}</div>
-<!--            New -->
-            <div class="col-2 text-center">
-                <img src="{{ url_for('uploaded_image', filename=product.get_image()) }}" alt="Product Image">
-            </div>
 
-            <div class="col-2 text-center">
+            <div class="col-3 text-center">
                 <a href="{{ url_for('update_product', seller_id=seller_id, product_id=product_id) }}">
                     <button class="btn btn-primary btn-sm">Update</button>
                 </a>
@@ -61,4 +57,3 @@
         </div>
     </div>
 {%- endmacro %}
-
