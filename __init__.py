@@ -862,6 +862,7 @@ def register():  # create
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
         appForm.set_date(today)
+        print(appForm.get_date())
         if 'support_document' in request.files:
             support_docs = request.files['support_document']
             if support_docs:

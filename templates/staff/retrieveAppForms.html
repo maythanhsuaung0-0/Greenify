@@ -37,12 +37,13 @@
   <div>
     {{ accordionComponent(
          i.get_application_id(),
-         i.get_name(),i.get_name()|replace("'", "\\'"),
+         i.get_name(),
+      i.get_name()|replace("'", "\\'"),
          i.get_email(),
          i.get_desc(),
          i.get_doc().split('/')[-1] if i.get_doc() and '/' in i.get_doc() else '',
          i.get_doc() if i.get_doc() else '',
-         i.get_date()
+         i.get_date() if i.get_date() else ''
        )
     }}
   </div>

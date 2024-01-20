@@ -8,9 +8,13 @@ class ApplicationFormFormat:
         self.__name = name
         self.__email = email
         self.__password = None
+        self.__profile_image = None
         self.__desc = desc
         self.__doc = None
         self.__date = None
+
+    def set_profile_image(self,img):
+        self.__profile_image = img
 
     def set_seller_name(self,n):
         self.__seller_name = n
@@ -44,6 +48,9 @@ class ApplicationFormFormat:
 
     def get_password(self):
         return self.__password
+
+    def get_profile_image(self):
+        return self.__profile_image
 
     def get_desc(self):        
         return self.__desc
