@@ -4,13 +4,17 @@
 {% block content %}
 {% from "includes/_formHelper.html" import render_field %}
 
+<head>
+<script src="{{url_for('static', filename='JS/changing_tabs.js')}}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/create_user.css') }}">
+</head>
+
 <div class="logo">
 <a href='/'>
   <img align="middle" src="{{ url_for('static', filename='images/favicon.svg') }}" alt="Greenify Trademark">
 </a>
   </div>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='css/create_user.css') }}">
 <div class="main">
 <h1 class="header" align="center">Register for an Account</h1>
 
@@ -19,16 +23,42 @@
   {% endif %}
 
 <form method="POST" action="">
-  <div class="form-group" id="email">
-    {{ render_field(form.email, class="form-control") }}
+<ul class="tabs">
+<li data-tab-target="#account_info" class="active tab">Account Information</li>
+<li data-tab-target="#address_info" class="tab">Address Details</li>
+</ul>
+
+<div class="tab-content">
+  <div id="account_info" data-tab-content class="active">
+      <div class="form-group" id="email">
+        {{ render_field(form.email, class="form-control") }}
+      </div>
+      <div class="form-group" id="password">
+        {{ render_field(form.password, class="form-control") }}
+      </div>
+      <button type="button" class="btn btn-primary next-button" id="Next">Next</button>
   </div>
-  <div class="form-group" id="password">
-    {{ render_field(form.password, class="form-control") }}
+
+  <div id="address_info" data-tab-content class="tab-content">
+      <div class="form-group" id="name">
+        {{ render_field(form.name, class="form-control") }}
+      </div>
+      <div class="form-group" id="contact_number">
+        {{ render_field(form.contact_number, class="form-control") }}
+      </div>
+      <div class="form-group" id="postal_code">
+        {{ render_field(form.postal_code, class="form-control") }}
+      </div>
+      <div class="form-group" id="address">
+        {{ render_field(form.address, class="form-control") }}
+      </div>
+      <input type="submit" value="Sign Up" class="btn btn-primary" id="SignUp"/>
   </div>
-  <input type="submit" value="Sign Up" class="btn btn-primary" id="SignUp"/>
+</div>
+</form>
+
   <br>
   <p class="info">Already have an account? Login <a href="/login" class="login-link">here</a></p>
-</form>
 </div>
 {% endblock %}
 

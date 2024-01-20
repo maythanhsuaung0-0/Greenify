@@ -89,6 +89,9 @@
         {% block body %}{% endblock %}
     </div>
 
-    {% block End_JS_CSS %}{% endblock %}
+    {% block End_JS_CSS %}
+      <script type="text/javascript" src="{{ url_for('static', filename='js/product_base.js') }}"></script>
+    {% endblock %}
+
 </body>
 </html>
