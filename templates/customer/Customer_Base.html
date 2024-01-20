@@ -19,7 +19,7 @@
 <body>
     <nav class="custom-nav navbar navbar-expand-lg bg-body-tertiary border-bottom border-bottom-dark sticky-top">
         <div class="container-fluid px-5">
-            <a class="navbar-brand col-1" href="#">
+            <a class="navbar-brand col-1" href="{{ url_for('home') }}">
                 <!-- <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="Greenify Trademark" class="trademark"> -->
                 <span class="brand">Greenify</span>
             </a>
@@ -58,10 +58,17 @@
             </div>
 
             <!--Shopping Cart-->
-            <a href="cart-page.html" class="btn cart-container col-1 position-relative">
+            {% if user == None %}
+            <a href="{{ url_for('login') }}" class="btn cart-container col-1 position-relative">
                 <i class="bi bi-bag"></i>
                 <span id="cart-item-qty" class="badge rounded-pill text-black">{{ saved_cart_qty }}</span>
             </a>
+            {% else %}
+            <a href="{{ url_for('shopping_cart', user=user) }}" class="btn cart-container col-1 position-relative">
+                <i class="bi bi-bag"></i>
+                <span id="cart-item-qty" class="badge rounded-pill text-black">{{ saved_cart_qty }}</span>
+            </a>
+            {% endif %}
 
             <!--Account-->
             <div class="dropdown col-1">
@@ -78,10 +85,7 @@
         </div>
     </nav>
 
-
-
-
-    <div class="container-fluid content" id="content-body">
+    <div class="container-md content" id="content-body">
         {% block body %}{% endblock %}
     </div>
 

@@ -1,3 +1,20 @@
 textarea {
     resize: none;
 }
+
+.invalid {
+    color: #ff3b62;
+    font-size: 0.8rem;
+}
+
+.invalid-div {
+    display: none;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    display: none;
+}
+
+.hidden-field {
+    display: none;
+}

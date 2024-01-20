@@ -82,16 +82,25 @@ def seller_id_search(seller_name):
 
 @app.route("/")
 def home():
-    return render_template("customer/homepage.html")
+    try:
+        user = session['user_id']
+        return render_template("customer/homepage.html", user=user, saved_cart_qty=cart_qty(user))
+    except:
+        return render_template("customer/homepage.html", user = None)
+
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
 def product(seller, product_id):
+    try:
+        user = session['user_id']
+    except:
+        user = None
     def cart_qty(user):
         saved_cart_qty = 0
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
         try:
-            users_shopping_cart = shopping_cart_db["hi@gmail.com"]
+            users_shopping_cart = shopping_cart_db[user]
             saved_cart_qty = users_shopping_cart["cart_qty"]
         except:
             print("Error in loading cart qty db")
@@ -162,7 +171,7 @@ def product(seller, product_id):
             user_selected_product = {}
             shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
             try:
-                users_shopping_cart = shopping_cart_db["hi@gmail.com"]
+                users_shopping_cart = shopping_cart_db[user]
                 user_selected_product = users_shopping_cart["selected_product"]
             except KeyError:
                 print("KeyError in opening saved cart items")
@@ -197,7 +206,7 @@ def product(seller, product_id):
 
                 user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
                 users_shopping_cart["selected_product"] = user_selected_product
-                shopping_cart_db["hi@gmail.com"] = users_shopping_cart
+                shopping_cart_db[user] = users_shopping_cart
             except:
                 if product["product_qty"] > product_stock:
                     return json.jsonify({"result": False, "reason": "added more than stock"})
@@ -218,13 +227,13 @@ def product(seller, product_id):
             users_shopping_cart["cart_qty"] = saved_cart_qty
 
             #Saving new info into db
-            shopping_cart_db["hi@gmail.com"] = users_shopping_cart
+            shopping_cart_db[user] = users_shopping_cart
             shopping_cart_db.close()
 
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
 
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"), form=create_ratings_form)
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user, form=create_ratings_form)
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
@@ -362,6 +371,7 @@ def shopping_cart(user):
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
+    user = session['user_id']
     #Receive AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
@@ -447,7 +457,7 @@ def payment(user):
             return json.jsonify({'result': True, 'redirect_link': url_for('success_payment')})
 
 
-    return render_template("customer/payment.html")
+    return render_template("customer/payment.html", user=user, saved_cart_qty=cart_qty(user))
 
 @app.route('/success')
 def success_payment():
