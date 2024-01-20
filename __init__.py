@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, \
+from flask import Flask, flash, render_template, request, redirect, url_for, json, session, send_file, \
     send_from_directory, jsonify
 from Forms import CreateUserForm, StaffLoginForm, LoginForm
 import shelve, User, SellerProduct, application, User_login
@@ -34,6 +34,42 @@ app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static
 # @app.route('/uploads/<filename>')
 # def uploaded_image(filename):
 #     return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+
+UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
+app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
+ALLOWED_EXTENSIONS = {'png', 'jpg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+@app.route('/uploadimage')
+def base():
+    return render_template('index.html')
+
+
+@app.route('/uploadimage', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        flash('No file part')
+        return redirect(request.url)
+    file = request.files['file']
+    if file.filename == '':
+        flash('No image selected for uploading')
+        return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename))
+        # print('upload_image filename: ' + filename)
+        flash('Image successfully uploaded and displayed below')
+        return render_template('index.html', filename=filename)
+    else:
+        flash('Allowed image types are - png, jpg, jpeg, gif')
+        return redirect(request.url)
+
+
+@app.route('/display/<filename>')
+def display_image(filename):
+    # print('display_image filename: ' + filename)
+    return redirect(url_for('static', filename='product_image/' + filename), code=301)
 
 
 def delete_folder(item):
