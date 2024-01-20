@@ -1,5 +1,7 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, json, session, send_file, \
     send_from_directory, jsonify
+from flask_wtf.file import FileField, FileRequired, FileAllowed
+from wtforms import SubmitField
 from Forms import CreateUserForm, StaffLoginForm, LoginForm
 import shelve, User, SellerProduct, application, User_login
 from sellerproductForm import CreateProductForm
@@ -12,6 +14,8 @@ import secrets
 import shutil
 from werkzeug.utils import secure_filename
 from datetime import date
+from flask_uploads import UploadSet, IMAGES, configure_uploads
+from flask_wtf import FlaskForm
 from urllib.parse import quote
 # for sending mail
 import string
@@ -25,6 +29,11 @@ logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
+
+
+@app.route('/testingupload', methods=['GET', 'POST'])
+def testing():
+    return render_template('upload_photo.html')
 
 # # New
 # UPLOAD_IMAGE_FOLDER = 'static/product_image'
@@ -1042,7 +1051,7 @@ def update_seller(seller_id):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
-        seller.set_seller_name(update_seller_form.seller_name.data)
+        seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
@@ -1060,7 +1069,7 @@ def update_seller(seller_id):
         approved_db.close()
 
         seller = approved_sellers.get(seller_id)
-        update_seller_form.seller_name.data = seller.get_seller_name()
+        update_seller_form.business_name.data = seller.get_seller_name()
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
