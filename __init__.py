@@ -27,24 +27,6 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
 
-def upload_profile_pic():
-    if 'image' not in request.files:
-        # Handle case where no file is selected
-        return None
-
-    uploaded_file = request.files['image']
-
-    if uploaded_file.filename == '':
-        # Handle case where file input is empty
-        return None
-
-    if uploaded_file:
-        filename = f"static/images/{secure_filename(uploaded_file.filename)}"
-        uploaded_file.save(filename)
-        return filename, None
-
-    return None, 'Upload failed'
-
 # # New
 # UPLOAD_IMAGE_FOLDER = 'static/product_image'
 # app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
@@ -1050,9 +1032,36 @@ def dashboard():
     return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
 
 
+def upload_profile_pic():
+    if 'image' not in request.files:
+        # Handle case where no file is selected
+        return None
+
+    uploaded_file = request.files['image']
+
+    if uploaded_file.filename == '':
+        # Handle case where file input is empty
+        return None
+
+    if uploaded_file:
+        filename = f"static/images/{secure_filename(uploaded_file.filename)}"
+        uploaded_file.save(filename)
+        return filename, None
+
+    return None, 'Upload failed'
+
+
+@app.route('/upload', methods=['GET','POST'])
+def upload():
+    filename = upload_profile_pic()
+    if filename:
+        session['filename'] = filename
+    return render_template('/seller/updateSeller.html',  filename=filename)
+
+
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
 def update_seller(seller_id):
-    filename = upload_profile_pic()
+    filename = session.get('filename', 'placeholder.jpg')
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
         updated_sellers = {}
@@ -1067,7 +1076,7 @@ def update_seller(seller_id):
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
-        seller.set_profile_image()
+        seller.set_profile_image(update_seller_form.profile_pic.data)
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
         db['Updated_sellers'] = updated_sellers
@@ -1086,6 +1095,7 @@ def update_seller(seller_id):
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
+        update_seller_form.profile_pic.data = seller.get_profile_image()
 
         return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename)
 

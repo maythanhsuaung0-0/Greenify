@@ -13,14 +13,16 @@
 {% endif %}
 
 {% if filename %}
-        <img src="" alt="Uploaded Image" id="previewImage" style="height: 150px; width: 150px; border-radius: 50%; object-fit: cover; background: #dfdfd">
+    <img src="{{ url_for('static', filename=filename) }}" alt="Uploaded Image" id="previewImage" style="height: 150px; width: 150px; border-radius: 50%; object-fit: cover; background: #dfdfd">
 {% endif %}
 
 
-<form class="grid-box" method="POST" action="" enctype="multipart/form-data">
-        <div class="form-group" id="fileInput">
-            {{render_field(form.profile_pic, class="form-control mt-1")}}
-            </div>
+<form class="grid-box" method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <input type="file" name="image" accept="image/*" id="fileInput">
+        </div>
+</form>
+<form class="grid-box" method="POST" action="{{ url_for('upload') }}" enctype="multipart/form-data">
         <div class="form-group">
             {{render_field(form.business_name, class="form-control mt-1")}}
           </div>
