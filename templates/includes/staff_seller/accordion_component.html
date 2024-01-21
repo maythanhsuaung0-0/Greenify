@@ -39,8 +39,59 @@
           {% endif %}
        <div class="col-2 text-center">{{date}}</div>
       <div class="col-2 text-center">
-       <button class="btn btn-primary btn-sm" onclick="handleButton('{{id}}','{{escaped_name}}','approve')" >Approve</button>
-          <button class="btn btn-danger btn-sm" onclick="handleButton('{{id}}','{{escaped_name}}','reject')" >Reject</button>
+          <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal-{{id}}">
+              Approve
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="approveModal-{{id}}" tabindex="-1"
+                 role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="approveModalLabel">Approve this seller? </h5>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" aria-label="Close">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to approve <b>{{escaped_name}}</b> ?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="w-full btn btn-primary" data-bs-dismiss="modal" onclick="handleButton('{{id}}','{{escaped_name}}','approve')">Approve</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+             <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal-{{id}}">
+              Reject
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="rejectModal-{{id}}" tabindex="-1"
+                 role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="rejectModalLabel">Reject this seller? </h5>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" aria-label="Close">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    Are you sure you want to reject <b>{{escaped_name}}</b> ?
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                            onclick="handleButton('{{id}}','{{escaped_name}}','reject')" >Reject</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                  </div>
+                </div>
+              </div>
+            </div>
       </div>
       <div class="col-1">
         <a class="btn btn-sm btn-light" data-bs-toggle="collapse" href="#collapse{{id}}" role="button" aria-expanded="false" aria-controls="collapse{{id}}"> <i class="fa-solid fa-caret-down"></i> </a>

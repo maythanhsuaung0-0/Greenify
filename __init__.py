@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, send_from_directory, jsonify
-from Forms import CreateUserForm, StaffLoginForm, LoginForm
-import shelve, User, SellerProduct, application, User_login
+from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
+    send_from_directory
+from Forms import CreateUserForm, StaffLoginForm
+import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
@@ -107,6 +108,7 @@ def generate_password(length):
     return ''.join(password_list)
 
 
+
 # Returning the qty for the cart icon
 def cart_qty(user):
     saved_cart_qty = 0
@@ -205,6 +207,7 @@ def product(seller, product_id):
 
     product = seller_products[product_id]
     seller_product_db.close()
+
 
     # Received AJAX Request
     if request.method == "POST":
@@ -343,6 +346,7 @@ def shopping_cart(user):
             print("Error in loading cart qty db")
         return saved_cart_qty
 
+
     users_shopping_cart = {}
     user_selected_product = {}
     shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -458,9 +462,8 @@ def shopping_cart(user):
 
             return json.jsonify({"redirect_link": url_for("payment", user=user)})
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user,
-                           saved_cart_qty=saved_cart_qty)
 
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty)
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
@@ -781,6 +784,7 @@ def create_product(seller_id):
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
                                                      create_product_form.product_stock.data,
+                                                     create_product_form.image.data,
                                                      create_product_form.description.data)
 
         # New
@@ -918,35 +922,77 @@ def respond():
     return render_template('sellers_application/respondPage.html')
 
 
+@app.route('/errorPage')
+def error():
+    return render_template('staff/errorPage.html')
+
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():  # create
     global last_id
     registration_form = ApplicationForm(request.form)
-    if request.method == 'POST' and registration_form.validate():
-        application_form = {}
-        db = shelve.open('application.db', 'c')
-        try:
-            application_form = db['Application']
-        except:
-            print("Error in retrieving application from application.db")
+    if request.method == 'POST':
+        if registration_form.validate():
+            application_form = {}
+            db = shelve.open('application.db', 'c')
+            try:
+                application_form = db['Application']
+            except:
+                print("Error in retrieving application from application.db")
 
-        # store id
-        try:
-            last_id = db['Id']
-        except KeyError:
+            # store id
+            try:
+                last_id = db['Id']
+            except KeyError:
+                if application_form.keys():
+                    last_id = max(application_form.keys())
+                else:
+                    last_id = 0
+            db['Id'] = last_id
+
+            appForm = AppFormFormat(last_id, registration_form.seller_name.data, registration_form.business_name.data,
+                                    registration_form.seller_email.data,
+                                    registration_form.business_desc.data)
+            application_form[appForm.get_application_id()] = appForm
+            today = date.today()
+            appForm.set_date(today)
+            print(appForm.get_date())
+            if 'support_document' in request.files:
+                support_docs = request.files['support_document']
+                if support_docs:
+                    filename = support_docs.filename
+                    if filename.endswith('.pdf'):
+                        print('sure pdf', filename)
+                        pdf_id = secrets.token_hex(16)
+                        print('filename', filename)
+                        os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id))
+                        support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id, filename))
+                        os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id)
+                        message = f"{pdf_id}/{filename.split('.')[0]}.pdf"
+                        print('message', message)
+                        appForm.set_doc(message)
+                    else:
+                        print('go back')
+                        return redirect(url_for('error'))
+
+            db['Application'] = application_form
+            # testing
+            application_form = db['Application']
+            appForm = application_form[appForm.get_application_id()]
+            print(appForm.get_name(), appForm.get_email(), "was stored in application.db successfully with user_id ==",
+                  appForm.get_application_id())
+            print("last id--", last_id)
             if application_form.keys():
                 last_id = max(application_form.keys())
             else:
                 last_id = 0
         db['Id'] = last_id
 
-        appForm = AppFormFormat(last_id, registration_form.seller_name.data, registration_form.business_name.data,
-                                registration_form.seller_email.data,
+        appForm = AppFormFormat(last_id, registration_form.business_name.data, registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
         appForm.set_date(today)
-        print(appForm.get_date())
         if 'support_document' in request.files:
             support_docs = request.files['support_document']
             if support_docs:
@@ -964,7 +1010,7 @@ def register():  # create
         # testing
         application_form = db['Application']
         appForm = application_form[appForm.get_application_id()]
-        print(appForm.get_name(), appForm.get_email(), "was stored in application.db successfully with user_id ==",
+        print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
               appForm.get_application_id())
         print("last id--", last_id)
         if application_form.keys():
@@ -974,31 +1020,30 @@ def register():  # create
         return redirect(url_for('respond'))
     return render_template('sellers_application/registration.html', form=registration_form)
 
-
 @app.route('/view/<path:pdf>')
 def view_pdf(pdf):
     pdf_path = os.path.join(app.config["UPLOAD_DIRECTORY"], pdf)
     return send_from_directory(os.path.dirname(pdf_path), os.path.basename(pdf_path), as_attachment=False)
 
 
-@app.route('/staff/retrieveApplicationForms', methods=['POST', 'GET'])  # read
+@app.route('/staff/retrieveApplicationForms',  methods = ['POST','GET'])  # read
 def retrieveApplicationForms():
-    app_list = retrieve_db('application.db', 'Application')
+    app_list = retrieve_db('application.db','Application')
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for rejecting the form
         if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'], "rejected")
+            print(data_to_modify['id'],"rejected")
             rejected = extracting('application.db', 'Application', data_to_modify['id'])
             if rejected.get_doc():
                 delete_folder(rejected)
-            send_mail(rejected.get_email(), False, rejected.get_seller_name(), '')
+            send_mail(rejected.get_email(), False, rejected.get_name(), '')
         if data_to_modify['request_type'] == 'approve':
-            print(data_to_modify['id'], "approved from AJAX")
+            print(data_to_modify['id'], "approved")
             # take the approved application
             approved = extracting('application.db', 'Application', data_to_modify['id'])
             print("This user is approved", approved.get_application_id())
-            # open the approved_sellers
+            # store in the approved_sellers
             approved_sellers = {}
             approved_db = shelve.open('approved_sellers.db', 'c')
             try:
@@ -1007,35 +1052,46 @@ def retrieveApplicationForms():
                 print("Error in retrieving sellers from application.db")
 
             passwords = []
-
-            for key, seller in approved_sellers.items():
-                passwords.append(seller.get_password())
-
-            print(passwords)
             while True:
                 password = generate_password(14)
                 if password not in passwords:
                     break
-
+            send_mail(approved.get_email(), True, approved.get_name(), password)
             approved.set_password(password)
-
             # storing approved seller
             approved_sellers[approved.get_application_id()] = approved
             approved_db['Approved_sellers'] = approved_sellers
+            for key, seller in approved_db['Approved_sellers'].items():
+                passwords.append(seller.get_password())
             approved_db.close()
+
             send_mail(approved.get_email(), True, approved.get_seller_name(), password)
+        if data_to_modify['request_type'] == 'filter':
+
+            if data_to_modify['filter_by'] == 'certificate':
+                certify = []
+                print('filtered')
+                for i in app_list:
+                    print(i)
+                    if i.get_doc():
+                        print('have certificate')
+                        certify.append(i)
+                        print('certified sellers', i.get_name())
+                print('certified',certify)
+                return render_template('staff/retrieveAppForms.html', count=len(certify), app_list=certify)
+
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
-@app.route('/staff/retrieveUpdateForms', methods=['POST', 'GET'])
+@app.route('/staff/retrieveUpdateForms', methods = ['POST','GET'])
 def retrieveUpdateForms():  # for approving updates
-    waiting_list = retrieve_db('updated_sellers.db', 'Updated_sellers')
+    waiting_list = retrieve_db('updated_sellers.db','Updated_sellers')
     print('waiting list', waiting_list)
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for rejecting the update form
         if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'], "rejected")
+            print(data_to_modify['id'],"rejected")
             deleted_item = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -1066,7 +1122,7 @@ def retrieveSellers():  # read
         data_to_modify = json.loads(request.data)
         # for removing
         if data_to_modify['request_type'] == 'delete':
-            print(data_to_modify['id'], "deleted")
+            print(data_to_modify['id'],"deleted")
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
