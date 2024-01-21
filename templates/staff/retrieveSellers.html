@@ -11,7 +11,30 @@ title %}Application Forms{% endblock %} {% block content %}
   <div class="d-flex justify-content-between align-items-center">
     <div class="">Our beloved clients : <b>{{count}}</b></div>
     <div class="">
-      <button class="btn btn-light">Filter by Date</button>
+     <div class="dropdown show">
+              <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Filter by
+              </a>
+
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+<!--                <div class="dropdown-item" >-->
+<!--                    <button class="outline-none no-background">Date</button>-->
+<!--                </div>-->
+<!--               <div class="dropdown-item" >-->
+<!--                    <button class="outline-none no-background">Name(descendant)</button>-->
+<!--                </div>-->
+<!--                  <div class="dropdown-item" >-->
+<!--                    <button class="outline-none no-background">Name(ascendant)</button>-->
+<!--                </div>-->
+                  <div class="dropdown-item" >
+                    <button class="outline-none no-background">Certificate</button>
+                </div>
+                  <div class="dropdown-item" >
+                    <button class="outline-none no-background">No Certificate</button>
+                </div>
+              </div>
+            </div>
+        </div>
     </div>
   </div>
   <div class="d-flex flex-column gap-2">
@@ -27,10 +50,22 @@ title %}Application Forms{% endblock %} {% block content %}
       </div>
       {% for i in sellers %}
       <div>
+<<<<<<< Updated upstream
         {{dataComponent( i.get_application_id(), i.get_name(),i.get_name()|replace("'", "\\'"), i.get_email(),
         i.get_desc(), i.get_doc().split('/')[1] if i.get_doc() and '/' in
         i.get_doc() else '', i.get_doc() if i.get_doc() else '', i.get_date() if
         i.get_date() else '' )}}
+=======
+        {{dataComponent( i.get_application_id(),
+        i.get_seller_name(),
+        i.get_name(),
+        i.get_name()|replace("'", "\\'"),
+        i.get_email(),
+        i.get_desc(),
+        i.get_doc().split('/')[1] if i.get_doc() and '/' in i.get_doc() else '',
+        i.get_doc() if i.get_doc() else '',
+        i.get_date() if i.get_date() else '' )}}
+>>>>>>> Stashed changes
       </div>
       {% endfor %}
     </div>

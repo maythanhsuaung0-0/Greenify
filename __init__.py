@@ -1,7 +1,14 @@
+<<<<<<< Updated upstream
 from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
     send_from_directory
 from Forms import CreateUserForm, StaffLoginForm
 import shelve, User, SellerProduct, application
+=======
+from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, send_from_directory, \
+    jsonify, flash
+from Forms import CreateUserForm, StaffLoginForm, LoginForm
+import shelve, User, SellerProduct, application, User_login
+>>>>>>> Stashed changes
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
@@ -24,6 +31,64 @@ app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
+<<<<<<< Updated upstream
+=======
+# # New
+# UPLOAD_IMAGE_FOLDER = 'static/product_image'
+# app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
+#
+#
+# @app.route('/uploads/<filename>')
+# def uploaded_image(filename):
+#     return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+
+UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/uploads/product_image'
+app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
+ALLOWED_EXTENSIONS = {'png', 'jpg'}
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+# testing image upload
+# @app.route('/uploadimage')
+# def base():
+#     return render_template('index.html')
+#
+#
+# @app.route('/uploadimage', methods=['POST'])
+# def upload_image():
+#     if 'file' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash('No image selected for uploading')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file.save(os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename))
+#         # print('upload_image filename: ' + filename)
+#         flash('Image successfully uploaded and displayed below')
+#         return render_template('index.html', filename=filename)
+#     else:
+#         flash('Allowed image types are - png, jpg, jpeg, gif')
+#         return redirect(request.url)
+
+
+# @app.route('/display/<filename>')
+# def display_image(filename):
+#     # print('display_image filename: ' + filename)
+#     return redirect(url_for('static', filename='product_image/' + filename), code=301)
+
+@app.route('/display_image/<filename>')
+def display_image(filename):
+    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+    print(f"Displaying image from: {image_path}")
+    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
+
+>>>>>>> Stashed changes
 
 def delete_folder(item):
     filename = item.get_doc()
@@ -79,11 +144,27 @@ def seller_id_search(seller_name):
 
 @app.route("/")
 def home():
+<<<<<<< Updated upstream
     return render_template("customer/homepage.html")
+=======
+    try:
+        user = session['user_id']
+        return render_template("customer/homepage.html", user=user, saved_cart_qty=cart_qty(user))
+    except:
+        return render_template("customer/homepage.html", user=None)
+>>>>>>> Stashed changes
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
 def product(seller, product_id):
+<<<<<<< Updated upstream
+=======
+    try:
+        user = session['user_id']
+    except:
+        user = None
+
+>>>>>>> Stashed changes
     def cart_qty(user):
         saved_cart_qty = 0
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -96,9 +177,12 @@ def product(seller, product_id):
         return saved_cart_qty
 
 
+<<<<<<< Updated upstream
     #Search for Seller Id
     seller_id = seller_id_search(seller)
 
+=======
+>>>>>>> Stashed changes
     if seller_id == False:
         print("Seller_id not found")
         return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
@@ -205,14 +289,25 @@ def product(seller, product_id):
             saved_cart_qty = len(user_selected_product)
             users_shopping_cart["cart_qty"] = saved_cart_qty
 
+<<<<<<< Updated upstream
             #Saving new info into db
             shopping_cart_db["hi@gmail.com"] = users_shopping_cart
+=======
+            # Saving new info into db
+            shopping_cart_db[user] = users_shopping_cart
+>>>>>>> Stashed changes
             shopping_cart_db.close()
 
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
+<<<<<<< Updated upstream
 
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty("hi@gmail.com"))
+=======
+    print(user)
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
+                           saved_cart_qty=cart_qty(user), user=user)
+>>>>>>> Stashed changes
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
@@ -259,11 +354,11 @@ def shopping_cart(user):
             # Getting Seller
             seller_name = product_selected["seller"]
 
-            #Making a dictionary of each product (product, product_qty, seller_name)
+            # Making a dictionary of each product (product, product_qty, seller_name)
             product_dict = {
-                "product" : product,
-                "product_qty" : product_qty,
-                "seller_name" : seller_name
+                "product": product,
+                "product_qty": product_qty,
+                "seller_name": seller_name
             }
             display_shopping_cart.append(product_dict)
 
@@ -349,7 +444,12 @@ def shopping_cart(user):
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
+<<<<<<< Updated upstream
     #Receive AJAX Request
+=======
+    user = session['user_id']
+    # Receive AJAX Request
+>>>>>>> Stashed changes
     if request.method == "POST":
         print('received')
         sent_data = json.loads(request.data)
@@ -420,9 +520,26 @@ def payment(user):
             del user_shopping_cart_db[email]
             user_shopping_cart_db.close()
 
+<<<<<<< Updated upstream
             print('complete')
             return json.jsonify({'result': True})
     return render_template("customer/payment.html")
+=======
+            return json.jsonify({'result': True, 'redirect_link': url_for('success_payment')})
+
+    user_db = shelve.open('user.db')
+    user_dict = user_db['Users']
+    user_info = user_dict[user]
+    user_db.close()
+
+    return render_template("customer/payment.html", user=user, user_address=user_info.get_address(),
+                           user_name=user_info.get_name(), saved_cart_qty=cart_qty(user))
+
+
+@app.route('/success')
+def success_payment():
+    return render_template('customer/success_payment.html')
+>>>>>>> Stashed changes
 
 
 @app.route('/createUser', methods=['GET', 'POST'])
@@ -715,24 +832,69 @@ def respond():
     return render_template('sellers_application/respondPage.html')
 
 
+@app.route('/errorPage')
+def error():
+    return render_template('staff/errorPage.html')
+
+
 @app.route("/register", methods=['GET', 'POST'])
 def register():  # create
     global last_id
     registration_form = ApplicationForm(request.form)
-    if request.method == 'POST' and registration_form.validate():
-        application_form = {}
-        db = shelve.open('application.db', 'c')
-        try:
-            application_form = db['Application']
-        except:
-            print("Error in retrieving application from application.db")
+    if request.method == 'POST':
+        if registration_form.validate():
+            application_form = {}
+            db = shelve.open('application.db', 'c')
+            try:
+                application_form = db['Application']
+            except:
+                print("Error in retrieving application from application.db")
 
-        # store id
-        try:
-            last_id = db['Id']
-        except KeyError:
+            # store id
+            try:
+                last_id = db['Id']
+            except KeyError:
+                if application_form.keys():
+                    last_id = max(application_form.keys())
+                else:
+                    last_id = 0
+            db['Id'] = last_id
+
+            appForm = AppFormFormat(last_id, registration_form.seller_name.data, registration_form.business_name.data,
+                                    registration_form.seller_email.data,
+                                    registration_form.business_desc.data)
+            application_form[appForm.get_application_id()] = appForm
+            today = date.today()
+            appForm.set_date(today)
+            print(appForm.get_date())
+            if 'support_document' in request.files:
+                support_docs = request.files['support_document']
+                if support_docs:
+                    filename = support_docs.filename
+                    if filename.endswith('.pdf'):
+                        print('sure pdf', filename)
+                        pdf_id = secrets.token_hex(16)
+                        print('filename', filename)
+                        os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id))
+                        support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id, filename))
+                        os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id)
+                        message = f"{pdf_id}/{filename.split('.')[0]}.pdf"
+                        print('message', message)
+                        appForm.set_doc(message)
+                    else:
+                        print('go back')
+                        return redirect(url_for('error'))
+
+            db['Application'] = application_form
+            # testing
+            application_form = db['Application']
+            appForm = application_form[appForm.get_application_id()]
+            print(appForm.get_name(), appForm.get_email(), "was stored in application.db successfully with user_id ==",
+                  appForm.get_application_id())
+            print("last id--", last_id)
             if application_form.keys():
                 last_id = max(application_form.keys())
+<<<<<<< Updated upstream
             else:
                 last_id = 0
         db['Id'] = last_id
@@ -767,6 +929,13 @@ def register():  # create
         db['Id'] = last_id
         db.close()
         return redirect(url_for('respond'))
+=======
+            db['Id'] = last_id
+            db.close()
+            return redirect(url_for('respond'))
+        else:
+            return redirect(url_for('register'))
+>>>>>>> Stashed changes
     return render_template('sellers_application/registration.html', form=registration_form)
 
 @app.route('/view/<path:pdf>')
@@ -813,7 +982,25 @@ def retrieveApplicationForms():
             for key, seller in approved_db['Approved_sellers'].items():
                 passwords.append(seller.get_password())
             approved_db.close()
+<<<<<<< Updated upstream
             print(passwords)
+=======
+            send_mail(approved.get_email(), True, approved.get_seller_name(), password)
+        if data_to_modify['request_type'] == 'filter':
+
+            if data_to_modify['filter_by'] == 'certificate':
+                certify = []
+                print('filtered')
+                for i in app_list:
+                    print(i)
+                    if i.get_doc():
+                        print('have certificate')
+                        certify.append(i)
+                        print('certified sellers', i.get_name())
+                print('certified',certify)
+                return render_template('staff/retrieveAppForms.html', count=len(certify), app_list=certify)
+
+>>>>>>> Stashed changes
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
@@ -869,9 +1056,37 @@ def dashboard():
     return render_template('staff/dashboard.html', sellers_count = len(sellers), users_count = len(users))
 
 
+<<<<<<< Updated upstream
 @app.route('/seller/<int:seller_id>/dashboard')
 def seller_dashboard(seller_id):
     return render_template('/seller/dashboard.html')
+=======
+def upload_profile_pic():
+    if 'image' not in request.files:
+        # Handle case where no file is selected
+        return None
+
+    uploaded_file = request.files['image']
+
+    if uploaded_file.filename == '':
+        # Handle case where file input is empty
+        return None
+
+    if uploaded_file:
+        filename = f"static/images/{secure_filename(uploaded_file.filename)}"
+        uploaded_file.save(filename)
+        return filename, None
+
+    return None, 'Upload failed'
+
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    filename = upload_profile_pic()
+    if filename:
+        session['filename'] = filename
+    return render_template('/seller/updateSeller.html', filename=filename)
+>>>>>>> Stashed changes
 
 
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
