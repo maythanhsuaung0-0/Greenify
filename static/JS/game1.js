@@ -78,29 +78,29 @@ function sendScoreToServer(score) {
     },
     body: JSON.stringify({ player_name: playerName, score: score })
   })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Score submission successful:', data);
+  .then(response => response.json())
+  .then(data => {
+          console.log('Score submission successful:', data);
       getUpdatedScores();
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
+      })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
 }
 
 // Function to get updated scores
 function getUpdatedScores() {
   fetch('/get_scores')
-    .then(response => response.json())
-    .then(data => {
-      updateScoreDisplay(data);
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
+  .then(response => response.json())
+  .then(data => {
+          updateScoreDisplay(data);
+      })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
 }
 
-// Function to update the score display
+// Function to update the score display ##
 function updateScoreDisplay(scores) {
   let scoreboard = document.getElementById('scoreboard');
   if (!scoreboard) {
@@ -108,12 +108,49 @@ function updateScoreDisplay(scores) {
     return;
   }
 
-  scoreboard.innerHTML = ''; // Clear current scores
+  // Create a table element
+  let table = document.createElement('table');
+  table.classList.add('score-table'); // Add class for styling
 
-  for (let player in scores) {
-    let scoreEntry = document.createElement('p');
-    scoreEntry.textContent = `${player}: ${scores[player]}`;
-    scoreboard.appendChild(scoreEntry);
+  // Create the header row
+  let thead = table.createTHead();
+  let headerRow = thead.insertRow();
+  let headers = ["Player", "Score"];
+  for (let headerText of headers) {
+    let headerCell = document.createElement("th");
+    headerCell.textContent = headerText;
+    headerRow.appendChild(headerCell);
   }
+
+  // Create and populate body rows
+  let tbody = table.createTBody();
+  for (let player in scores) {
+    let row = tbody.insertRow();
+    let playerCell = row.insertCell();
+    playerCell.textContent = player;
+    let scoreCell = row.insertCell();
+    scoreCell.textContent = scores[player];
+  }
+
+  // Clear existing content and add the table
+  scoreboard.innerHTML = '';
+  scoreboard.appendChild(table);
 }
+
+// Original function in case idw table
+// function updateScoreDisplay(scores) {
+//   let scoreboard = document.getElementById('scoreboard');
+//   if (!scoreboard) {
+//       console.error('Scoreboard element not found');
+//       return;
+//   }
+
+//   scoreboard.innerHTML = ''; // Clear current scores
+
+//   for (let player in scores) {
+//       let scoreEntry = document.createElement('p');
+//       scoreEntry.textContent = `${player}: ${scores[player]}`;
+//       scoreboard.appendChild(scoreEntry);
+//   }
+// }
 

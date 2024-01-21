@@ -78,6 +78,50 @@
     #drag6 {
       touch-action: none;
     }
+
+    /* for the scoreboard */
+
+    /* ##Scoreboard Header Style */
+    .scoreboard-header {
+      text-align: center;
+      font-size: 24px;
+      color: #4CAF50;
+      margin-bottom: 10px;
+    }
+
+    /* Table Styles */
+    .score-table {
+      width: 60%;
+      margin: 20px auto;
+      /* Center the table */
+      border-collapse: collapse;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      /* Subtle shadow for depth */
+    }
+
+    .score-table th,
+    .score-table td {
+      border: 1px solid #0e0e0e;
+      /* Visible borders */
+      padding: 8px;
+      text-align: left;
+    }
+
+    .score-table th {
+      background-color: #101110;
+      /* Header background color */
+      color: white;
+    }
+
+    .score-table tr:nth-child(even) {
+      background-color: #f2f2f2;
+      /* Zebra striping for rows */
+    }
+
+    .score-table tr:hover {
+      background-color: #ddd;
+      /* Hover effect for rows */
+    }
   </style>
 
   <script>
@@ -334,11 +378,12 @@
     style="font-family: 'Times New Roman', Times, serif; font-size: x-large; font-weight: bold;">
     <div id="user_score"></div>
   </div>
-
+  
   <div id="scoreboard" style="margin-top: 20px;">
-    <!-- Scores will be displayed here -->
+    <h2 class="scoreboard-header">Scoreboard</h2>
+    <!-- The table will be inserted here  -->
   </div>
-
+  
   <script src="{{ url_for('static', filename='JS/game1.js') }}"></script>
 </body>
 
