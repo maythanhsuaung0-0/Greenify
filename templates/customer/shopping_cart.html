@@ -9,12 +9,11 @@
 
 <h1>Shopping Cart</h1>
 
-<div class="product-showcase container ms-1">
+<div class="product-showcase container-md ms-1">
   <table class="mx-5 text-center table table-striped">
     <thead class="text-center">
       <tr>
         <th>Product</th>
-        <th>Selected Option</th>
         <th>Unit Price</th>
         <th>Quantity</th>
         <th>Total Price</th>
@@ -24,21 +23,23 @@
     <tbody>
       {% for product in display_shopping_cart %}
       <tr class="product-container container" id="product-{{ display_shopping_cart.index(product) }}">
-        <td class="px-5">
+        <td>
           <div class="product-img-name d-flex flex-row">
-            <img src="{{ product['product'].get_image() }}" alt="image of {{ product['product'].get_product_name() }}">
-            <p class="my-auto"><a
-                href=" {{ url_for('product', seller=product['seller_name'], product_id=product['product'].get_product_id()) }}">{{
-                product['product'].get_product_name() }}</a></p>
+            <a href=" {{ url_for('product', seller=product['seller_name'], product_id=product['product'].get_product_id()) }}">
+              <img src="{{ url_for('static', filename='images/Tupperware 2.jpg') }}"
+                alt="image of {{ product['product'].get_product_name() }}">
+            </a>
+            <p class="my-auto ms-4">
+              <a
+                href=" {{ url_for('product', seller=product['seller_name'], product_id=product['product'].get_product_id()) }}">
+                {{ product['product'].get_product_name() }}</a>
+            </p>
           </div>
         </td>
-        <td class="px-5">
-          <p class="my-auto">selected option</p>
+        <td>
+          <p>${{ "%.2f"|format(product['product'].get_product_price()) }}</p>
         </td>
-        <td class="px-5">
-          <p class="my-auto">${{ "%.2f"|format(product['product'].get_product_price()) }}</p>
-        </td>
-        <td class="px-5">
+        <td>
           <div class="qty-selector d-flex flex-row justify-content-around align-items-center">
             <p class="mx-1 my-auto">Qty:</p>
             <i class="bi bi-plus-lg mx-2"
@@ -49,11 +50,11 @@
               onclick="decrement({{ display_shopping_cart.index(product) }}, {{ product['product'].get_product_price() }}, '{{ product['seller_name'] }}', {{ product['product'].get_product_id() }})"></i>
           </div>
         </td>
-        <td class="px-5">
+        <td>
           <div class="indv-total-price">$<span id="price-{{ display_shopping_cart.index(product) }}">{{
               "%.2f"|format(product['product_qty'] * product['product'].get_product_price()) }}</span></div>
         </td>
-        <td class="px-5">
+        <td>
           <!-- Button trigger modal -->
           <button type="button" class="btn btn-danger mx-5" data-bs-toggle="modal"
             data-bs-target="#modal-{{ display_shopping_cart.index(product) }}">
@@ -91,31 +92,33 @@
   </table>
 </div>
 
-<div class="cart-summary">
-  <div class="cart-summary-label">Subtotal:</div>
-  <div class="cart-summary-content">
+<div class="cart-summary row row-cols-2 w-25 ms-auto">
+  <div class="cart-summary-label col-6 py-3"><p class="fw-bold">Subtotal:</p></div>
+  <div class="cart-summary-content col-6 py-3">
     $<span id="subtotal"></span>
   </div>
-  <div class="cart-summary-label">Shipping Fee:</div>
-  <div class="cart-summary-content">
+  <div class="cart-summary-label col-6 py-3"><p class="fw-bold">Shipping Fee:</p></div>
+  <div class="cart-summary-content col-6 py-3">
     <span>$2.00</span>
   </div>
-  <div class="promo-code">
-    <div class="cart-summary-label">Promo Code:</div>
+  <div class="promo-code col-12 py-3">
+    <div class="cart-summary-label"><p class="fw-bold">Promo Code:</p></div>
     <div>
-      <input type="text" id="promo-code-input" class="is-invalid">
+      <input type="text" id="promo-code-input" class="is-invalid w-50">
       <button class="btn btn-dark" id="promo-code-btn" onclick="applyPromoCode()">Apply</button>
     </div>
   </div>
-  <div class="cart-summary-label">Promo:</div>
-  <div class="cart-summary-content">
+  <div class="cart-summary-label py-3"><p class="fw-bold">Promo:</p></div>
+  <div class="cart-summary-content py-3">
     -$<span id="promo-price">0</span>
   </div>
-  <div class="cart-summary-label">Total:</div>
-  <div class="cart-summary-content">
+  <div class="cart-summary-label py-3"><p class="fw-bold">Total:</p></div>
+  <div class="cart-summary-content py-3">
     $<span id="total-price"></span>
   </div>
-  <button class="btn btn-danger" onclick="checkout()">Checkout</button>
+  <div class="col-12 py-3">
+    <button class="btn btn-danger ms-auto" onclick="checkout()">Checkout</button>
+  </div>
 </div>
 
 

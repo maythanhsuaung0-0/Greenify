@@ -1,8 +1,11 @@
 @import url(./common.css);
 
+* {
+    font-family:var(--inter-font);
+}
+
 .custom-nav{
     background-color: var(--theme-color) !important;
-    font-family:var(--inter-font);
 }
 #offcanvasNavbar ul li{
     list-style-type: none;

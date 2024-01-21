@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components.css') }}">
     {% block JS_CSS %}{% endblock %}
 </head>
-{% macro dataComponent(seller_id, product_id, product_name, description, product_price, product_stock) -%}
+{% macro dataComponent(seller_id, product_id, product_name, description, product_price, product_stock, image) -%}
     <div class='card'>
         <div class="row card-body">
             <div class="col-1 text-center">{{product_id}}</div>
@@ -18,12 +18,12 @@
             <div class="col-3 text-center">{{description}}</div>
             <div class="col-1 text-center">{{product_price}}</div>
             <div class="col-1 text-center">{{product_stock}}</div>
-<!--            New -->
-            <div class="col-2 text-center">
-                <img src="{{ url_for('uploaded_image', filename=product.get_image()) }}" alt="Product Image">
+            <div class="col-1 text-center">
+                {{image}}
+                <img src="{{ url_for('display_image', filename=filename) }}">
             </div>
 
-            <div class="col-2 text-center">
+            <div class="col-3 text-center">
                 <a href="{{ url_for('update_product', seller_id=seller_id, product_id=product_id) }}">
                     <button class="btn btn-primary btn-sm">Update</button>
                 </a>
@@ -61,4 +61,3 @@
         </div>
     </div>
 {%- endmacro %}
-

@@ -18,26 +18,26 @@
                 <h1 class="my-5">Shipping Address</h1>
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label">Name:</label>
-                    <div class="payment-content col-md-6 d-flex align-items-center"><span id="name">Jun Yuan</span></div>
-                    <button type="button" class="btn col-md-1"><i class="bi bi-pencil-square"></i></button>
-                    <div class="hidden-field d-none">
-                        <input type="text" value='Jun Yuan'>
+                    <div class="payment-content col-md-6 d-flex align-items-center"><span id="name">{{ user_name }}</span></div>
+                    <button type="button" class="btn col-md-1" onclick="editField('name')"><i class="bi bi-pencil-square"></i></button>
+                    <div class="hidden-field"  id="name-edit" data-status="off">
+                        <input id="name-input" type="text" value='{{ user_name }}'>
+                        <button type="button" class="btn btn-success" onclick="editField('name')"><i class="bi bi-check-lg"></i></button>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label">Email Address:</label>
-                    <div class="payment-content col-md-6 d-flex align-items-center"><span id="email">hi@gmail.com</span></div>
-                    <button type="button" class="btn col-md-1"><i class="bi bi-pencil-square"></i></button>
-                    <div class="hidden-field d-none">
-                        <input type="text" value='hi@gmail.com'>
-                    </div>
+                    <div class="payment-content col-md-6 d-flex align-items-center"><span id="email">{{ user }}</span></div>                    
                 </div>
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label"> Shipping Address:</label>
-                    <div class="payment-content col-md-6 d-flex align-items-center"><span id="address">Blk 123, Yishun Road, Singapore 760123</span></div>
-                    <button type="button" class="btn col-md-1"><i class="bi bi-pencil-square"></i></button>
-                    <div class="hidden-field d-none">
-                        <textarea class="form-control w-50" style="height: 100px">Blk 123, Yishun Road, Singapore 760123</textarea>
+                    <div class="payment-content col-md-6 d-flex align-items-center"><span id="address">{{ user_address }}</span></div>
+                    <button type="button" class="btn col-md-1" onclick="editField('address')"><i class="bi bi-pencil-square"></i></button>
+                    <div class="hidden-field" id="address-edit" data-status="off">
+                        <div class="d-flex align-items-center">
+                            <textarea id="address-input" class="form-control w-50">{{ user_address }}</textarea>
+                            <button type="button" class="btn btn-success ms-3" style="width:40px; height:40px;" onclick="editField('address')"><i class="bi bi-check-lg"></i></button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -48,25 +48,28 @@
                     <label class="col-md-2 col-form-label">Card Number:</label>
                    <div class="payment-content col-md-5">
                        <input type="number" class='form-control' id="card-no" maxlength="19" placeholder="Card Number" required>
+                       <div class="invalid-div" id="invalid-card"><p class='invalid'>Please Enter A Valid Card</p></div>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label">CVV:</label>
                    <div class="payment-content col-md-3">
                         <input type="number" class='form-control' id="card-cvv" max="3" placeholder="CVV" required>
+                        <div class="invalid-div" id="invalid-cvv"><p class='invalid'>Please Enter A Valid CVV</p></div>
                     </div>
                 </div>
                 <div class="row mb-3" id="datepicker">
                     <label class="col-md-2 col-form-label">Exp Date:</label>
                     <div class="input-group date datepicker w-25" data-provide="datepicker">
-                        <input type="text" class="form-control" placeholder="mm-yyyy" required>
+                        <input type="text" class="form-control" id="card-exp-date" placeholder="mm-yyyy" required>
+                        <div class="invalid-div" id="invalid-exp-date"><p class='invalid'>Please Enter A Valid Date</p></div>
                         <div class="input-group-addon">
                             <span class="glyphicon glyphicon-th"></span>
                         </div>
                     </div>
                 </div>
 
-                <button type="button" class="btn btn-warning w-25" onclick="payment()">Pay</button>
+                <button class="btn btn-warning w-25" onclick="payment()">Pay</button>
             </div>
         </div>
     </form>

@@ -25,14 +25,59 @@ app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
-# New
-UPLOAD_IMAGE_FOLDER = 'static/product_image'
-app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
+
+# # New
+# UPLOAD_IMAGE_FOLDER = 'static/product_image'
+# app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
+#
+#
+# @app.route('/uploads/<filename>')
+# def uploaded_image(filename):
+#     return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+
+UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
+app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
+ALLOWED_EXTENSIONS = {'png', 'jpg'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# testing image upload
+# @app.route('/uploadimage')
+# def base():
+#     return render_template('index.html')
+#
+#
+# @app.route('/uploadimage', methods=['POST'])
+# def upload_image():
+#     if 'file' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash('No image selected for uploading')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file.save(os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename))
+#         # print('upload_image filename: ' + filename)
+#         flash('Image successfully uploaded and displayed below')
+#         return render_template('index.html', filename=filename)
+#     else:
+#         flash('Allowed image types are - png, jpg, jpeg, gif')
+#         return redirect(request.url)
 
 
-@app.route('/uploads/<filename>')
-def uploaded_image(filename):
-    return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+# @app.route('/display/<filename>')
+# def display_image(filename):
+#     # print('display_image filename: ' + filename)
+#     return redirect(url_for('static', filename='product_image/' + filename), code=301)
+
+@app.route('/display_image/<filename>')
+def display_image(filename):
+    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+    print(f"Displaying image from: {image_path}")
+    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
 def delete_folder(item):
@@ -88,16 +133,25 @@ def seller_id_search(seller_name):
 
 @app.route("/")
 def home():
-    return render_template("customer/homepage.html")
+    try:
+        user = session['user_id']
+        return render_template("customer/homepage.html", user=user, saved_cart_qty=cart_qty(user))
+    except:
+        return render_template("customer/homepage.html", user = None)
+
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
 def product(seller, product_id):
+    try:
+        user = session['user_id']
+    except:
+        user = None
     def cart_qty(user):
         saved_cart_qty = 0
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
         try:
-            users_shopping_cart = shopping_cart_db["hi@gmail.com"]
+            users_shopping_cart = shopping_cart_db[user]
             saved_cart_qty = users_shopping_cart["cart_qty"]
         except:
             print("Error in loading cart qty db")
@@ -106,6 +160,7 @@ def product(seller, product_id):
 
     # Search for Seller Id
     seller_id = seller_id_search(seller)
+
 
     if seller_id == False:
         print("Seller_id not found")
@@ -188,7 +243,7 @@ def product(seller, product_id):
             user_selected_product = {}
             shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
             try:
-                users_shopping_cart = shopping_cart_db["hi@gmail.com"]
+                users_shopping_cart = shopping_cart_db[user]
                 user_selected_product = users_shopping_cart["selected_product"]
             except KeyError:
                 print("KeyError in opening saved cart items")
@@ -223,7 +278,7 @@ def product(seller, product_id):
 
                 user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
                 users_shopping_cart["selected_product"] = user_selected_product
-                shopping_cart_db["hi@gmail.com"] = users_shopping_cart
+                shopping_cart_db[user] = users_shopping_cart
             except:
                 if product["product_qty"] > product_stock:
                     return json.jsonify({"result": False, "reason": "added more than stock"})
@@ -241,14 +296,14 @@ def product(seller, product_id):
             saved_cart_qty = len(user_selected_product)
             users_shopping_cart["cart_qty"] = saved_cart_qty
 
-            # Saving new info into db
-            shopping_cart_db["hi@gmail.com"] = users_shopping_cart
+            #Saving new info into db
+            shopping_cart_db[user] = users_shopping_cart
             shopping_cart_db.close()
 
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
-                           saved_cart_qty=cart_qty("hi@gmail.com"))
+    print(user)
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user)
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
@@ -294,11 +349,11 @@ def shopping_cart(user):
             # Getting Seller
             seller_name = product_selected["seller"]
 
-            # Making a dictionary of each product (product, product_qty, seller_name)
+            #Making a dictionary of each product (product, product_qty, seller_name)
             product_dict = {
-                "product": product,
-                "product_qty": product_qty,
-                "seller_name": seller_name
+                "product" : product,
+                "product_qty" : product_qty,
+                "seller_name" : seller_name
             }
             display_shopping_cart.append(product_dict)
 
@@ -382,10 +437,10 @@ def shopping_cart(user):
                            saved_cart_qty=saved_cart_qty)
 
 
-
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
-    # Receive AJAX Request
+    user = session['user_id']
+    #Receive AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
 
@@ -470,7 +525,12 @@ def payment(user):
 
             return json.jsonify({'result': True, 'redirect_link': url_for('success_payment')})
 
-    return render_template("customer/payment.html")
+    user_db = shelve.open('user.db')
+    user_dict = user_db['Users']
+    user_info = user_dict[user]
+    user_db.close()
+
+    return render_template("customer/payment.html", user=user, user_address=user_info.get_address(), user_name=user_info.get_name(), saved_cart_qty=cart_qty(user))
 
 
 @app.route('/success')
@@ -691,28 +751,30 @@ def create_product(seller_id):
             seller_product_id = seller_product_info["id"]
         except KeyError:
             seller_product_id = 1
+        #
 
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
                                                      create_product_form.product_stock.data,
-                                                     create_product_form.image.data,
                                                      create_product_form.description.data)
 
         # New
-        # Handle file upload
         if 'image' in request.files:
             image = request.files['image']
-            if image.filename != '':
+            if image and allowed_file(image.filename):
                 # Save the uploaded image
                 filename = secure_filename(image.filename)
-                image_path = os.path.join(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+                image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
                 image.save(image_path)
+                print(f"Image saved at: {image_path}")
 
                 # Call the create_image_set function
-                create_image_set(app.config['UPLOAD_IMAGE_FOLDER'], filename)
+                create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
 
                 # Set the image field in your SellerProduct instance
                 create_product.set_image(filename)
+            else:
+                flash('Allowed image types are png and jpg only')
 
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
@@ -921,7 +983,7 @@ def retrieveApplicationForms():
 
             passwords = []
 
-            for key, seller in approved_db['Approved_sellers'].items():
+            for key, seller in approved_sellers.items():
                 passwords.append(seller.get_password())
 
             print(passwords)
@@ -993,8 +1055,36 @@ def dashboard():
     return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
 
 
+def upload_profile_pic():
+    if 'image' not in request.files:
+        # Handle case where no file is selected
+        return None
+
+    uploaded_file = request.files['image']
+
+    if uploaded_file.filename == '':
+        # Handle case where file input is empty
+        return None
+
+    if uploaded_file:
+        filename = f"static/images/{secure_filename(uploaded_file.filename)}"
+        uploaded_file.save(filename)
+        return filename, None
+
+    return None, 'Upload failed'
+
+
+@app.route('/upload', methods=['GET','POST'])
+def upload():
+    filename = upload_profile_pic()
+    if filename:
+        session['filename'] = filename
+    return render_template('/seller/updateSeller.html',  filename=filename)
+
+
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
 def update_seller(seller_id):
+    filename = session.get('filename', 'placeholder.jpg')
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
         updated_sellers = {}
@@ -1004,11 +1094,12 @@ def update_seller(seller_id):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
-        seller.set_seller_name(update_seller_form.seller_name.data)
+        seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
+        seller.set_profile_image(update_seller_form.profile_pic.data)
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
         db['Updated_sellers'] = updated_sellers
@@ -1022,13 +1113,14 @@ def update_seller(seller_id):
         approved_db.close()
 
         seller = approved_sellers.get(seller_id)
-        update_seller_form.seller_name.data = seller.get_seller_name()
+        update_seller_form.business_name.data = seller.get_seller_name()
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
+        update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form)
+        return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
