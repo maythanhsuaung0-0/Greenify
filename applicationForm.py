@@ -2,7 +2,7 @@ from wtforms import Form, StringField, EmailField, TextAreaField, FileField, val
 
 
 class ApplicationForm(Form):
-    name = StringField('Fullname',[validators.DataRequired()])
+    seller_name = StringField('Fullname',[validators.DataRequired()])
     business_name = StringField('Business Name', [validators.DataRequired(), validators.length(max=20)])
     business_desc = TextAreaField("Business Description", [validators.DataRequired()])
     seller_email = EmailField("Email Address", [validators.DataRequired(), validators.Email()])

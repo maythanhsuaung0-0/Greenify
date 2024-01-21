@@ -1,5 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, \
-    send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, json, session, send_file, send_from_directory, jsonify
 from Forms import CreateUserForm, StaffLoginForm, LoginForm
 import shelve, User, SellerProduct, application, User_login
 from sellerproductForm import CreateProductForm
@@ -382,8 +381,6 @@ def shopping_cart(user):
     return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user,
                            saved_cart_qty=saved_cart_qty)
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user,
-                           saved_cart_qty=saved_cart_qty)
 
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
@@ -856,7 +853,7 @@ def register():  # create
                 last_id = 0
         db['Id'] = last_id
 
-        appForm = AppFormFormat(last_id, registration_form.name.data, registration_form.business_name.data,
+        appForm = AppFormFormat(last_id, registration_form.seller_name.data, registration_form.business_name.data,
                                 registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
