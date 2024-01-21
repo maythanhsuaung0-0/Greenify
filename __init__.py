@@ -928,89 +928,53 @@ def error():
 
 
 @app.route("/register", methods=['GET', 'POST'])
+@app.route("/register", methods=['GET', 'POST'])
 def register():  # create
     global last_id
     registration_form = ApplicationForm(request.form)
-    if request.method == 'POST':
-        if registration_form.validate():
-            application_form = {}
-            db = shelve.open('application.db', 'c')
-            try:
-                application_form = db['Application']
-            except:
-                print("Error in retrieving application from application.db")
-
-            # store id
-            try:
-                last_id = db['Id']
-            except KeyError:
-                if application_form.keys():
-                    last_id = max(application_form.keys())
-                else:
-                    last_id = 0
-            db['Id'] = last_id
-
-            appForm = AppFormFormat(last_id, registration_form.seller_name.data, registration_form.business_name.data,
-                                    registration_form.seller_email.data,
-                                    registration_form.business_desc.data)
-            application_form[appForm.get_application_id()] = appForm
-            today = date.today()
-            appForm.set_date(today)
-            print(appForm.get_date())
-            if 'support_document' in request.files:
-                support_docs = request.files['support_document']
-                if support_docs:
-                    filename = support_docs.filename
-                    if filename.endswith('.pdf'):
-                        print('sure pdf', filename)
-                        pdf_id = secrets.token_hex(16)
-                        print('filename', filename)
-                        os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id))
-                        support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id, filename))
-                        os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id)
-                        message = f"{pdf_id}/{filename.split('.')[0]}.pdf"
-                        print('message', message)
-                        appForm.set_doc(message)
-                    else:
-                        print('go back')
-                        return redirect(url_for('error'))
-
-            db['Application'] = application_form
-            # testing
+    if request.method == 'POST' and registration_form.validate():
+        application_form = {}
+        db = shelve.open('application.db', 'c')
+        try:
             application_form = db['Application']
-            appForm = application_form[appForm.get_application_id()]
-            print(appForm.get_name(), appForm.get_email(), "was stored in application.db successfully with user_id ==",
-                  appForm.get_application_id())
-            print("last id--", last_id)
+        except:
+            print("Error in retrieving application from application.db")
+        # store id
+        try:
+            last_id = db['Id']
+        except KeyError:
             if application_form.keys():
                 last_id = max(application_form.keys())
             else:
                 last_id = 0
         db['Id'] = last_id
-
-        appForm = AppFormFormat(last_id, registration_form.business_name.data, registration_form.seller_email.data,
+        appForm = AppFormFormat(last_id, registration_form.seller_name.data, registration_form.business_name.data,
+                                registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
         appForm.set_date(today)
+        print(appForm.get_date())
         if 'support_document' in request.files:
             support_docs = request.files['support_document']
             if support_docs:
                 filename = support_docs.filename
-                pdf_id = secrets.token_hex(16)
-                print('filename', filename)
-                os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id))
-                support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id, filename))
-                os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id)
-                message = f"{pdf_id}/{filename.split('.')[0]}.pdf"
-                print('message', message)
-                appForm.set_doc(message)
-
+                if filename.endswith('.pdf'):
+                    pdf_id = secrets.token_hex(16)
+                    print('filename', filename)
+                    os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id))
+                    support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id, filename))
+                    os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id)
+                    message = f"{pdf_id}/{filename.split('.')[0]}.pdf"
+                    print('message', message)
+                    appForm.set_doc(message)
+                else:
+                    return redirect(url_for('error'))
         db['Application'] = application_form
         # testing
         application_form = db['Application']
         appForm = application_form[appForm.get_application_id()]
-        print(appForm.get_name(), appForm.get_email(), "was stored in user.db successfully with user_id ==",
+        print(appForm.get_name(), appForm.get_email(), "was stored in application.db successfully with user_id ==",
               appForm.get_application_id())
         print("last id--", last_id)
         if application_form.keys():
@@ -1019,6 +983,7 @@ def register():  # create
         db.close()
         return redirect(url_for('respond'))
     return render_template('sellers_application/registration.html', form=registration_form)
+
 
 @app.route('/view/<path:pdf>')
 def view_pdf(pdf):
@@ -1056,7 +1021,6 @@ def retrieveApplicationForms():
                 password = generate_password(14)
                 if password not in passwords:
                     break
-            send_mail(approved.get_email(), True, approved.get_name(), password)
             approved.set_password(password)
             # storing approved seller
             approved_sellers[approved.get_application_id()] = approved
@@ -1067,7 +1031,6 @@ def retrieveApplicationForms():
 
             send_mail(approved.get_email(), True, approved.get_seller_name(), password)
         if data_to_modify['request_type'] == 'filter':
-
             if data_to_modify['filter_by'] == 'certificate':
                 certify = []
                 print('filtered')
