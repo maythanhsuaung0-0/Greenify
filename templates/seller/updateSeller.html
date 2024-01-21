@@ -4,9 +4,23 @@
 {% block content %}
 {% from "includes/_formHelper.html" import render_field %}
 
+<script src="{{url_for('static', filename='JS/upload_image.js')}}"></script>
+
 <h1 class="display-4">Update Account Details</h1>
 
+{% if error %}
+<p>{{ error }}</p>
+{% endif %}
+
+{% if filename %}
+        <img src="" alt="Uploaded Image" id="previewImage" style="height: 150px; width: 150px; border-radius: 50%; object-fit: cover; background: #dfdfd">
+{% endif %}
+
+
 <form class="grid-box" method="POST" action="" enctype="multipart/form-data">
+        <div class="form-group" id="fileInput">
+            {{render_field(form.profile_pic, class="form-control mt-1")}}
+            </div>
         <div class="form-group">
             {{render_field(form.business_name, class="form-control mt-1")}}
           </div>

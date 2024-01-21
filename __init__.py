@@ -1,7 +1,5 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, json, session, send_file, \
     send_from_directory, jsonify
-from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import SubmitField
 from Forms import CreateUserForm, StaffLoginForm, LoginForm
 import shelve, User, SellerProduct, application, User_login
 from sellerproductForm import CreateProductForm
@@ -14,8 +12,6 @@ import secrets
 import shutil
 from werkzeug.utils import secure_filename
 from datetime import date
-from flask_uploads import UploadSet, IMAGES, configure_uploads
-from flask_wtf import FlaskForm
 from urllib.parse import quote
 # for sending mail
 import string
@@ -31,9 +27,23 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
 
-@app.route('/testingupload', methods=['GET', 'POST'])
-def testing():
-    return render_template('upload_photo.html')
+def upload_profile_pic():
+    if 'image' not in request.files:
+        # Handle case where no file is selected
+        return None
+
+    uploaded_file = request.files['image']
+
+    if uploaded_file.filename == '':
+        # Handle case where file input is empty
+        return None
+
+    if uploaded_file:
+        filename = f"static/images/{secure_filename(uploaded_file.filename)}"
+        uploaded_file.save(filename)
+        return filename, None
+
+    return None, 'Upload failed'
 
 # # New
 # UPLOAD_IMAGE_FOLDER = 'static/product_image'
@@ -1042,6 +1052,7 @@ def dashboard():
 
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
 def update_seller(seller_id):
+    filename = upload_profile_pic()
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
         updated_sellers = {}
@@ -1056,6 +1067,7 @@ def update_seller(seller_id):
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
+        seller.set_profile_image()
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
         db['Updated_sellers'] = updated_sellers
@@ -1075,7 +1087,7 @@ def update_seller(seller_id):
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form)
+        return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
