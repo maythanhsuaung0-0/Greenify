@@ -26,6 +26,8 @@ app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
+UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # # New
 # UPLOAD_IMAGE_FOLDER = 'static/product_image'
@@ -1032,36 +1034,9 @@ def dashboard():
     return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
 
 
-def upload_profile_pic():
-    if 'image' not in request.files:
-        # Handle case where no file is selected
-        return None
-
-    uploaded_file = request.files['image']
-
-    if uploaded_file.filename == '':
-        # Handle case where file input is empty
-        return None
-
-    if uploaded_file:
-        filename = f"static/images/{secure_filename(uploaded_file.filename)}"
-        uploaded_file.save(filename)
-        return filename, None
-
-    return None, 'Upload failed'
-
-
-@app.route('/upload', methods=['GET','POST'])
-def upload():
-    filename = upload_profile_pic()
-    if filename:
-        session['filename'] = filename
-    return render_template('/seller/updateSeller.html',  filename=filename)
-
-
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
 def update_seller(seller_id):
-    filename = session.get('filename', 'placeholder.jpg')
+    filename = session.get('filename', '/images/placeholder.jpg')
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
         updated_sellers = {}
@@ -1071,12 +1046,23 @@ def update_seller(seller_id):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
+
+        if 'image' in request.files:
+            uploaded_file = request.files['image']
+            if uploaded_file.filename != '':
+                filename = secure_filename(uploaded_file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                uploaded_file.save(filepath)
+                seller.set_profile_image(filepath)
+                session['filename'] = filename
+
         seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
         seller.set_profile_image(update_seller_form.profile_pic.data)
+
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
         db['Updated_sellers'] = updated_sellers
@@ -1097,7 +1083,7 @@ def update_seller(seller_id):
         update_seller_form.support_document.data = seller.get_doc()
         update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename)
+        return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename, seller_id=seller_id)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
