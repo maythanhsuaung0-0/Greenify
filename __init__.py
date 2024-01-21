@@ -44,35 +44,43 @@ ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-@app.route('/uploadimage')
-def base():
-    return render_template('index.html')
+
+# testing image upload
+# @app.route('/uploadimage')
+# def base():
+#     return render_template('index.html')
+#
+#
+# @app.route('/uploadimage', methods=['POST'])
+# def upload_image():
+#     if 'file' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash('No image selected for uploading')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file.save(os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename))
+#         # print('upload_image filename: ' + filename)
+#         flash('Image successfully uploaded and displayed below')
+#         return render_template('index.html', filename=filename)
+#     else:
+#         flash('Allowed image types are - png, jpg, jpeg, gif')
+#         return redirect(request.url)
 
 
-@app.route('/uploadimage', methods=['POST'])
-def upload_image():
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(request.url)
-    file = request.files['file']
-    if file.filename == '':
-        flash('No image selected for uploading')
-        return redirect(request.url)
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename))
-        # print('upload_image filename: ' + filename)
-        flash('Image successfully uploaded and displayed below')
-        return render_template('index.html', filename=filename)
-    else:
-        flash('Allowed image types are - png, jpg, jpeg, gif')
-        return redirect(request.url)
+# @app.route('/display/<filename>')
+# def display_image(filename):
+#     # print('display_image filename: ' + filename)
+#     return redirect(url_for('static', filename='product_image/' + filename), code=301)
 
-
-@app.route('/display/<filename>')
+@app.route('/display_image/<filename>')
 def display_image(filename):
-    # print('display_image filename: ' + filename)
-    return redirect(url_for('static', filename='product_image/' + filename), code=301)
+    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+    print(f"Displaying image from: {image_path}")
+    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
 def delete_folder(item):
@@ -751,10 +759,26 @@ def create_product(seller_id):
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
                                                      create_product_form.product_stock.data,
-                                                     create_product_form.image.data,
                                                      create_product_form.description.data)
 
         # New
+        if 'image' in request.files:
+            image = request.files['image']
+            if image and allowed_file(image.filename):
+                # Save the uploaded image
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+                image.save(image_path)
+                print(f"Image saved at: {image_path}")
+
+                # Call the create_image_set function
+                create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+
+                # Set the image field in your SellerProduct instance
+                create_product.set_image(filename)
+            else:
+                flash('Allowed image types are png and jpg only')
+
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
         seller_product_id += 1
