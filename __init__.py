@@ -123,6 +123,30 @@ def seller_id_search(seller_name):
             return seller_id
 
 
+def search_engine(search_query):
+    search_query_list = search_query.split()
+
+
+    seller_product_db = shelve.open('seller-product.db')
+    result_list = []
+
+    for seller in seller_product_db:
+        seller_products = seller_product_db[str(seller)]['products']
+
+        #Accessing Indv Product to get the Product Name
+        for product_id in seller_products:
+            product_name = seller_products[product_id].get_product_name()
+
+            #Loop Through Search Query
+            for word in search_query_list:
+                result = product_name.find(word)
+                if result:
+                    result_list.append(seller_products[product_id])
+                    break
+
+    return result_list
+
+
 @app.route("/")
 def home():
     try:
@@ -294,7 +318,6 @@ def product(seller, product_id):
 
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-    print(user)
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user)
 
 
