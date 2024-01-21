@@ -26,6 +26,9 @@ app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 
+UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 # # New
 # UPLOAD_IMAGE_FOLDER = 'static/product_image'
 # app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
@@ -41,35 +44,43 @@ ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-@app.route('/uploadimage')
-def base():
-    return render_template('index.html')
+
+# testing image upload
+# @app.route('/uploadimage')
+# def base():
+#     return render_template('index.html')
+#
+#
+# @app.route('/uploadimage', methods=['POST'])
+# def upload_image():
+#     if 'file' not in request.files:
+#         flash('No file part')
+#         return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         flash('No image selected for uploading')
+#         return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file.save(os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename))
+#         # print('upload_image filename: ' + filename)
+#         flash('Image successfully uploaded and displayed below')
+#         return render_template('index.html', filename=filename)
+#     else:
+#         flash('Allowed image types are - png, jpg, jpeg, gif')
+#         return redirect(request.url)
 
 
-@app.route('/uploadimage', methods=['POST'])
-def upload_image():
-    if 'file' not in request.files:
-        flash('No file part')
-        return redirect(request.url)
-    file = request.files['file']
-    if file.filename == '':
-        flash('No image selected for uploading')
-        return redirect(request.url)
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename))
-        # print('upload_image filename: ' + filename)
-        flash('Image successfully uploaded and displayed below')
-        return render_template('index.html', filename=filename)
-    else:
-        flash('Allowed image types are - png, jpg, jpeg, gif')
-        return redirect(request.url)
+# @app.route('/display/<filename>')
+# def display_image(filename):
+#     # print('display_image filename: ' + filename)
+#     return redirect(url_for('static', filename='product_image/' + filename), code=301)
 
-
-@app.route('/display/<filename>')
+@app.route('/display_image/<filename>')
 def display_image(filename):
-    # print('display_image filename: ' + filename)
-    return redirect(url_for('static', filename='product_image/' + filename), code=301)
+    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+    print(f"Displaying image from: {image_path}")
+    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
 def delete_folder(item):
@@ -771,10 +782,26 @@ def create_product(seller_id):
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
                                                      create_product_form.product_stock.data,
-                                                     create_product_form.image.data,
                                                      create_product_form.description.data)
 
         # New
+        if 'image' in request.files:
+            image = request.files['image']
+            if image and allowed_file(image.filename):
+                # Save the uploaded image
+                filename = secure_filename(image.filename)
+                image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+                image.save(image_path)
+                print(f"Image saved at: {image_path}")
+
+                # Call the create_image_set function
+                create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+
+                # Set the image field in your SellerProduct instance
+                create_product.set_image(filename)
+            else:
+                flash('Allowed image types are png and jpg only')
+
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
         seller_product_id += 1
@@ -1056,6 +1083,7 @@ def dashboard():
 
 @app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
 def update_seller(seller_id):
+    filename = session.get('filename', '/images/placeholder.jpg')
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
         updated_sellers = {}
@@ -1065,11 +1093,23 @@ def update_seller(seller_id):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
-        seller.set_seller_name(update_seller_form.seller_name.data)
+
+        if 'image' in request.files:
+            uploaded_file = request.files['image']
+            if uploaded_file.filename != '':
+                filename = secure_filename(uploaded_file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                uploaded_file.save(filepath)
+                seller.set_profile_image(filepath)
+                session['filename'] = filename
+
+        seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
+        seller.set_profile_image(update_seller_form.profile_pic.data)
+
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
         db['Updated_sellers'] = updated_sellers
@@ -1083,13 +1123,14 @@ def update_seller(seller_id):
         approved_db.close()
 
         seller = approved_sellers.get(seller_id)
-        update_seller_form.seller_name.data = seller.get_seller_name()
+        update_seller_form.business_name.data = seller.get_seller_name()
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
+        update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form)
+        return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename, seller_id=seller_id)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])

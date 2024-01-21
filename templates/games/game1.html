@@ -1,3 +1,6 @@
+{% extends "customer/Customer_Base.html" %}
+{% block title%}Homepage{% endblock %}
+{% block body %}
 <!DOCTYPE HTML>
 <html>
 
@@ -12,6 +15,61 @@
   </style>
 
   <style>
+    body {
+      text-align: center;
+      font-family: 'Arial', sans-serif;
+    }
+
+    #ecosort_title {
+      font-family: 'Arial', sans-serif;
+      font-size: 48px;
+      font-weight: bold;
+      color: #0d0e0d;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      letter-spacing: 1px;
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 20px;
+
+    }
+
+    #drag_item_text {
+      /* text-align: justify; */
+      margin-right: 460px;
+    }
+
+    #conveyorBelt {
+      width: 80%;
+      margin: 0 auto;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    #dragItems {
+      position: relative;
+      top: -10px;
+      z-index: 2;
+    }
+
+    .dragItem {
+      display: inline-block;
+      margin: 0 10px;
+      touch-action: none;
+      cursor: pointer;
+    }
+
+    #bins {
+      position: relative;
+      top: -100px;
+      z-index: 0;
+    }
+
+    .bin {
+      display: inline-block;
+      margin: 0 20px;
+    }
+
     #drag1,
     #drag2,
     #drag3,
@@ -41,8 +99,8 @@
   <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10.11/dist/interact.min.js"></script>
 
   <script>
-    
-    var playerName = "{{ user_id }}";  
+
+    var playerName = "{{ user_id }}";
     var score = 0;
     var total_items = 6;
     var items_played = 0;
@@ -236,35 +294,41 @@
   <audio id="gameoverfullmarks"
     src="{{ url_for('static', filename='sounds/660408__kevp888__220625-08_fr_applause.mp3') }}" preload="auto"></audio>
 
-
-  <h1>EcoSort Challenge</h1>
+  <br>
+  <h1 id="ecosort_title">EcoSort Challenge</h1>
   <br>
   <br>
 
-
-  <div id="div-bin1" ondrop="drop(event)" ondragover="allowDrop(event)">
-    <img id="dropzone1" src="{{ url_for('static', filename='images/bin1.png') }}" draggable="false">
-    <img id="dropzone2" src="{{ url_for('static', filename='images/bin2.png') }}" draggable="false">
-    <img id="dropzone3" src="{{ url_for('static', filename='images/bin3.png') }}" draggable="false">
-  </div>
-
-  <br>
-  <br>
   <h3 id="drag_item_text">Drag items into the correct recycle bins:</h3>
   <br>
   <br>
-  <img id="drag1" src="{{ url_for('static', filename='images/bottle.png') }}" draggable="true" ondragstart="drag(event)"
-    width="120" height="180" materialtype="glass">
-  <img id="drag2" src="{{ url_for('static', filename='images/cup.png') }}" draggable="true" ondragstart="drag(event)"
-    width="120" height="180" materialtype="paper">
-  <img id="drag3" src="{{ url_for('static', filename='images/plastic_bag.png') }}" draggable="true"
-    ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
-  <img id="drag4" src="{{ url_for('static', filename='images/straw.png') }}" draggable="true" ondragstart="drag(event)"
-    width="120" height="180" materialtype="plastic">
-  <img id="drag5" src="{{ url_for('static', filename='images/plastic_bottle.png') }}" draggable="true"
-    ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
-  <img id="drag6" src="{{ url_for('static', filename='images/newspaper.png') }}" draggable="true"
-    ondragstart="drag(event)" width="120" height="180" materialtype="paper">
+  <div id="dragItems">
+    <img id="drag1" src="{{ url_for('static', filename='images/bottle.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="glass">
+    <img id="drag2" src="{{ url_for('static', filename='images/cup.jpeg') }}" draggable="true" ondragstart="drag(event)"
+      width="120" height="180" materialtype="paper">
+    <img id="drag3" src="{{ url_for('static', filename='images/plastic_bag.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
+    <img id="drag4" src="{{ url_for('static', filename='images/straw.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
+    <img id="drag5" src="{{ url_for('static', filename='images/plastic_bottle.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
+    <img id="drag6" src="{{ url_for('static', filename='images/newspaper.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="paper">
+    <!-- Conveyor Belt -->
+    <img id="conveyorBelt" src="{{ url_for('static', filename='images/conveyor.jpeg') }}" alt="Conveyor Belt">
+
+  </div>
+
+
+  <div id="div-bin1" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <img id="dropzone1" src="{{ url_for('static', filename='images/bin1.jpeg') }}" draggable="false">
+    <img id="dropzone2" src="{{ url_for('static', filename='images/bin2.jpeg') }}" draggable="false">
+    <img id="dropzone3" src="{{ url_for('static', filename='images/bin3.jpeg') }}" draggable="false">
+  </div>
+
+
+
 
   <div id="user_score_display"
     style="font-family: 'Times New Roman', Times, serif; font-size: x-large; font-weight: bold;">
@@ -279,3 +343,5 @@
 </body>
 
 </html>
+
+{% endblock %}
