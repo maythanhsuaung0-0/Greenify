@@ -19,6 +19,7 @@ from send_email import send_mail
 import uuid
 from crud_functions import *
 from seller_order import SellerOrder
+import hashlib
 
 app = Flask(__name__, static_url_path='/static')
 logged_in = False
@@ -28,6 +29,19 @@ app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static
 
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+@app.errorhandler(404)
+def error_404(e):
+    return render_template('error_msg.html')
+
+@app.errorhandler(403)
+def error_403(e):
+    return render_template('error_msg.html')
+
+@app.errorhandler(500)
+def error_500(e):
+    return render_template('error_msg.html')
 
 # # New
 # UPLOAD_IMAGE_FOLDER = 'static/product_image'
@@ -134,6 +148,18 @@ def seller_id_search(seller_name):
             seller_id = approved_sellers[id].get_application_id()
             return seller_id
 
+def seller_name_search(seller_id):
+    seller_id = int(seller_id)
+    approved_sellers = {}
+    approve_seller_db = shelve.open('approved_sellers.db')
+    try:
+        approved_sellers = approve_seller_db['Approved_sellers']
+    except:
+        return False
+    for id in approved_sellers:
+        if seller_id == id:
+            return approved_sellers[seller_id].get_seller_name()
+
 
 def search_engine(search_query):
     search_query_list = search_query.split()
@@ -142,8 +168,8 @@ def search_engine(search_query):
     seller_product_db = shelve.open('seller-product.db')
     result_list = []
 
-    for seller in seller_product_db:
-        seller_products = seller_product_db[str(seller)]['products']
+    for seller_id in seller_product_db:
+        seller_products = seller_product_db[str(seller_id)]['products']
 
         #Accessing Indv Product to get the Product Name
         for product_id in seller_products:
@@ -153,7 +179,7 @@ def search_engine(search_query):
             for word in search_query_list:
                 result = product_name.find(word)
                 if result:
-                    result_list.append(seller_products[product_id])
+                    result_list.append([seller_name_search(seller_id), seller_products[product_id]])
                     break
 
     return result_list
@@ -192,7 +218,7 @@ def product(seller, product_id):
 
     if seller_id == False:
         print("Seller_id not found")
-        return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+        return render_template('customer/error_msg.html')
 
     # Retrieving Product for html to display
     seller_products = {}
@@ -203,7 +229,7 @@ def product(seller, product_id):
         seller_products = seller_product_info['products']
     except:
         print("Product is not found")
-        return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+        return render_template('customer/error_msg.html')
 
     product = seller_products[product_id]
     seller_product_db.close()
@@ -253,7 +279,7 @@ def product(seller, product_id):
                 seller_products = seller_product_info['products']
             except:
                 print("Product is not found")
-                return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+                return render_template('customer/error_msg.html')
 
             product = seller_products[product_id]
             product_stock = product.get_product_stock()
@@ -290,7 +316,7 @@ def product(seller, product_id):
                 seller_products = seller_product_info['products']
             except:
                 print("Product is not found")
-                return render_template('customer/error_msg.html', msg="Sorry, Page Could Not Be Found")
+                return render_template('customer/error_msg.html')
 
             seller_saved_product = seller_products[product_id]
             product_stock = seller_saved_product.get_product_stock()
@@ -336,6 +362,7 @@ def product(seller, product_id):
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
 def shopping_cart(user):
+    user = session['user_id']
     def cart_qty(user):
         saved_cart_qty = 0
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -354,7 +381,7 @@ def shopping_cart(user):
         users_shopping_cart = shopping_cart_db[user]
         user_selected_product = users_shopping_cart["selected_product"]
     except KeyError:
-        return render_template("customer/error_msg.html", msg="Your Shopping Cart is Empty")
+        return render_template("customer/empty_cart.html")
     except:
         print("Error in retrieving User Shopping Cart Info in user_shopping_cart.db")
 
@@ -388,7 +415,7 @@ def shopping_cart(user):
 
         saved_cart_qty = cart_qty(user)
     else:
-        return render_template("customer/error_msg.html", msg="Your Shopping Cart is Empty")
+        return render_template("customer/empty_cart.html")
 
     # Receive AJAX Request
     if request.method == "POST":
@@ -561,6 +588,10 @@ def payment(user):
     return render_template("customer/payment.html", user=user, user_address=user_info.get_address(), user_name=user_info.get_name(), saved_cart_qty=cart_qty(user))
 
 
+@app.route('/product_search')
+def product_search():
+    return 'hi'
+
 @app.route('/success')
 def success_payment():
     return render_template('customer/success_payment.html')
@@ -613,6 +644,7 @@ def login():
                     if key == user.get_email():
                         session['user_id'] = user_id
                         session['logged_in'] = True
+                        print(session['user_id'])
                         return redirect(url_for('home'))
                 error = 'Email or Password is incorrect, please try again.'
             else:
@@ -1247,4 +1279,4 @@ def game1():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)

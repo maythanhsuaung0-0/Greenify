@@ -1,0 +1,20 @@
+{% extends "customer/Customer_Base.html" %}
+{% block Head_JS_CSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/error.css') }}" />
+{% endblock %}
+
+{% block title%} Product Search {%endblock %}
+
+{% block body %}
+
+<div class="d-flex flex-column justify-content-center align-items-center vh-100">
+    <h1 class="align-middle">Sorry, Page Could Not Be Found</h1>
+    <button class="btn home-btn my-5" type="button"><a href="{{ url_for('home') }}">Return to Home</a></button>
+</div>
+
+{% endblock %}
+
+{% block End_JS_CSS %}
+
+
+{% endblock %}
