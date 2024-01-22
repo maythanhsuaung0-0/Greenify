@@ -829,8 +829,8 @@ def create_product(seller_id):
                 image.save(image_path)
                 print(f"Image saved at: {image_path}")
 
-                # # Call the create_image_set function
-                create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+                # Call the create_image_set function
+                # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
 
                 # Set the image field in your SellerProduct instance
                 create_product.set_image(filename)
