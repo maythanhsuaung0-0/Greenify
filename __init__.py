@@ -613,6 +613,7 @@ def create_user():
 
         if create_user_form.email.data in users_dict:
             error = 'An account has already been created with this email. Please Login.'
+
         else:
             user = User.User(create_user_form.email.data, create_user_form.password.data, create_user_form.name.data,
                              create_user_form.contact_number.data, create_user_form.postal_code.data,
@@ -693,10 +694,13 @@ def update_user(email):
             user.set_contact_number(update_user_form.contact_number.data)
             user.set_postal_code(update_user_form.postal_code.data)
             user.set_address(update_user_form.address.data)
-            error = "Update Successful."
+            if not update_user_form.password.data.strip():
+                error = 'Password is required.'
+            elif len(update_user_form.password.data) < 8:
+                error = 'Password must be at least 8 characters long.'
 
         else:
-            error = 'Update Unsuccessful, please try again.'
+            error = "Update Successful."
 
         db['Users'] = users_dict
         db.close()
@@ -1159,7 +1163,7 @@ def update_seller(seller_id):
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
-        seller.set_profile_image(update_seller_form.profile_pic.data)
+        # seller.set_profile_image(update_seller_form.profile_pic.data)
 
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
@@ -1179,9 +1183,9 @@ def update_seller(seller_id):
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
-        update_seller_form.profile_pic.data = seller.get_profile_image()
+        # update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename, seller_id=seller_id)
+        return render_template('/seller/updateSeller.html', form=update_seller_form)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])

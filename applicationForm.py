@@ -7,4 +7,4 @@ class ApplicationForm(Form):
     business_desc = TextAreaField("Business Description", [validators.DataRequired()])
     seller_email = EmailField("Email Address", [validators.DataRequired(), validators.Email()])
     support_document = FileField('Upload Supporting Document (* pdf file only *)', [validators.optional()],render_kw={'accept': '.pdf'})
-    profile_pic = FileField('Upload Profile Picture (* image files only *)', [validators.optional()], render_kw={'accept': '.jpg, .jpeg, .png'})
+    # profile_pic = FileField('Upload Profile Picture (* image files only *)', [validators.optional()], render_kw={'accept': '.jpg, .jpeg, .png'})
