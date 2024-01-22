@@ -91,11 +91,7 @@ def allowed_file(filename):
 #     # print('display_image filename: ' + filename)
 #     return redirect(url_for('static', filename='product_image/' + filename), code=301)
 
-@app.route('/display_image/<filename>')
-def display_image(filename):
-    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
-    print(f"Displaying image from: {image_path}")
-    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
+
 
 
 def delete_folder(item):
@@ -821,11 +817,10 @@ def create_product(seller_id):
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
                                                      create_product_form.product_stock.data,
-                                                     create_product_form.image.data,
                                                      create_product_form.description.data)
 
         # New
-        if 'image' in request.files:
+        if 'image' in request.files and request.files['image'].filename != '':
             image = request.files['image']
             if image and allowed_file(image.filename):
                 # Save the uploaded image
@@ -839,8 +834,8 @@ def create_product(seller_id):
 
                 # Set the image field in your SellerProduct instance
                 create_product.set_image(filename)
-            else:
-                flash('Allowed image types are png and jpg only')
+        else:
+            print("not working")
 
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
@@ -859,6 +854,13 @@ def create_product(seller_id):
 
         return redirect(url_for('retrieve_product', seller_id=seller_id))
     return render_template('seller/createProduct.html', form=create_product_form)
+
+
+@app.route('/display_image/<filename>')
+def display_image(filename):
+    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+    print(f"Displaying image from: {image_path}")
+    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
 @app.route('/seller/<int:seller_id>/retrieveProducts')
