@@ -829,7 +829,7 @@ def create_product(seller_id):
                 image.save(image_path)
                 print(f"Image saved at: {image_path}")
 
-                # Call the create_image_set function
+                # # Call the create_image_set function
                 create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
 
                 # Set the image field in your SellerProduct instance
@@ -957,15 +957,23 @@ def delete_product(seller_id, product_id):
         seller_product_db = shelve.open('seller-product.db', 'c')
         seller_products = seller_product_db[str(seller_id)]
 
-        # Check if the product exists
-        if 'products' in seller_products and product_id in seller_products['products']:
-            seller_products['products'].pop(product_id)
-            seller_product_db[str(seller_id)] = seller_products
-            seller_product_db.close()
-            return redirect(url_for('retrieve_product', seller_id=seller_id))
-        else:
-            seller_product_db.close()
-            return "Product not found"
+        # Get the product and its image filename
+        deleted_product = seller_products['products'][product_id]
+        deleted_image_filename = deleted_product.get_image()
+
+        # Delete the product from the dictionary
+        seller_products['products'].pop(product_id)
+        seller_product_db[str(seller_id)] = seller_products
+        seller_product_db.close()
+
+        # Delete the associated image file
+        if deleted_image_filename:
+            deleted_image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], deleted_image_filename)
+            if os.path.exists(deleted_image_path):
+                os.remove(deleted_image_path)
+                print(f"Deleted image file at: {deleted_image_path}")
+
+        return redirect(url_for('retrieve_product', seller_id=seller_id))
     except:
         return "Error in deleting product from seller-product db"
 
