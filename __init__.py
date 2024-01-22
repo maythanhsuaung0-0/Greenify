@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
     send_from_directory
-from Forms import CreateUserForm, StaffLoginForm
+from Forms import CreateUserForm, StaffLoginForm, LoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
@@ -10,6 +10,7 @@ import os
 from set_image import create_image_set
 import secrets
 import shutil
+import User_login
 from werkzeug.utils import secure_filename
 from datetime import date
 from urllib.parse import quote
