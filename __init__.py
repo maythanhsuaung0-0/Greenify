@@ -905,6 +905,30 @@ def update_product(seller_id, product_id):
             sellerProduct.set_product_price(update_product_form.product_price.data)
             sellerProduct.set_product_stock(update_product_form.product_stock.data)
             sellerProduct.set_description(update_product_form.description.data)
+
+            # Handle image update
+            if 'image' in request.files and request.files['image'].filename != '':
+                image = request.files['image']
+                if image and allowed_file(image.filename):
+                    # Delete previous image if it exists
+                    if sellerProduct.get_image():
+                        previous_image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], sellerProduct.get_image())
+                        if os.path.exists(previous_image_path):
+                            os.remove(previous_image_path)
+                            print(f"Previous image deleted at: {previous_image_path}")
+
+                    # Save the uploaded image
+                    filename = secure_filename(image.filename)
+                    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+                    image.save(image_path)
+                    print(f"New image saved at: {image_path}")
+
+                    # Call the create_image_set function if needed (not sure yet)
+                    # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+
+                    # Set the image field in your SellerProduct instance
+                    sellerProduct.set_image(filename)
+
             seller_product_db[str(seller_id)] = seller_products
             seller_product_db.close()
 
