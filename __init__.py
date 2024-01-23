@@ -91,11 +91,7 @@ def allowed_file(filename):
 #     # print('display_image filename: ' + filename)
 #     return redirect(url_for('static', filename='product_image/' + filename), code=301)
 
-@app.route('/display_image/<filename>')
-def display_image(filename):
-    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
-    print(f"Displaying image from: {image_path}")
-    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
+
 
 
 def delete_folder(item):
@@ -613,6 +609,7 @@ def create_user():
 
         if create_user_form.email.data in users_dict:
             error = 'An account has already been created with this email. Please Login.'
+
         else:
             user = User.User(create_user_form.email.data, create_user_form.password.data, create_user_form.name.data,
                              create_user_form.contact_number.data, create_user_form.postal_code.data,
@@ -693,10 +690,13 @@ def update_user(email):
             user.set_contact_number(update_user_form.contact_number.data)
             user.set_postal_code(update_user_form.postal_code.data)
             user.set_address(update_user_form.address.data)
-            error = "Update Successful."
+            if not update_user_form.password.data.strip():
+                error = 'Password is required.'
+            elif len(update_user_form.password.data) < 8:
+                error = 'Password must be at least 8 characters long.'
 
         else:
-            error = 'Update Unsuccessful, please try again.'
+            error = "Update Successful."
 
         db['Users'] = users_dict
         db.close()
@@ -817,11 +817,10 @@ def create_product(seller_id):
         create_product = SellerProduct.SellerProduct(create_product_form.product_name.data,
                                                      create_product_form.product_price.data,
                                                      create_product_form.product_stock.data,
-                                                     create_product_form.image.data,
                                                      create_product_form.description.data)
 
         # New
-        if 'image' in request.files:
+        if 'image' in request.files and request.files['image'].filename != '':
             image = request.files['image']
             if image and allowed_file(image.filename):
                 # Save the uploaded image
@@ -831,12 +830,12 @@ def create_product(seller_id):
                 print(f"Image saved at: {image_path}")
 
                 # Call the create_image_set function
-                create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+                # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
 
                 # Set the image field in your SellerProduct instance
                 create_product.set_image(filename)
-            else:
-                flash('Allowed image types are png and jpg only')
+        else:
+            print("not working")
 
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
@@ -855,6 +854,13 @@ def create_product(seller_id):
 
         return redirect(url_for('retrieve_product', seller_id=seller_id))
     return render_template('seller/createProduct.html', form=create_product_form)
+
+
+@app.route('/display_image/<filename>')
+def display_image(filename):
+    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+    print(f"Displaying image from: {image_path}")
+    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
 @app.route('/seller/<int:seller_id>/retrieveProducts')
@@ -899,6 +905,30 @@ def update_product(seller_id, product_id):
             sellerProduct.set_product_price(update_product_form.product_price.data)
             sellerProduct.set_product_stock(update_product_form.product_stock.data)
             sellerProduct.set_description(update_product_form.description.data)
+
+            # Handle image update
+            if 'image' in request.files and request.files['image'].filename != '':
+                image = request.files['image']
+                if image and allowed_file(image.filename):
+                    # Delete previous image if it exists
+                    if sellerProduct.get_image():
+                        previous_image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], sellerProduct.get_image())
+                        if os.path.exists(previous_image_path):
+                            os.remove(previous_image_path)
+                            print(f"Previous image deleted at: {previous_image_path}")
+
+                    # Save the uploaded image
+                    filename = secure_filename(image.filename)
+                    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+                    image.save(image_path)
+                    print(f"New image saved at: {image_path}")
+
+                    # Call the create_image_set function if needed (not sure yet)
+                    # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+
+                    # Set the image field in your SellerProduct instance
+                    sellerProduct.set_image(filename)
+
             seller_product_db[str(seller_id)] = seller_products
             seller_product_db.close()
 
@@ -927,15 +957,23 @@ def delete_product(seller_id, product_id):
         seller_product_db = shelve.open('seller-product.db', 'c')
         seller_products = seller_product_db[str(seller_id)]
 
-        # Check if the product exists
-        if 'products' in seller_products and product_id in seller_products['products']:
-            seller_products['products'].pop(product_id)
-            seller_product_db[str(seller_id)] = seller_products
-            seller_product_db.close()
-            return redirect(url_for('retrieve_product', seller_id=seller_id))
-        else:
-            seller_product_db.close()
-            return "Product not found"
+        # Get the product and its image filename
+        deleted_product = seller_products['products'][product_id]
+        deleted_image_filename = deleted_product.get_image()
+
+        # Delete the product from the dictionary
+        seller_products['products'].pop(product_id)
+        seller_product_db[str(seller_id)] = seller_products
+        seller_product_db.close()
+
+        # Delete the associated image file
+        if deleted_image_filename:
+            deleted_image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], deleted_image_filename)
+            if os.path.exists(deleted_image_path):
+                os.remove(deleted_image_path)
+                print(f"Deleted image file at: {deleted_image_path}")
+
+        return redirect(url_for('retrieve_product', seller_id=seller_id))
     except:
         return "Error in deleting product from seller-product db"
 
@@ -1159,7 +1197,7 @@ def update_seller(seller_id):
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
-        seller.set_profile_image(update_seller_form.profile_pic.data)
+        # seller.set_profile_image(update_seller_form.profile_pic.data)
 
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
@@ -1179,9 +1217,9 @@ def update_seller(seller_id):
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
-        update_seller_form.profile_pic.data = seller.get_profile_image()
+        # update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename, seller_id=seller_id)
+        return render_template('/seller/updateSeller.html', form=update_seller_form)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
