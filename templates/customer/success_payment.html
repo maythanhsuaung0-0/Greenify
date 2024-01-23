@@ -1,16 +1,20 @@
 {% extends "customer/Customer_Base.html" %}
 
 {% block Head_JS_CSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/success_payment.css') }}" />
 {% endblock %}
 
 {% block title %} Successful {% endblock%}
 
 
 {% block body %}
-<div class="text-center">
-    <i class="bi bi-check-lg"></i>
-    <h3>Order Successful!</h3>
-    <p>Thank You For Shopping With Us! You Will Receive A Receipt In Your Email, Have A Nice Day!</p>
+<div class="d-flex flex-column justify-content-center align-items-center vh-100">
+    <div class="check-icon-box my-3 d-flex justify-content-center align-items-center">
+        <i class="check-icon bi bi-check-lg"></i>
+    </div>
+    <h1 class="my-3">Order Successful!</h1>
+    <p class="my-3">Thank You For Shopping With Us! You Will Receive A Receipt In Your Email, Have A Nice Day!</p>
+    <button class="btn home-btn my-5" type="button"><a href="{{ url_for('home') }}">Return to Home</a></button>
 </div>
 {% endblock %}
 

@@ -560,7 +560,6 @@ def payment(user):
                 print("No Record Found")
 
             order_history_id = uuid.uuid4()
-            print(order_history_id)
 
             # Saving Datas
             order_history['items'] = user_selected_product
