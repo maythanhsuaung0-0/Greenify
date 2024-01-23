@@ -1,7 +1,7 @@
-from flask import Flask, flash, render_template, request, redirect, url_for, json, session, send_file, \
-    send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
+    send_from_directory
 from Forms import CreateUserForm, StaffLoginForm, LoginForm
-import shelve, User, SellerProduct, application, User_login
+import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
@@ -10,6 +10,7 @@ import os
 from set_image import create_image_set
 import secrets
 import shutil
+import User_login
 from werkzeug.utils import secure_filename
 from datetime import date
 from urllib.parse import quote
@@ -90,11 +91,7 @@ def allowed_file(filename):
 #     # print('display_image filename: ' + filename)
 #     return redirect(url_for('static', filename='product_image/' + filename), code=301)
 
-@app.route('/display_image/<filename>')
-def display_image(filename):
-    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
-    print(f"Displaying image from: {image_path}")
-    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
+
 
 
 def delete_folder(item):
@@ -120,6 +117,7 @@ def generate_password(length):
     password_list = list(password)
     secrets.SystemRandom().shuffle(password_list)
     return ''.join(password_list)
+
 
 
 # Returning the qty for the cart icon
@@ -232,6 +230,7 @@ def product(seller, product_id):
 
     product = seller_products[product_id]
     seller_product_db.close()
+
 
     # Received AJAX Request
     if request.method == "POST":
@@ -371,6 +370,7 @@ def shopping_cart(user):
             print("Error in loading cart qty db")
         return saved_cart_qty
 
+
     users_shopping_cart = {}
     user_selected_product = {}
     shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -486,9 +486,8 @@ def shopping_cart(user):
 
             return json.jsonify({"redirect_link": url_for("payment", user=user)})
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user,
-                           saved_cart_qty=saved_cart_qty)
 
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty)
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
@@ -610,6 +609,7 @@ def create_user():
 
         if create_user_form.email.data in users_dict:
             error = 'An account has already been created with this email. Please Login.'
+
         else:
             user = User.User(create_user_form.email.data, create_user_form.password.data, create_user_form.name.data,
                              create_user_form.contact_number.data, create_user_form.postal_code.data,
@@ -690,10 +690,13 @@ def update_user(email):
             user.set_contact_number(update_user_form.contact_number.data)
             user.set_postal_code(update_user_form.postal_code.data)
             user.set_address(update_user_form.address.data)
-            error = "Update Successful."
+            if not update_user_form.password.data.strip():
+                error = 'Password is required.'
+            elif len(update_user_form.password.data) < 8:
+                error = 'Password must be at least 8 characters long.'
 
         else:
-            error = 'Update Unsuccessful, please try again.'
+            error = "Update Successful."
 
         db['Users'] = users_dict
         db.close()
@@ -817,7 +820,7 @@ def create_product(seller_id):
                                                      create_product_form.description.data)
 
         # New
-        if 'image' in request.files:
+        if 'image' in request.files and request.files['image'].filename != '':
             image = request.files['image']
             if image and allowed_file(image.filename):
                 # Save the uploaded image
@@ -827,12 +830,12 @@ def create_product(seller_id):
                 print(f"Image saved at: {image_path}")
 
                 # Call the create_image_set function
-                create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+                # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
 
                 # Set the image field in your SellerProduct instance
                 create_product.set_image(filename)
-            else:
-                flash('Allowed image types are png and jpg only')
+        else:
+            print("not working")
 
         # Assigning product with id
         create_product.set_product_id(seller_product_id)
@@ -851,6 +854,13 @@ def create_product(seller_id):
 
         return redirect(url_for('retrieve_product', seller_id=seller_id))
     return render_template('seller/createProduct.html', form=create_product_form)
+
+
+@app.route('/display_image/<filename>')
+def display_image(filename):
+    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+    print(f"Displaying image from: {image_path}")
+    return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
 @app.route('/seller/<int:seller_id>/retrieveProducts')
@@ -895,6 +905,30 @@ def update_product(seller_id, product_id):
             sellerProduct.set_product_price(update_product_form.product_price.data)
             sellerProduct.set_product_stock(update_product_form.product_stock.data)
             sellerProduct.set_description(update_product_form.description.data)
+
+            # Handle image update
+            if 'image' in request.files and request.files['image'].filename != '':
+                image = request.files['image']
+                if image and allowed_file(image.filename):
+                    # Delete previous image if it exists
+                    if sellerProduct.get_image():
+                        previous_image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], sellerProduct.get_image())
+                        if os.path.exists(previous_image_path):
+                            os.remove(previous_image_path)
+                            print(f"Previous image deleted at: {previous_image_path}")
+
+                    # Save the uploaded image
+                    filename = secure_filename(image.filename)
+                    image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+                    image.save(image_path)
+                    print(f"New image saved at: {image_path}")
+
+                    # Call the create_image_set function if needed (not sure yet)
+                    # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+
+                    # Set the image field in your SellerProduct instance
+                    sellerProduct.set_image(filename)
+
             seller_product_db[str(seller_id)] = seller_products
             seller_product_db.close()
 
@@ -923,15 +957,23 @@ def delete_product(seller_id, product_id):
         seller_product_db = shelve.open('seller-product.db', 'c')
         seller_products = seller_product_db[str(seller_id)]
 
-        # Check if the product exists
-        if 'products' in seller_products and product_id in seller_products['products']:
-            seller_products['products'].pop(product_id)
-            seller_product_db[str(seller_id)] = seller_products
-            seller_product_db.close()
-            return redirect(url_for('retrieve_product', seller_id=seller_id))
-        else:
-            seller_product_db.close()
-            return "Product not found"
+        # Get the product and its image filename
+        deleted_product = seller_products['products'][product_id]
+        deleted_image_filename = deleted_product.get_image()
+
+        # Delete the product from the dictionary
+        seller_products['products'].pop(product_id)
+        seller_product_db[str(seller_id)] = seller_products
+        seller_product_db.close()
+
+        # Delete the associated image file
+        if deleted_image_filename:
+            deleted_image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], deleted_image_filename)
+            if os.path.exists(deleted_image_path):
+                os.remove(deleted_image_path)
+                print(f"Deleted image file at: {deleted_image_path}")
+
+        return redirect(url_for('retrieve_product', seller_id=seller_id))
     except:
         return "Error in deleting product from seller-product db"
 
@@ -951,6 +993,12 @@ def respond():
     return render_template('sellers_application/respondPage.html')
 
 
+@app.route('/errorPage')
+def error():
+    return render_template('staff/errorPage.html')
+
+
+@app.route("/register", methods=['GET', 'POST'])
 @app.route("/register", methods=['GET', 'POST'])
 def register():  # create
     global last_id
@@ -962,7 +1010,6 @@ def register():  # create
             application_form = db['Application']
         except:
             print("Error in retrieving application from application.db")
-
         # store id
         try:
             last_id = db['Id']
@@ -972,8 +1019,7 @@ def register():  # create
             else:
                 last_id = 0
         db['Id'] = last_id
-
-        appForm = AppFormFormat(last_id, registration_form.name.data, registration_form.business_name.data,
+        appForm = AppFormFormat(last_id, registration_form.seller_name.data, registration_form.business_name.data,
                                 registration_form.seller_email.data,
                                 registration_form.business_desc.data)
         application_form[appForm.get_application_id()] = appForm
@@ -984,15 +1030,17 @@ def register():  # create
             support_docs = request.files['support_document']
             if support_docs:
                 filename = support_docs.filename
-                pdf_id = secrets.token_hex(16)
-                print('filename', filename)
-                os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id))
-                support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id, filename))
-                os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id)
-                message = f"{pdf_id}/{filename.split('.')[0]}.pdf"
-                print('message', message)
-                appForm.set_doc(message)
-
+                if filename.endswith('.pdf'):
+                    pdf_id = secrets.token_hex(16)
+                    print('filename', filename)
+                    os.makedirs(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id))
+                    support_docs.save(os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id, filename))
+                    os.path.join(app.config["UPLOAD_DIRECTORY"], pdf_id)
+                    message = f"{pdf_id}/{filename.split('.')[0]}.pdf"
+                    print('message', message)
+                    appForm.set_doc(message)
+                else:
+                    return redirect(url_for('error'))
         db['Application'] = application_form
         # testing
         application_form = db['Application']
@@ -1014,24 +1062,24 @@ def view_pdf(pdf):
     return send_from_directory(os.path.dirname(pdf_path), os.path.basename(pdf_path), as_attachment=False)
 
 
-@app.route('/staff/retrieveApplicationForms', methods=['POST', 'GET'])  # read
+@app.route('/staff/retrieveApplicationForms',  methods = ['POST','GET'])  # read
 def retrieveApplicationForms():
-    app_list = retrieve_db('application.db', 'Application')
+    app_list = retrieve_db('application.db','Application')
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for rejecting the form
         if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'], "rejected")
+            print(data_to_modify['id'],"rejected")
             rejected = extracting('application.db', 'Application', data_to_modify['id'])
             if rejected.get_doc():
                 delete_folder(rejected)
-            send_mail(rejected.get_email(), False, rejected.get_seller_name(), '')
+            send_mail(rejected.get_email(), False, rejected.get_name(), '')
         if data_to_modify['request_type'] == 'approve':
-            print(data_to_modify['id'], "approved from AJAX")
+            print(data_to_modify['id'], "approved")
             # take the approved application
             approved = extracting('application.db', 'Application', data_to_modify['id'])
             print("This user is approved", approved.get_application_id())
-            # open the approved_sellers
+            # store in the approved_sellers
             approved_sellers = {}
             approved_db = shelve.open('approved_sellers.db', 'c')
             try:
@@ -1040,35 +1088,44 @@ def retrieveApplicationForms():
                 print("Error in retrieving sellers from application.db")
 
             passwords = []
-
-            for key, seller in approved_sellers.items():
-                passwords.append(seller.get_password())
-
-            print(passwords)
             while True:
                 password = generate_password(14)
                 if password not in passwords:
                     break
-
             approved.set_password(password)
-
             # storing approved seller
             approved_sellers[approved.get_application_id()] = approved
             approved_db['Approved_sellers'] = approved_sellers
+            for key, seller in approved_db['Approved_sellers'].items():
+                passwords.append(seller.get_password())
             approved_db.close()
+
             send_mail(approved.get_email(), True, approved.get_seller_name(), password)
+        if data_to_modify['request_type'] == 'filter':
+            if data_to_modify['filter_by'] == 'certificate':
+                certify = []
+                print('filtered')
+                for i in app_list:
+                    print(i)
+                    if i.get_doc():
+                        print('have certificate')
+                        certify.append(i)
+                        print('certified sellers', i.get_name())
+                print('certified',certify)
+                return render_template('staff/retrieveAppForms.html', count=len(certify), app_list=certify)
+
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
-@app.route('/staff/retrieveUpdateForms', methods=['POST', 'GET'])
+@app.route('/staff/retrieveUpdateForms', methods = ['POST','GET'])
 def retrieveUpdateForms():  # for approving updates
-    waiting_list = retrieve_db('updated_sellers.db', 'Updated_sellers')
+    waiting_list = retrieve_db('updated_sellers.db','Updated_sellers')
     print('waiting list', waiting_list)
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for rejecting the update form
         if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'], "rejected")
+            print(data_to_modify['id'],"rejected")
             deleted_item = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -1099,7 +1156,7 @@ def retrieveSellers():  # read
         data_to_modify = json.loads(request.data)
         # for removing
         if data_to_modify['request_type'] == 'delete':
-            print(data_to_modify['id'], "deleted")
+            print(data_to_modify['id'],"deleted")
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -1140,7 +1197,7 @@ def update_seller(seller_id):
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
-        seller.set_profile_image(update_seller_form.profile_pic.data)
+        # seller.set_profile_image(update_seller_form.profile_pic.data)
 
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
@@ -1160,9 +1217,9 @@ def update_seller(seller_id):
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
-        update_seller_form.profile_pic.data = seller.get_profile_image()
+        # update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form, filename=filename, seller_id=seller_id)
+        return render_template('/seller/updateSeller.html', form=update_seller_form)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
@@ -1259,6 +1316,9 @@ def game1():
     else:
         return redirect(url_for('login'))
 
+# @app.route('/about_us')
+# def about_us():
+#     return render_template('/customer/about_us.html')
 
 if __name__ == "__main__":
     app.run(debug=False)

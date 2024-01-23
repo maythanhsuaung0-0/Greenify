@@ -24,7 +24,7 @@
   />
   {% block JS_CSS %}{% endblock %}
 </head>
-{% macro dataComponent(id,name,escaped_name,email,desc,file_name,docs,date) -%}
+{% macro dataComponent(id,seller_name,name,escaped_name,email,desc,file_name,docs,date) -%}
 <div class="card" id="card-{{id}}">
   <div class="row card-body">
     <div class="col-1 text-center">{{id}}</div>
@@ -37,9 +37,32 @@
     {% endif %}
     <div class="col-2 text-center">{{date}}</div>
     <div class="col-2 text-center">
+                  <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal-{{id}}">
+                                Delete
+                   </button>
 
-<button class="btn btn-danger btn-sm" onclick="handleButton('{{id}}','{{escaped_name}}','delete')" >Delete</button>
-
+                  <!-- Modal -->
+                  <div class="modal fade" id="deleteModal-{{id}}" tabindex="-1"
+                       role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="deleteModalLabel">Delete this seller? </h5>
+                          <button type="button" class="btn btn-light" data-bs-dismiss="modal" aria-label="Close">
+                            <i class="fa-solid fa-xmark"></i>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          Are you sure you want to delete <b>{{escaped_name}}</b> ?
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                             onclick="handleButton('{{id}}','{{escaped_name}}','delete')" >Delete</button>
+                          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
     </div>
     <div class="col-1">
       <a
@@ -61,6 +84,10 @@
         <div>
           <h6 class="fw-bold">Business Email</h6>
           <p>{{email}}</p>
+        </div>
+        <div>
+          <h6 class="fw-bold">Seller's name</h6>
+          <p>{{seller_name}}</p>
         </div>
         <div>
           <h6 class="fw-bold">Business Description</h6>

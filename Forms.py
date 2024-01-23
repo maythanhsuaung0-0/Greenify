@@ -1,4 +1,4 @@
-from wtforms import Form, EmailField, validators, PasswordField, StringField, TelField, IntegerField
+from wtforms import Form, EmailField, validators, PasswordField, StringField, TelField
 
 
 class CreateUserForm(Form):
@@ -8,6 +8,7 @@ class CreateUserForm(Form):
     contact_number = TelField('Phone Number', [validators.DataRequired(), validators.length(min=8)])
     postal_code = StringField('Postal Code', [validators.DataRequired(), validators.length(min=6)])
     address = StringField('Address', [validators.DataRequired()])
+
 
 class StaffLoginForm(Form):
     admin_email = EmailField('Email', [validators.DataRequired(), validators.Email()])

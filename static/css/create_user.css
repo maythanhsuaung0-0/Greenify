@@ -1,7 +1,6 @@
 .main {
         background-color: #FFFFFF;
         width: 400px;
-        height: 500px;
         margin: 7em auto;
         border-radius: 1.5em;
         box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
@@ -12,6 +11,50 @@
         color: #000000;
         font-weight: bold;
         font-size: 23px;
+    }
+
+#password {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 40px;
+    }
+
+#email {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    }
+
+#name {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    }
+
+#contact_number {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
+    }
+
+#postal_code {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
+    }
+
+#address {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
     }
 
 #SignUp {
@@ -25,7 +68,7 @@
         padding-bottom: 10px;
         padding-top: 10px;
         margin-top: 20px;
-        margin-left: 35%;
+        margin-left: 100px;
         margin-bottom:21px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
