@@ -81,14 +81,6 @@
 
     /* for the scoreboard */
 
-    /* ##Scoreboard Header Style */
-    .scoreboard-header {
-      text-align: center;
-      font-size: 24px;
-      color: #4CAF50;
-      margin-bottom: 10px;
-    }
-
     /* Table Styles */
     .score-table {
       width: 60%;
@@ -140,7 +132,7 @@
     }
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10.11/dist/interact.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/inter actjs@1.10.11/dist/interact.min.js"></script>
 
   <script>
 
@@ -378,12 +370,11 @@
     style="font-family: 'Times New Roman', Times, serif; font-size: x-large; font-weight: bold;">
     <div id="user_score"></div>
   </div>
-  
+
   <div id="scoreboard" style="margin-top: 20px;">
-    <h2 class="scoreboard-header">Scoreboard</h2>
     <!-- The table will be inserted here  -->
   </div>
-  
+
   <script src="{{ url_for('static', filename='JS/game1.js') }}"></script>
 </body>
 

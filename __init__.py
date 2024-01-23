@@ -1278,6 +1278,9 @@ def game1():
     else:
         return redirect(url_for('login'))
 
+# @app.route('/about_us')
+# def about_us():
+#     return render_template('/customer/about_us.html')
 
 if __name__ == "__main__":
     app.run(debug=False)
