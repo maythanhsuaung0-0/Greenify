@@ -22,11 +22,14 @@ function creditCardValidation(creditCradNum) {
   }
 }
 
+
 //Pay
 function payment() {
   var credit_card_no = $('#card-no').val();
   var cvv = $('#card-cvv').val();
   var date = $('#card-exp-date').val();
+  date = date.slice(0,7)
+  month = date.slice(0,2)
 
 
   if (cvv.length < 3 && cvv.length != 0) {
@@ -35,7 +38,7 @@ function payment() {
     $('#invalid-cvv').css('display', 'none');
   }
 
-  if (date.match(/[\d]{2}\-[\d]{4}/)) {
+  if (date.match(/[\d]{2}\-[\d]{4}/) && date.length < 8 && month < 13) {
     $('#invalid-exp-date').css('display', 'none');
   } else if (date.length != 0) {
     $('#invalid-exp-date').css('display', 'block');

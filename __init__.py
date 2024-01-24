@@ -560,7 +560,6 @@ def payment(user):
                 print("No Record Found")
 
             order_history_id = uuid.uuid4()
-            print(order_history_id)
 
             # Saving Datas
             order_history['items'] = user_selected_product
@@ -833,8 +832,8 @@ def create_product(seller_id):
                 image.save(image_path)
                 print(f"Image saved at: {image_path}")
 
-                # # Call the create_image_set function
-                create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+                # Call the create_image_set function
+                # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
 
                 # Set the image field in your SellerProduct instance
                 create_product.set_image(filename)
@@ -1320,6 +1319,9 @@ def game1():
     else:
         return redirect(url_for('login'))
 
+# @app.route('/about_us')
+# def about_us():
+#     return render_template('/customer/about_us.html')
 
 if __name__ == "__main__":
     app.run(debug=False)
