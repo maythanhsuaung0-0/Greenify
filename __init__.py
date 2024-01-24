@@ -609,7 +609,10 @@ def create_user():
 
         if create_user_form.email.data in users_dict:
             error = 'An account has already been created with this email. Please Login.'
-
+        elif len(str(create_user_form.contact_number.data)) != 8:
+            error = 'Phone number must be 8 digits.'
+        elif len(str(create_user_form.postal_code.data)) != 6:
+            error = 'Postal code must be 6 digits.'
         else:
             user = User.User(create_user_form.email.data, create_user_form.password.data, create_user_form.name.data,
                              create_user_form.contact_number.data, create_user_form.postal_code.data,
@@ -671,32 +674,33 @@ def logout():
     return "You have successfully logged out from your account."
 
 
-# email in the url won't change
 @app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
     error = None
     update_user_form = CreateUserForm(request.form)
-    if request.method == 'POST' and update_user_form.validate():
+
+    if request.method == 'POST':
         users_dict = {}
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
         user = users_dict.get(email)
 
-        if user:
-            user.set_email(update_user_form.email.data)
-            user.set_password(update_user_form.password.data)
-            user.set_name(update_user_form.name.data)
-            user.set_contact_number(update_user_form.contact_number.data)
-            user.set_postal_code(update_user_form.postal_code.data)
-            user.set_address(update_user_form.address.data)
-            if not update_user_form.password.data.strip():
-                error = 'Password is required.'
-            elif len(update_user_form.password.data) < 8:
-                error = 'Password must be at least 8 characters long.'
-
+        if update_user_form.validate():
+            if len(str(update_user_form.contact_number.data)) != 8:
+                error = 'Phone number must be 8 digits.'
+            elif len(str(update_user_form.postal_code.data)) != 6:
+                error = 'Postal code must be 6 digits.'
+            else:
+                user.set_email(update_user_form.email.data)
+                user.set_password(update_user_form.password.data)
+                user.set_name(update_user_form.name.data)
+                user.set_contact_number(update_user_form.contact_number.data)
+                user.set_postal_code(update_user_form.postal_code.data)
+                user.set_address(update_user_form.address.data)
+                error = "Update Successful."
         else:
-            error = "Update Successful."
+            error = "Update Unsuccessful."
 
         db['Users'] = users_dict
         db.close()
@@ -717,8 +721,8 @@ def update_user(email):
             update_user_form.address.data = user.get_address()
 
     if session.get('logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, email=update_user_form.email.data,
-                               error=error, user=user)
+        return render_template('customer/updateUser.html', form=update_user_form, email=email, error=error,
+                               user=user)
     else:
         return redirect(url_for('login'))
 
