@@ -181,9 +181,21 @@ def search_engine(search_query):
 
     return result_list
 
+def last_url(url):
+    logged_in = False
+    try:
+        logged_in = session['logged_in']
+    except:
+        session['logeed_in'] = False
+        print("User not logged in")
+
+    if not logged_in:
+        session['last_url'] = url
+
 
 @app.route("/")
 def home():
+    last_url(url_for('home'))
     try:
         user = session['user_id']
         return render_template("customer/homepage.html", user=user, saved_cart_qty=cart_qty(user))
@@ -194,6 +206,8 @@ def home():
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
 def product(seller, product_id):
+    print(session['last_url'])
+    last_url(url_for('product', seller=seller, product_id=product_id))
     try:
         user = session['user_id']
     except:
@@ -359,6 +373,7 @@ def product(seller, product_id):
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
 def shopping_cart(user):
+    last_url(url_for('shopping_cart', user=user))
     user = session['user_id']
     def cart_qty(user):
         saved_cart_qty = 0
@@ -586,6 +601,7 @@ def payment(user):
 
 @app.route('/product_search')
 def product_search():
+    last_url(url_for('product_search'))
     return 'hi'
 
 @app.route('/success')
@@ -641,8 +657,7 @@ def login():
                     if key == user.get_email():
                         session['user_id'] = user_id
                         session['logged_in'] = True
-                        print(session['user_id'])
-                        return redirect(url_for('home'))
+                        return redirect(session['last_url'])
                 error = 'Email or Password is incorrect, please try again.'
             else:
                 return render_template('customer/createUser.html')
@@ -666,6 +681,7 @@ def check_login():
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)  # Remove 'logged_in' from session
+    session.pop('user_id', None)
     print(session.get('logged_in'))
     return "You have successfully logged out from your account."
 
@@ -1320,4 +1336,4 @@ def game1():
 #     return render_template('/customer/about_us.html')
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    app.run(debug=True)
