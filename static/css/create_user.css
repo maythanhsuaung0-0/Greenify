@@ -17,7 +17,14 @@
     width: 76%;
     margin-left: 39px;
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 15px;
+    }
+
+#confirm_password {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
     }
 
 #email {
@@ -68,24 +75,7 @@
         padding-bottom: 10px;
         padding-top: 10px;
         margin-top: 20px;
-        margin-left: 100px;
-        margin-bottom:21px;
-        font-size: 13px;
-        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
-    }
-
-#Next {
-      cursor: pointer;
-        border-radius: 5em;
-        color: #fff;
-        background: linear-gradient(to right, #020202, #090909);
-        border: 0;
-        padding-left: 40px;
-        padding-right: 40px;
-        padding-bottom: 10px;
-        padding-top: 10px;
-        margin-top: 20px;
-        margin-left: 35%;
+        margin-left: 130px;
         margin-bottom:21px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);

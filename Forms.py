@@ -1,12 +1,12 @@
-from wtforms import Form, EmailField, validators, PasswordField, StringField, TelField
-
+from wtforms import Form, EmailField, validators, PasswordField, StringField, IntegerField
 
 class CreateUserForm(Form):
     email = EmailField('Email', [validators.DataRequired(), validators.Email()])
-    password = PasswordField('Password', [validators.DataRequired(), validators.length(min=8, max=30)])
+    password = PasswordField('Password', [validators.DataRequired(), validators.length(min=8, max=30), validators.EqualTo('confirm_password', message='Passwords must match.')])
+    confirm_password = PasswordField('Confirm Password')
     name = StringField('Name', [validators.DataRequired()])
-    contact_number = TelField('Phone Number', [validators.DataRequired(), validators.length(min=8)])
-    postal_code = StringField('Postal Code', [validators.DataRequired(), validators.length(min=6)])
+    contact_number = IntegerField('Phone Number', [validators.DataRequired(), validators.NumberRange(min=00000000, max=99999999)])
+    postal_code = IntegerField('Postal Code', [validators.DataRequired(), validators.NumberRange(min=000000, max=999999)])
     address = StringField('Address', [validators.DataRequired()])
 
 

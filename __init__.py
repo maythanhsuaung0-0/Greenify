@@ -23,7 +23,8 @@ from seller_order import SellerOrder
 import hashlib
 
 app = Flask(__name__, static_url_path='/static')
-logged_in = False
+user_logged_in = False
+seller_logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
@@ -184,9 +185,9 @@ def search_engine(search_query):
 def last_url(url):
     logged_in = False
     try:
-        logged_in = session['logged_in']
+        logged_in = session['user_logged_in']
     except:
-        session['logeed_in'] = False
+        session['user_logged_in'] = False
         print("User not logged in")
 
     if not logged_in:
@@ -206,7 +207,6 @@ def home():
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
 def product(seller, product_id):
-    print(session['last_url'])
     last_url(url_for('product', seller=seller, product_id=product_id))
     try:
         user = session['user_id']
@@ -624,7 +624,10 @@ def create_user():
 
         if create_user_form.email.data in users_dict:
             error = 'An account has already been created with this email. Please Login.'
-
+        elif len(str(create_user_form.contact_number.data)) != 8:
+            error = 'Phone number must be 8 digits.'
+        elif len(str(create_user_form.postal_code.data)) != 6:
+            error = 'Postal code must be 6 digits.'
         else:
             user = User.User(create_user_form.email.data, create_user_form.password.data, create_user_form.name.data,
                              create_user_form.contact_number.data, create_user_form.postal_code.data,
@@ -639,7 +642,7 @@ def create_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global logged_in, user_id, user
+    global user_id, user
     error = None
     login_form = LoginForm(request.form)
     if request.method == 'POST' and login_form.validate():
@@ -657,14 +660,16 @@ def login():
                     if key == user.get_email():
                         session['user_id'] = user_id
                         session['logged_in'] = True
+                        session['user_logged_in'] = True
+                        print(session['user_id'])
+                        print(f"User login status = {session.get('user_logged_in')}")
                         return redirect(session['last_url'])
                 error = 'Email or Password is incorrect, please try again.'
             else:
                 return render_template('customer/createUser.html')
         except:
             print("Error in opening user.db")
-    print(session.get('logged_in'))
-    return render_template('customer/login.html', form=login_form, logged_in=logged_in, error=error)
+    return render_template('customer/login.html', form=login_form, user_logged_in=user_logged_in, error=error)
 
 
 def get_key(val, users_dict):
@@ -675,43 +680,51 @@ def get_key(val, users_dict):
 
 @app.route("/check_login")
 def check_login():
-    return logged_in
+    return user_logged_in
 
 
-@app.route('/logout')
-def logout():
-    session.pop('logged_in', None)  # Remove 'logged_in' from session
-    session.pop('user_id', None)
-    print(session.get('logged_in'))
+@app.route('/user/logout')
+def user_logout():
+    if session.get('user_logged_in'):
+        session.pop('user_logged_in', None)
+        session.pop('user_id', None)
+    print(f"User login status = {session.get('user_logged_in')}")
     return "You have successfully logged out from your account."
 
 
-# email in the url won't change
+@app.route('/seller/logout')
+def seller_logout():
+    if session.get('seller_logged_in'):
+        session.pop('seller_logged_in', None)
+    print(f"Seller login status = {session.get('seller_logged_in')}")
+
 @app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
     error = None
     update_user_form = CreateUserForm(request.form)
-    if request.method == 'POST' and update_user_form.validate():
+
+    if request.method == 'POST':
         users_dict = {}
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
         user = users_dict.get(email)
 
-        if user:
-            user.set_email(update_user_form.email.data)
-            user.set_password(update_user_form.password.data)
-            user.set_name(update_user_form.name.data)
-            user.set_contact_number(update_user_form.contact_number.data)
-            user.set_postal_code(update_user_form.postal_code.data)
-            user.set_address(update_user_form.address.data)
-            if not update_user_form.password.data.strip():
-                error = 'Password is required.'
-            elif len(update_user_form.password.data) < 8:
-                error = 'Password must be at least 8 characters long.'
-
+        if update_user_form.validate():
+            if len(str(update_user_form.contact_number.data)) != 8:
+                error = 'Phone number must be 8 digits.'
+            elif len(str(update_user_form.postal_code.data)) != 6:
+                error = 'Postal code must be 6 digits.'
+            else:
+                user.set_email(update_user_form.email.data)
+                user.set_password(update_user_form.password.data)
+                user.set_name(update_user_form.name.data)
+                user.set_contact_number(update_user_form.contact_number.data)
+                user.set_postal_code(update_user_form.postal_code.data)
+                user.set_address(update_user_form.address.data)
+                error = "Update Successful."
         else:
-            error = "Update Successful."
+            error = "Update Unsuccessful."
 
         db['Users'] = users_dict
         db.close()
@@ -731,9 +744,9 @@ def update_user(email):
             update_user_form.postal_code.data = user.get_postal_code()
             update_user_form.address.data = user.get_address()
 
-    if session.get('logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, email=update_user_form.email.data,
-                               error=error, user=user)
+    if session.get('user_logged_in'):
+        return render_template('customer/updateUser.html', form=update_user_form, email=email, error=error,
+                               user=user)
     else:
         return redirect(url_for('login'))
 
@@ -766,12 +779,12 @@ def staff_login():
 
 @app.route('/seller/login', methods=['GET', 'POST'])
 def seller_login():
-    global logged_in, seller_password
+    global seller_password
     error = None
-    login_form = CreateUserForm(request.form)
+    login_form = LoginForm(request.form)
     if request.method == 'POST' and login_form.validate():
         approved_sellers = {}
-        user = User.User(login_form.email.data, login_form.password.data)
+        user = User_login.UserLogin(login_form.email.data, login_form.password.data)
         sellers = []
         seller_password = []
         seller_email = []
@@ -790,12 +803,13 @@ def seller_login():
             print(i)
             if login_form.email.data == i["email"] and login_form.password.data == i["pw"]:
                 seller_id = i['id']
-                session['logged_in'] = True
-                return redirect(url_for('seller_dashboard', seller_id=seller_id))
+                session['seller_logged_in'] = True
+                print(f"Seller login status = {session.get('seller_logged_in')}")
+                if session.get('seller_logged_in'):
+                    return redirect(url_for('seller_dashboard', seller_id=seller_id))
             else:
                 error = 'Email or Password is incorrect, please try again.'
-    print(session.get('logged_in'))
-    return render_template('seller/seller_login.html', form=login_form, logged_in=logged_in, error=error)
+    return render_template('seller/seller_login.html', form=login_form, seller_logged_in=seller_logged_in, error=error)
 
 
 @app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])

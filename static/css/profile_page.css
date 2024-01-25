@@ -24,24 +24,7 @@
         padding-bottom: 10px;
         padding-top: 10px;
         margin-top: 20px;
-        margin-left: 99px;
-        margin-bottom:5px;
-        font-size: 13px;
-        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
-    }
-
-#Next {
-      cursor: pointer;
-        border-radius: 5em;
-        color: #fff;
-        background: linear-gradient(to right, #020202, #090909);
-        border: 0;
-        padding-left: 48px;
-        padding-right: 48px;
-        padding-bottom: 10px;
-        padding-top: 10px;
-        margin-left: 1px;
-        margin-top: 25px;
+        margin-left: 134px;
         margin-bottom:5px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
@@ -57,7 +40,7 @@
         padding-right: 46px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 35%;
+        margin-left: 134px;
         margin-bottom:5px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
@@ -73,7 +56,7 @@
         padding-right: 40px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 35%;
+        margin-left: 135px;
         margin-bottom:5px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
@@ -95,18 +78,6 @@
       color: inherit; /* Inherit the color from the parent */
     }
 
-[data-tab-content] {
-  display: none;
-}
-
-.active[data-tab-content] {
-  display: block;
-}
-
-.inactive[data-tab-content] {
-  display: none;
-  visibility: hidden;
-}
 
 .tab.active {
   background-color: #CCC;
@@ -148,7 +119,14 @@ body {
     width: 76%;
     margin-left: 39px;
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 15px;
+    }
+
+#confirm_password {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
     }
 
 #email {
@@ -163,7 +141,6 @@ body {
     width: 76%;
     margin-left: 39px;
     text-align: center;
-    margin-top: 5px;
     margin-bottom: 10px;
     }
 
