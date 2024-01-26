@@ -13,6 +13,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/Customer base.css') }}">
+    <script src="{{ url_for('static', filename='JS/customer_base.js') }}"></script>
     {% block Head_JS_CSS %}{% endblock %}
     <title>{% block title %}{% endblock%}</title>
 </head>
@@ -52,12 +53,13 @@
             </div>
 
             <!-- Search Engine -->
-<!--            <div>-->
-<!--                <form class="d-flex" role="search">-->
-<!--                    <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">-->
-<!--                    <button class="btn btn-sm custom-btn" type="submit">Search</button>-->
-<!--                </form>-->
-<!--            </div>-->
+            <div>
+                <form method="POST" action="" class="d-flex" role="search">
+                    {% from "includes/_formHelper.html" import render_field %}
+                    {{ render_field(form.search_query, class="form-control", placeholder='Search') }}
+                    <button class="btn btn-sm custom-btn mx-3" type="submit">Search</button>
+                </form>
+            </div>
 
             <!--Shopping Cart-->
             {% if user == None %}

@@ -21,6 +21,8 @@ import uuid
 from crud_functions import *
 from seller_order import SellerOrder
 import hashlib
+from searchForm import Search
+
 
 app = Flask(__name__, static_url_path='/static')
 user_logged_in = False
@@ -33,17 +35,17 @@ UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-@app.errorhandler(404)
-def error_404(e):
-    return render_template('error_msg.html')
-
-@app.errorhandler(403)
-def error_403(e):
-    return render_template('error_msg.html')
-
-@app.errorhandler(500)
-def error_500(e):
-    return render_template('error_msg.html')
+# @app.errorhandler(404)
+# def error_404(e):
+#     return render_template('error_msg.html')
+#
+# @app.errorhandler(403)
+# def error_403(e):
+#     return render_template('error_msg.html')
+#
+# @app.errorhandler(500)
+# def error_500(e):
+#     return render_template('error_msg.html')
 
 # # New
 # UPLOAD_IMAGE_FOLDER = 'static/product_image'
@@ -159,13 +161,12 @@ def seller_name_search(seller_id):
             return approved_sellers[seller_id].get_seller_name()
 
 
+
 def search_engine(search_query):
     search_query_list = search_query.split()
 
-
     seller_product_db = shelve.open('seller-product.db')
     result_list = []
-
     for seller_id in seller_product_db:
         seller_products = seller_product_db[str(seller_id)]['products']
 
@@ -175,12 +176,20 @@ def search_engine(search_query):
 
             #Loop Through Search Query
             for word in search_query_list:
-                result = product_name.find(word)
-                if result:
+                result = product_name.lower().find(word)
+                if result != -1:
+                    print(word)
+                    print(product_name)
+                    print(result)
+                    #Seller Name, Product
                     result_list.append([seller_name_search(seller_id), seller_products[product_id]])
                     break
 
-    return result_list
+    search_db = shelve.open('search.db')
+    if len(result_list) != 0:
+        search_db['result_list'] = result_list
+    else:
+        search_db['result_list'] = None
 
 def last_url(url):
     logged_in = False
@@ -193,15 +202,19 @@ def last_url(url):
     if not logged_in:
         session['last_url'] = url
 
-
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def home():
     last_url(url_for('home'))
+    search_form = Search(request.form)
+    if request.method == 'POST' and search_form.validate():
+        search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
+
     try:
         user = session['user_id']
-        return render_template("customer/homepage.html", user=user, saved_cart_qty=cart_qty(user))
+        return render_template("customer/homepage.html", user=user, saved_cart_qty=cart_qty(user), form=search_form)
     except:
-        return render_template("customer/homepage.html", user = None)
+        return render_template("customer/homepage.html", user = None, form=search_form)
 
 
 
@@ -212,6 +225,12 @@ def product(seller, product_id):
         user = session['user_id']
     except:
         user = None
+
+    search_form = Search(request.form)
+    if request.method == 'POST' and search_form.validate():
+        search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
+
     def cart_qty(user):
         saved_cart_qty = 0
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -368,13 +387,19 @@ def product(seller, product_id):
 
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user)
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user, form=search_form)
 
 
 @app.route('/<user>/cart', methods=['GET', 'POST'])
 def shopping_cart(user):
     last_url(url_for('shopping_cart', user=user))
     user = session['user_id']
+
+    search_form = Search(request.form)
+    if request.method == 'POST' and search_form.validate():
+        search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
+
     def cart_qty(user):
         saved_cart_qty = 0
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -502,11 +527,17 @@ def shopping_cart(user):
             return json.jsonify({"redirect_link": url_for("payment", user=user)})
 
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty)
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty, form=search_form)
 
 @app.route('/<user>/payment', methods=['GET', 'POST'])
 def payment(user):
     user = session['user_id']
+
+    search_form = Search(request.form)
+    if request.method == 'POST' and search_form.validate():
+        search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
+
     #Receive AJAX Request
     if request.method == "POST":
         sent_data = json.loads(request.data)
@@ -596,16 +627,37 @@ def payment(user):
     user_info = user_dict[user]
     user_db.close()
 
-    return render_template("customer/payment.html", user=user, user_address=user_info.get_address(), user_name=user_info.get_name(), saved_cart_qty=cart_qty(user))
+    return render_template("customer/payment.html", user=user, user_address=user_info.get_address(), user_name=user_info.get_name(), saved_cart_qty=cart_qty(user), form=search_form)
 
 
-@app.route('/product_search')
+@app.route('/product_search', methods=['GET', 'POST'])
 def product_search():
+    try:
+        user = session['user_id']
+    except:
+        user = None
     last_url(url_for('product_search'))
-    return 'hi'
+
+
+    search_form = Search(request.form)
+    if request.method == 'POST' and search_form.validate():
+        search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
+
+    search_db = shelve.open('search.db')
+    result_list = search_db['result_list']
+    print('search', result_list)
+    # for product in result_list:
+    #     print(product[1].get_product_id())
+    return render_template('customer/search_result.html', user=user, saved_cart_qty=cart_qty(user), result_list=result_list, form=search_form)
 
 @app.route('/success')
 def success_payment():
+    search_form = Search(request.form)
+    global result_list
+    if request.method == 'POST' and search_form.validate():
+        result_list = search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
     return render_template('customer/success_payment.html')
 
 
