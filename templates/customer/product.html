@@ -1,4 +1,5 @@
-{% extends "customer/Customer_Base.html" %} {% block Head_JS_CSS %}
+{% extends "customer/Customer_Base.html" %}
+{% block Head_JS_CSS %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/starrating.css') }}" />
 <link rel="stylesheet" href="{{ url_for('static', filename='css/product.css') }}" />
 {% endblock %}
@@ -111,9 +112,5 @@
 </div>
 
 
-
-{% endblock %}
-{% block End_JS_CSS %}
-<script type="text/javascript" src="{{ url_for('static', filename='JS/product_base.js') }}"></script>
 
 {% endblock %}

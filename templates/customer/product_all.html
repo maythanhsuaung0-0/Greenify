@@ -1,0 +1,29 @@
+{% extends "customer/Customer_Base.html" %}
+{% block Head_JS_CSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/product_all.css') }}">
+{% endblock %}
+
+{% block title%} Products {%endblock %}
+
+{% block body %}
+<div class="my-5">
+    <h1>All Products</h1>
+    <div class="row row-cols-lg-4 row-cols-2 my-5">
+        {% for product in all_result %}
+        <div class="col indv-prod ms-3">
+            <a href="{{ url_for('product', seller=product[0], product_id=product[1].get_product_id()) }}">
+                <div class="image">
+                    <img src="{{ url_for('static', filename='images/Tupperware 2.jpg') }}" alt="">
+                </div>
+                <p class="product-name">{{ product[1].get_product_name() }}</p>
+                <p class="product-price">$ {{ product[1].get_product_price() }}</p>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+
+{% block End_JS_CSS %}
+{% endblock %}
