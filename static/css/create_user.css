@@ -14,18 +14,31 @@
     }
 
 #password {
+    width: 80%; /* Adjust to 100% for full width */
+    margin-bottom: 0; /* Remove or adjust margin-bottom as needed */
+    margin-top: 7px; /* Adjust the top margin to vertically align with the input */
+    text-align: center;
+}
+
+.input-group-append {
+   height: 38px;
+   margin-top: 7px;
+}
+
+.input-group {
     width: 76%;
     margin-left: 39px;
-    text-align: center;
-    margin-bottom: 15px;
-    }
+    margin: 0 auto; /* Center the input group horizontally */
+}
+
 
 #confirm_password {
     width: 76%;
     margin-left: 39px;
     text-align: center;
     margin-bottom: 15px;
-    }
+}
+
 
 #email {
     width: 76%;
@@ -103,53 +116,4 @@
 
 img {
   width: 150%
-}
-
-[data-tab-content] {
-  display: none;
-}
-
-.active[data-tab-content] {
-  display: block;
-}
-
-.inactive[data-tab-content] {
-  display: none;
-  visibility: hidden;
-}
-
-.tab.active {
-  background-color: #CCC;
-}
-
-body {
-  padding: 0;
-  margin: 0;
-}
-
-.tabs {
-  display: flex;
-  justify-content: space-around;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  border-bottom: 1px solid black;
-}
-
-.tab {
-  cursor: pointer;
-  padding: 10px;
-}
-
-.tab.active {
-  background-color: #CCC;
-}
-
-.tab:hover {
-  background-color: #AAA;
-}
-
-.tab-content {
-  margin-left: 20px;
-  margin-right: 20px;
 }
