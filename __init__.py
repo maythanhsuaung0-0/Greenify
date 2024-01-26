@@ -646,10 +646,38 @@ def product_search():
 
     search_db = shelve.open('search.db')
     result_list = search_db['result_list']
-    print('search', result_list)
-    # for product in result_list:
-    #     print(product[1].get_product_id())
+
     return render_template('customer/search_result.html', user=user, saved_cart_qty=cart_qty(user), result_list=result_list, form=search_form)
+
+
+@app.route('/Product', methods=['GET', 'POST'])
+def product_all():
+    try:
+        user = session['user_id']
+    except:
+        user = None
+    last_url(url_for('product_search'))
+
+    search_form = Search(request.form)
+    if request.method == 'POST' and search_form.validate():
+        search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
+
+
+    #Adding All Saved Products From All Seller Into A List
+    all_result = []
+    seller_product_db = shelve.open('seller-product.db')
+
+    for seller_id in seller_product_db:
+        seller_products = seller_product_db[str(seller_id)]['products']
+
+        #Accessing Indv Product
+        for product_id in seller_products:
+            all_result.append([seller_name_search(seller_id), seller_products[product_id]])
+
+
+    return render_template('customer/product_all.html', user=user, saved_cart_qty=cart_qty(user), form=search_form, all_result=all_result)
+
 
 @app.route('/success')
 def success_payment():

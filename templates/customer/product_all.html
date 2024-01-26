@@ -1,16 +1,15 @@
 {% extends "customer/Customer_Base.html" %}
 {% block Head_JS_CSS %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/product_all.css') }}">
 {% endblock %}
 
-{% block title%} Search Result {%endblock %}
+{% block title%} Products {%endblock %}
 
 {% block body %}
-{% if result_list != None %}
 <div class="my-5">
-    <h1>Search Results</h1>
+    <h1>All Products</h1>
     <div class="row row-cols-lg-4 row-cols-2 my-5">
-        {% for product in result_list %}
+        {% for product in all_result %}
         <div class="col indv-prod ms-3">
             <a href="{{ url_for('product', seller=product[0], product_id=product[1].get_product_id()) }}">
                 <div class="image">
@@ -23,13 +22,8 @@
         {% endfor %}
     </div>
 </div>
-{% else %}
-<div class="d-flex flex-column justify-content-center align-items-center vh-100">
-    <h1>No Search Result Found</h1>
-    <button class="btn home-btn my-5" type="button"><a href="{{ url_for('home') }}">Return to Home</a></button>
-</div>
-{% endif %}
 {% endblock %}
+
 
 {% block End_JS_CSS %}
 {% endblock %}
