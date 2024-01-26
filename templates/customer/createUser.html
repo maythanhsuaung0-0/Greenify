@@ -5,8 +5,7 @@
 {% from "includes/_formHelper.html" import render_field %}
 
 <head>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/create_user.css') }}">
 <script src="{{url_for('static', filename='JS/show_password.js')}}"></script>
 </head>
@@ -29,21 +28,26 @@
       <div class="form-group" id="email">
         {{ render_field(form.email, class="form-control") }}
       </div>
-    <div class="form-group">
-      <div class="input-group" id="password">
+
+<div class="form-group" id="password">
+    <label class="control-label" >Password</label>
+    <div class="custom-input-group">
         {{ render_field(form.password, class="form-control") }}
-        <div class="input-group-append">
-          <span class="input-group-text password-toggle" onclick="togglePassword()">
-            <i id="eye-icon" class="fa fa-eye"></i>
-          </span>
-        </div>
-      </div>
+        <span class="input-group-addon custom-addon" role="button" title="Show Password" id="passBtn">
+            <i class="fa fa-eye fa-fw" aria-hidden="true"></i>
+        </span>
     </div>
+</div>
 
       <div class="form-group" id="confirm_password">
+    <label class="control-label" >Confirm Password</label>
+    <div class="custom-input-group">
         {{ render_field(form.confirm_password, class="form-control") }}
-      </div>
-  </div>
+        <span class="input-group-addon custom-addon" role="button" title="Show Password" id="passBtn2">
+            <i class="fa fa-eye fa-fw" aria-hidden="true"></i>
+        </span>
+    </div>
+</div>
 
   <div id="address_info">
       <div class="form-group" id="name">
@@ -65,5 +69,7 @@
   <br>
   <p class="info">Already have an account? Login <a href="/login" class="login-link">here</a></p>
 </div>
+
+
 {% endblock %}
 

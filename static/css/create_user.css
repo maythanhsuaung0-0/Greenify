@@ -13,30 +13,49 @@
         font-size: 23px;
     }
 
-#password {
-    width: 80%; /* Adjust to 100% for full width */
-    margin-bottom: 0; /* Remove or adjust margin-bottom as needed */
-    margin-top: 7px; /* Adjust the top margin to vertically align with the input */
-    text-align: center;
-}
-
-.input-group-append {
-   height: 38px;
-   margin-top: 7px;
-}
-
-.input-group {
-    width: 76%;
-    margin-left: 39px;
-    margin: 0 auto; /* Center the input group horizontally */
-}
-
-
-#confirm_password {
+/* Password Input Styles */
+.custom-input-group {
     width: 76%;
     margin-left: 39px;
     text-align: center;
     margin-bottom: 15px;
+    display: flex;
+}
+
+#password {
+    width: 93%;
+    margin-left: 20px;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+/* Eye Icon Styles */
+.custom-addon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    width: 38px;
+    cursor: pointer;
+}
+
+#passBtn {
+    font-size: 20px;
+}
+
+#passBtn2 {
+    font-size: 20px;
+}
+
+.control-label {
+margin-left: -22px;
+}
+
+#confirm_password {
+    width: 93%;
+    margin-left: 20px;
+    text-align: center;
+    margin-bottom: 5px;
 }
 
 

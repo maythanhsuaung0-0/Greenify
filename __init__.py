@@ -628,6 +628,8 @@ def create_user():
             error = 'Phone number must be 8 digits.'
         elif len(str(create_user_form.postal_code.data)) != 6:
             error = 'Postal code must be 6 digits.'
+        elif create_user_form.password.data != create_user_form.confirm_password.data:
+            error = 'Passwords must match.'
         else:
             user = User.User(create_user_form.email.data, create_user_form.password.data, create_user_form.name.data,
                              create_user_form.contact_number.data, create_user_form.postal_code.data,
@@ -715,6 +717,8 @@ def update_user(email):
                 error = 'Phone number must be 8 digits.'
             elif len(str(update_user_form.postal_code.data)) != 6:
                 error = 'Postal code must be 6 digits.'
+            elif update_user_form.password.data != update_user_form.confirm_password.data:
+                error = 'Passwords must match.'
             else:
                 user.set_email(update_user_form.email.data)
                 user.set_password(update_user_form.password.data)
