@@ -1,0 +1,24 @@
+{% extends "customer/Customer_Base.html" %}
+{% block Head_JS_CSS %}
+<!--<link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}" />-->
+{% block Add_Head_JS_CSS %}
+{% endblock %}
+{% endblock %}
+
+{% block title%}{%endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="nav col-4 d-flex flex-column">
+        <a href="#" class="my-3"><p>Account</p></a>
+        <a href="{{ url_for('order_history', user=user) }}" class="my-3"><p>Order History</p></a>
+    </div>
+    <div class="content col-8">
+        {% block content %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}
+
+{% block End_JS_CSS %}
+{% endblock %}

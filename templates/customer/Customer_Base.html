@@ -13,16 +13,14 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/Customer base.css') }}">
-    <script src="{{ url_for('static', filename='JS/customer_base.js') }}"></script>
     {% block Head_JS_CSS %}{% endblock %}
     <title>{% block title %}{% endblock%}</title>
 </head>
 <body>
     <nav class="custom-nav navbar navbar-expand-lg bg-body-tertiary border-bottom border-bottom-dark sticky-top">
         <div class="container-fluid px-5">
-
             <a class="navbar-brand col-1" href="{{ url_for('home') }}">
-           <img src="{{ url_for('static', filename='images/favicon.svg') }}"
+            <img src="{{ url_for('static', filename='images/favicon.svg') }}"
                 alt="Greenify Trademark" class="trademark">
 
             </a>
@@ -65,7 +63,7 @@
             {% if user == None %}
             <a href="{{ url_for('login') }}" class="btn cart-container col-1 position-relative">
                 <i class="bi bi-bag"></i>
-                <span id="cart-item-qty" class="badge rounded-pill text-black">{{ saved_cart_qty }}</span>
+                <span id="cart-item-qty" class="badge rounded-pill text-black">0</span>
             </a>
             {% else %}
             <a href="{{ url_for('shopping_cart', user=user) }}" class="btn cart-container col-1 position-relative">
@@ -75,6 +73,7 @@
             {% endif %}
 
             <!--Account-->
+            {% if user == None %}
             <div class="dropdown col-1">
                 <a class="btn d-flex justify-content-center account w-20">
                     <i class="bi bi-person-circle" id="dropdownIcon" onclick="toggleDropdown()"></i>
@@ -86,6 +85,19 @@
                     <a href="/sellerlogin">Login as Seller</a>
                 </div>
             </div>
+            {% else %}
+            <div class="dropdown col-1">
+                <a href="{{ url_for('profile', user=user) }}" class="btn d-flex justify-content-center account w-20">
+                    <i class="bi bi-person-circle" id="dropdownIcon" onclick="toggleDropdown()"></i>
+                </a>
+                 <!-- Dropdown content -->
+                <div class="dropdown-content" id="myDropdown">
+                    <a href="/login">Login as User</a>
+                    <a href="/stafflogin">Login as Staff</a>
+                    <a href="/sellerlogin">Login as Seller</a>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </nav>
 

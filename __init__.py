@@ -227,9 +227,6 @@ def product(seller, product_id):
         user = None
 
     search_form = Search(request.form)
-    if request.method == 'POST' and search_form.validate():
-        search_engine(search_form.search_query.data)
-        return redirect(url_for('product_search'))
 
     def cart_qty(user):
         saved_cart_qty = 0
@@ -267,6 +264,16 @@ def product(seller, product_id):
 
     # Received AJAX Request
     if request.method == "POST":
+
+        # Search Query
+        try:
+            if search_form.search_query.id.data != None and search_form.validate():
+                search_engine(search_form.search_query.data)
+                return redirect(url_for('product_search'))
+        except:
+            pass
+
+
         sent_data = json.loads(request.data)
 
         # Check Customer Feedback
@@ -396,9 +403,6 @@ def shopping_cart(user):
     user = session['user_id']
 
     search_form = Search(request.form)
-    if request.method == 'POST' and search_form.validate():
-        search_engine(search_form.search_query.data)
-        return redirect(url_for('product_search'))
 
     def cart_qty(user):
         saved_cart_qty = 0
@@ -456,6 +460,16 @@ def shopping_cart(user):
 
     # Receive AJAX Request
     if request.method == "POST":
+
+        # Search Query
+        try:
+            if search_form.search_query.id.data != None and search_form.validate():
+                search_engine(search_form.search_query.data)
+                return redirect(url_for('product_search'))
+        except:
+            pass
+
+
         sent_data = json.loads(request.data)
 
         # Request to Update Cart Qty
@@ -534,12 +548,19 @@ def payment(user):
     user = session['user_id']
 
     search_form = Search(request.form)
-    if request.method == 'POST' and search_form.validate():
-        search_engine(search_form.search_query.data)
-        return redirect(url_for('product_search'))
 
     #Receive AJAX Request
     if request.method == "POST":
+
+        # Search Query
+        try:
+            if search_form.search_query.id.data != None and search_form.validate():
+                search_engine(search_form.search_query.data)
+                return redirect(url_for('product_search'))
+        except:
+            pass
+
+
         sent_data = json.loads(request.data)
 
         if sent_data['request_type'] == 'payment':
@@ -681,12 +702,41 @@ def product_all():
 
 @app.route('/success')
 def success_payment():
+    try:
+        user = session['user_id']
+    except:
+        user = None
+
     search_form = Search(request.form)
     global result_list
     if request.method == 'POST' and search_form.validate():
         result_list = search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
-    return render_template('customer/success_payment.html')
+    return render_template('customer/success_payment.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
+
+
+@app.route('/<user>/order_history', methods=['GET', 'POST'])
+def order_history(user):
+    try:
+        user = session['user_id']
+    except:
+        user = None
+    last_url(url_for('product_search'))
+
+    search_form = Search(request.form)
+    if request.method == 'POST' and search_form.validate():
+        search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
+
+    order_history_db = shelve.open('order_history.db')
+
+    try:
+        orders = order_history_db[user]
+    except:
+        pass
+
+
+    return render_template('customer/order_history.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
 
 
 @app.route('/createUser', methods=['GET', 'POST'])
@@ -779,6 +829,23 @@ def seller_logout():
     if session.get('seller_logged_in'):
         session.pop('seller_logged_in', None)
     print(f"Seller login status = {session.get('seller_logged_in')}")
+
+
+@app.route('/<user>/profile', methods=['GET', 'POST'])
+def profile(user):
+    try:
+        user = session['user_id']
+    except:
+        user = None
+    last_url(url_for('product_search'))
+
+    search_form = Search(request.form)
+    if request.method == 'POST' and search_form.validate():
+        search_engine(search_form.search_query.data)
+        return redirect(url_for('product_search'))
+
+
+    return render_template('customer/profile.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
 
 @app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
