@@ -884,6 +884,7 @@ def profile(user_id_hash):
 
     return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
 
+
 @app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
     error = None
