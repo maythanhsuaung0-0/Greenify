@@ -127,13 +127,9 @@ def generate_password(length):
 def cart_qty(user):
     saved_cart_qty = 0
     shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
-    print('start')
     try:
-        print('1')
         users_shopping_cart = shopping_cart_db[user]
-        print('2')
         saved_cart_qty = users_shopping_cart["cart_qty"]
-        print('3')
     except:
         print("Error in loading cart qty db")
     return saved_cart_qty
@@ -820,8 +816,7 @@ def login():
                 if login_form.email.data in users_dict and login_form.password.data in passwords:
                     key = get_key(login_form.password.data, db['Users'])
                     if key == user.get_email():
-                        user_id_encode = user_id.encode()
-                        user_id_hash = hashlib.sha256(user_id_encode).hexdigest()
+                        user_id_hash = uuid.uuid4().hex
                         session['user_id_hash'] = user_id_hash
                         session['user_id'] = user_id
                         session['logged_in'] = True
