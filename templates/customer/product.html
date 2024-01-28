@@ -90,6 +90,7 @@
 
 <div class="item product-review">
   <h3>Product Review</h3>
+
   <div class="form-group mb-4">
     <div class="rating-wrapper">
         <p>My Rating:</p>
@@ -107,8 +108,12 @@
         <textarea name="review" id="review" rows="5" class="form-control" placeholder="Enter your review..." required></textarea>
     </div>
     <div class="pt-3">
-        <button type="button" class="btn btn-secondary" id="customer_feedback" onclick="customer_feedback()">Submit</button>
+        <button type="button" class="btn btn-secondary" id="customer_feedback" onclick="customer_feedback({{ seller_id }}, {{ product.get_product_id() }})">Submit</button>
     </div>
+
+</div>
+
+
 </div>
 
 
