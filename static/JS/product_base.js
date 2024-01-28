@@ -1,6 +1,4 @@
 $("document").ready(function(){
-    // Add this line to log ratings_reviews_list
-    console.log('ratings_reviews_list:', {{ ratings_reviews_list | tojson | safe }});
 
     //Fetching Price of Product(Qty:1)
     var product_price = $("#price").text();
