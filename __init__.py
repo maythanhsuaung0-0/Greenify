@@ -1379,15 +1379,15 @@ def update_seller(seller_id):
                 filename = secure_filename(uploaded_file.filename)
                 filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 uploaded_file.save(filepath)
-                seller.set_profile_image(filepath)
-                session['filename'] = filename
+                print(f"Image saved at: {filepath}")
+                session['filename'] = filename  # Update the session data
 
         seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
-        # seller.set_profile_image(update_seller_form.profile_pic.data)
+        seller.set_profile_image(update_seller_form.profile_pic.data)
 
         # for adding data
         updated_sellers[seller.get_application_id()] = seller
@@ -1409,7 +1409,7 @@ def update_seller(seller_id):
         update_seller_form.support_document.data = seller.get_doc()
         # update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form)
+        return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id=seller_id)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])

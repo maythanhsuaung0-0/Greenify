@@ -4,7 +4,9 @@
 {% block content %}
 {% from "includes/_formHelper.html" import render_field %}
 
-<link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/staff_login.css') }}">
+<script src="{{url_for('static', filename='JS/show_password_for_login.js')}}"></script>
 
 <div class="main">
 <h1 class="header" align="center">Login as Staff</h1>
@@ -17,9 +19,15 @@
   <div class="form-group" id="email">
     {{ render_field(form.admin_email, class="form-control") }}
   </div>
-  <div class="form-group" id="password">
-    {{ render_field(form.admin_password, class="form-control") }}
-  </div>
+<div class="form-group" id="password">
+    <label class="control-label" >Password</label>
+    <div class="custom-input-group">
+        {{ render_field(form.admin_password, class="form-control") }}
+        <span class="input-group-addon custom-addon" role="button" title="Show Password" id="passBtn">
+            <i class="fa fa-eye fa-fw" aria-hidden="true"></i>
+        </span>
+    </div>
+</div>
   <input type="submit" value="Login" class="btn btn-primary" align="center" id="login"/>
 </form>
 </div>
