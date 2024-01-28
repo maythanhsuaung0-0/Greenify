@@ -1,4 +1,6 @@
 $("document").ready(function(){
+    // Add this line to log ratings_reviews_list
+    console.log('ratings_reviews_list:', {{ ratings_reviews_list | tojson | safe }});
 
     //Fetching Price of Product(Qty:1)
     var product_price = $("#price").text();
@@ -98,8 +100,8 @@ function addToCart(product_id, seller_id, seller) {
         document.getElementById('rating').value = '';
     }
 
-    // Example: Handle form submission with Ajax
-    function customer_feedback() {
+
+    function customer_feedback(seller_id, product_id) {
         var rating = $('#rating').val();
         var review = $('#review').val();
 
@@ -113,6 +115,9 @@ function addToCart(product_id, seller_id, seller) {
     // Testing codes
     console.log('Selected Rating:', rating);
     console.log('Review:', review);
+    console.log('Seller Id:', seller_id)
+    console.log('Product Id:', product_id)
+
 
         // You can proceed with your Ajax request here
         $.ajax({
@@ -121,6 +126,8 @@ function addToCart(product_id, seller_id, seller) {
             contentType: 'application/json',
             data: JSON.stringify({
                 "request_type": "customer_feedback",
+                "seller_id" : seller_id,
+                "product_id" : product_id,
                 "ratings": parseInt(rating),
                 "reviews": review,
             }),
@@ -134,3 +141,4 @@ function addToCart(product_id, seller_id, seller) {
             },
         });
     }
+

@@ -23,7 +23,6 @@ from seller_order import SellerOrder
 import hashlib
 from searchForm import Search
 
-
 app = Flask(__name__, static_url_path='/static')
 user_logged_in = False
 seller_logged_in = False
@@ -33,7 +32,6 @@ app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static
 
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 
 # @app.errorhandler(404)
 # def error_404(e):
@@ -60,8 +58,10 @@ UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_ima
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # testing image upload
 # @app.route('/uploadimage')
@@ -95,8 +95,6 @@ def allowed_file(filename):
 #     return redirect(url_for('static', filename='product_image/' + filename), code=301)
 
 
-
-
 def delete_folder(item):
     filename = item.get_doc()
     folder_path, _ = os.path.split(filename)
@@ -120,7 +118,6 @@ def generate_password(length):
     password_list = list(password)
     secrets.SystemRandom().shuffle(password_list)
     return ''.join(password_list)
-
 
 
 # Returning the qty for the cart icon
@@ -152,6 +149,7 @@ def seller_id_search(seller_name):
             seller_id = approved_sellers[id].get_application_id()
             return seller_id
 
+
 def seller_name_search(seller_id):
     seller_id = int(seller_id)
     approved_sellers = {}
@@ -165,7 +163,6 @@ def seller_name_search(seller_id):
             return approved_sellers[seller_id].get_seller_name()
 
 
-
 def search_engine(search_query):
     search_query_list = search_query.split()
 
@@ -174,18 +171,18 @@ def search_engine(search_query):
     for seller_id in seller_product_db:
         seller_products = seller_product_db[str(seller_id)]['products']
 
-        #Accessing Indv Product to get the Product Name
+        # Accessing Indv Product to get the Product Name
         for product_id in seller_products:
             product_name = seller_products[product_id].get_product_name()
 
-            #Loop Through Search Query
+            # Loop Through Search Query
             for word in search_query_list:
                 result = product_name.lower().find(word)
                 if result != -1:
                     print(word)
                     print(product_name)
                     print(result)
-                    #Seller Name, Product
+                    # Seller Name, Product
                     result_list.append([seller_name_search(seller_id), seller_products[product_id]])
                     break
 
@@ -194,6 +191,7 @@ def search_engine(search_query):
         search_db['result_list'] = result_list
     else:
         search_db['result_list'] = None
+
 
 def last_url(url):
     logged_in = False
@@ -206,6 +204,7 @@ def last_url(url):
     if not logged_in:
         session['last_url'] = url
 
+
 @app.route("/", methods=['GET', 'POST'])
 def home():
     last_url(url_for('home'))
@@ -216,10 +215,10 @@ def home():
     try:
         user = session['user_id']
         user_id_hash = session['user_id_hash']
-        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
+        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user),
+                               form=search_form)
     except:
-        return render_template("customer/homepage.html", user = None, form=search_form)
-
+        return render_template("customer/homepage.html", user=None, form=search_form)
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
@@ -248,7 +247,6 @@ def product(seller, product_id):
     # Search for Seller Id
     seller_id = seller_id_search(seller)
 
-
     if seller_id == False:
         print("Seller_id not found")
         return render_template('customer/error_msg.html')
@@ -267,7 +265,7 @@ def product(seller, product_id):
     product = seller_products[product_id]
     seller_product_db.close()
 
-
+    product_reviews = []
     # Received AJAX Request
     if request.method == "POST":
 
@@ -279,19 +277,32 @@ def product(seller, product_id):
         except:
             pass
 
-
         sent_data = json.loads(request.data)
 
         # Check Customer Feedback
         if sent_data["request_type"] == "customer_feedback":
             reviews_db = shelve.open('reviews.db', 'c')
             try:
-                # Get the existing list of ratings and reviews or create a new one
-                ratings_reviews_list = reviews_db.get('Reviews', [])
+                # Get the existing dictionary of ratings and reviews or create a new one
+                ratings_reviews_dict = reviews_db.get('Reviews', {})
 
-                # If 'Reviews' key is initially a dictionary, convert it to a list
-                if not isinstance(ratings_reviews_list, list):
-                    ratings_reviews_list = [ratings_reviews_list]
+                # Get the seller ID and product ID from the sent data
+                seller_id = int(sent_data.get('seller_id', ''))  # Convert to string
+                product_id = int(sent_data.get('product_id', ''))  # Convert to string
+
+                # Ensure the seller ID is in the dictionary
+                if seller_id not in ratings_reviews_dict:
+                    ratings_reviews_dict[seller_id] = {}
+
+                # Get the seller's dictionary
+                seller_reviews = ratings_reviews_dict[seller_id]
+
+                # Ensure the product ID is in the seller's dictionary
+                if product_id not in seller_reviews:
+                    seller_reviews[product_id] = []
+
+                # Get the list of reviews for the product
+                product_reviews = seller_reviews[product_id]
 
                 # Get the new feedback
                 new_feedback = {
@@ -299,18 +310,43 @@ def product(seller, product_id):
                     'review': sent_data.get('reviews', '')
                 }
 
-                # Add the new feedback to the list
-                ratings_reviews_list.append(new_feedback)
-                # Testing codes
-                print(ratings_reviews_list)
+                # Add the new feedback to the list under the product ID
+                product_reviews.append(new_feedback)
 
-                # Store the updated list back to the database
-                reviews_db['Reviews'] = ratings_reviews_list
+                # Store the updated dictionary back to the database
+                reviews_db['Reviews'] = ratings_reviews_dict
+                # print("seller_id:", seller_id)
+                # print("product_id:", product_id)
+                print("ratings_reviews_dict:", ratings_reviews_dict)
+                # print("seller_reviews:", seller_reviews)
+                # print("product_reviews:", product_reviews)
 
             except Exception as e:
                 print("Error in handling customer feedback:", str(e))
             finally:
                 reviews_db.close()
+
+        # New
+        # Retrieving r and r
+        reviews_db = shelve.open('reviews.db', 'r')
+        ratings_reviews_dict = reviews_db.get('Reviews', {})
+
+        # Get the seller ID and product ID
+        seller_id = int(seller_id)
+        product_id = int(product_id)
+
+        # Get the seller's dictionary
+        seller_reviews = ratings_reviews_dict.get(seller_id, {})
+
+        # Get the list of reviews for the product
+        product_reviews = seller_reviews.get(product_id, [])
+        # print("seller_id:", seller_id)
+        # print("product_id:", product_id)
+        # print("ratings_reviews_dict:", ratings_reviews_dict)
+        # print("seller_reviews:", seller_reviews)
+        # print("product_reviews:", product_reviews)
+        # Close the database after retrieving data
+        reviews_db.close()
 
         # Check Product Stock
         if sent_data["request_type"] == "product_stock":
@@ -377,7 +413,7 @@ def product(seller, product_id):
                 user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
                 users_shopping_cart["selected_product"] = user_selected_product
                 shopping_cart_db[user] = users_shopping_cart
-            #Product not Added
+            # Product not Added
             except:
                 if product["product_qty"] > product_stock:
                     return json.jsonify({"result": False, "reason": "added more than stock"})
@@ -385,7 +421,6 @@ def product(seller, product_id):
                 product['product_obj'] = seller_saved_product
                 user_selected_product[product["seller"] + str(product["product_id"])] = product
                 users_shopping_cart["selected_product"] = user_selected_product
-
 
             # Update Cart Qty
             saved_cart_qty = 0
@@ -397,19 +432,20 @@ def product(seller, product_id):
             saved_cart_qty = len(user_selected_product)
             users_shopping_cart["cart_qty"] = saved_cart_qty
 
-            #Saving new info into db
+            # Saving new info into db
             shopping_cart_db[user] = users_shopping_cart
             shopping_cart_db.close()
 
             print(users_shopping_cart)
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form)
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
+                           saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form,
+                           ratings_reviews_list=product_reviews)
 
 
 @app.route('/<user_id_hash>/cart', methods=['GET', 'POST'])
 def shopping_cart(user_id_hash):
-
     user_id_hash = session['user_id_hash']
     user = session['user_id']
 
@@ -427,7 +463,6 @@ def shopping_cart(user_id_hash):
             print("Error in loading cart qty db")
         return saved_cart_qty
 
-
     users_shopping_cart = {}
     user_selected_product = {}
     shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -435,7 +470,8 @@ def shopping_cart(user_id_hash):
         users_shopping_cart = shopping_cart_db[user]
         user_selected_product = users_shopping_cart["selected_product"]
     except KeyError:
-        return render_template("customer/empty_cart.html", user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
+        return render_template("customer/empty_cart.html", user=user_id_hash, saved_cart_qty=cart_qty(user),
+                               form=search_form)
     except:
         print("Error in retrieving User Shopping Cart Info in user_shopping_cart.db")
 
@@ -459,11 +495,11 @@ def shopping_cart(user_id_hash):
             # Getting Seller
             seller_name = product_selected["seller"]
 
-            #Making a dictionary of each product (product, product_qty, seller_name)
+            # Making a dictionary of each product (product, product_qty, seller_name)
             product_dict = {
-                "product" : product,
-                "product_qty" : product_qty,
-                "seller_name" : seller_name
+                "product": product,
+                "product_qty": product_qty,
+                "seller_name": seller_name
             }
             display_shopping_cart.append(product_dict)
 
@@ -481,7 +517,6 @@ def shopping_cart(user_id_hash):
                 return redirect(url_for('product_search'))
         except:
             pass
-
 
         sent_data = json.loads(request.data)
 
@@ -553,18 +588,18 @@ def shopping_cart(user_id_hash):
 
             return json.jsonify({"redirect_link": url_for("payment", user_id_hash=user_id_hash)})
 
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart,
+                           user=user_id_hash, saved_cart_qty=saved_cart_qty, form=search_form)
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user_id_hash, saved_cart_qty=saved_cart_qty, form=search_form)
 
 @app.route('/<user_id_hash>/payment', methods=['GET', 'POST'])
 def payment(user_id_hash):
-
     user_id_hash = session['user_id_hash']
     user = session['user_id']
 
     search_form = Search(request.form)
 
-    #Receive AJAX Request
+    # Receive AJAX Request
     if request.method == "POST":
 
         # Search Query
@@ -574,7 +609,6 @@ def payment(user_id_hash):
                 return redirect(url_for('product_search'))
         except:
             pass
-
 
         sent_data = json.loads(request.data)
 
@@ -663,7 +697,9 @@ def payment(user_id_hash):
     user_info = user_dict[user]
     user_db.close()
 
-    return render_template("customer/payment.html", user=user_id_hash, user_id=user, user_address=user_info.get_address(), user_name=user_info.get_name(), saved_cart_qty=cart_qty(user), form=search_form)
+    return render_template("customer/payment.html", user=user_id_hash, user_id=user,
+                           user_address=user_info.get_address(), user_name=user_info.get_name(),
+                           saved_cart_qty=cart_qty(user), form=search_form)
 
 
 @app.route('/product_search', methods=['GET', 'POST'])
@@ -676,7 +712,6 @@ def product_search():
         user_id_hash = None
     last_url(url_for('product_search'))
 
-
     search_form = Search(request.form)
     if request.method == 'POST' and search_form.validate():
         search_engine(search_form.search_query.data)
@@ -685,7 +720,8 @@ def product_search():
     search_db = shelve.open('search.db')
     result_list = search_db['result_list']
 
-    return render_template('customer/search_result.html', user=user_id_hash, saved_cart_qty=cart_qty(user), result_list=result_list, form=search_form)
+    return render_template('customer/search_result.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
+                           result_list=result_list, form=search_form)
 
 
 @app.route('/Product', methods=['GET', 'POST'])
@@ -703,20 +739,19 @@ def product_all():
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
 
-
-    #Adding All Saved Products From All Seller Into A List
+    # Adding All Saved Products From All Seller Into A List
     all_result = []
     seller_product_db = shelve.open('seller-product.db')
 
     for seller_id in seller_product_db:
         seller_products = seller_product_db[str(seller_id)]['products']
 
-        #Accessing Indv Product
+        # Accessing Indv Product
         for product_id in seller_products:
             all_result.append([seller_name_search(seller_id), seller_products[product_id]])
 
-
-    return render_template('customer/product_all.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, all_result=all_result)
+    return render_template('customer/product_all.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
+                           form=search_form, all_result=all_result)
 
 
 @app.route('/success')
@@ -758,15 +793,15 @@ def order_history(user_id_hash):
         all_orders = order_history_db[user]
     except:
 
-        return render_template('customer/empty_order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
+        return render_template('customer/empty_order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
+                               form=search_form)
 
     for order_id in all_orders:
         for items in all_orders[order_id]['items']:
             print(all_orders[order_id]['items'][items])
 
-    return render_template('customer/order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, all_orders=all_orders)
-
-
+    return render_template('customer/order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
+                           form=search_form, all_orders=all_orders)
 
 
 @app.route('/createUser', methods=['GET', 'POST'])
@@ -881,8 +916,8 @@ def profile(user_id_hash):
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
 
-
     return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
+
 
 @app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
@@ -1279,14 +1314,14 @@ def view_pdf(pdf):
     return send_from_directory(os.path.dirname(pdf_path), os.path.basename(pdf_path), as_attachment=False)
 
 
-@app.route('/staff/retrieveApplicationForms',  methods = ['POST','GET'])  # read
+@app.route('/staff/retrieveApplicationForms', methods=['POST', 'GET'])  # read
 def retrieveApplicationForms():
-    app_list = retrieve_db('application.db','Application')
+    app_list = retrieve_db('application.db', 'Application')
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for rejecting the form
         if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'],"rejected")
+            print(data_to_modify['id'], "rejected")
             rejected = extracting('application.db', 'Application', data_to_modify['id'])
             if rejected.get_doc():
                 delete_folder(rejected)
@@ -1328,21 +1363,21 @@ def retrieveApplicationForms():
                         print('have certificate')
                         certify.append(i)
                         print('certified sellers', i.get_name())
-                print('certified',certify)
+                print('certified', certify)
                 return render_template('staff/retrieveAppForms.html', count=len(certify), app_list=certify)
 
     return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
 
 
-@app.route('/staff/retrieveUpdateForms', methods = ['POST','GET'])
+@app.route('/staff/retrieveUpdateForms', methods=['POST', 'GET'])
 def retrieveUpdateForms():  # for approving updates
-    waiting_list = retrieve_db('updated_sellers.db','Updated_sellers')
+    waiting_list = retrieve_db('updated_sellers.db', 'Updated_sellers')
     print('waiting list', waiting_list)
     if request.method == 'POST':
         data_to_modify = json.loads(request.data)
         # for rejecting the update form
         if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'],"rejected")
+            print(data_to_modify['id'], "rejected")
             deleted_item = extracting('updated_sellers.db', 'Updated_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -1373,7 +1408,7 @@ def retrieveSellers():  # read
         data_to_modify = json.loads(request.data)
         # for removing
         if data_to_modify['request_type'] == 'delete':
-            print(data_to_modify['id'],"deleted")
+            print(data_to_modify['id'], "deleted")
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
@@ -1532,6 +1567,7 @@ def game1():
         return render_template('/games/game1.html', user_id=user_id)
     else:
         return redirect(url_for('login'))
+
 
 # @app.route('/about_us')
 # def about_us():
