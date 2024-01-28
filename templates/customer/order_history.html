@@ -1,12 +1,37 @@
 {% extends "customer/Customer_account_Base.html" %}
 {% block Add_Head_JS_CSS %}
-<!--<link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}" />-->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/order_history.css') }}" />
 {% endblock %}
 
 {% block title%}{%endblock %}
 
 {% block content %}
 
+{% for order_id in all_orders %}
+<div class="indv-order">
+    <h3 class="order-id m-3 mx-4">Order ID: {{ order_id }}</h3>
+
+    {% for items in all_orders[order_id]['items'] %}
+    <div class="indv-prod d-flex">
+        <div class="product-img mx-5 my-3">
+            <img src="{{ url_for('static', filename='images/Tupperware 2.jpg') }}" alt="">
+        </div>
+        <div class="m-3">
+            <p class="product-name">{{ all_orders[order_id]['items'][items]['product_obj'].get_product_name() }}</p>
+            <p class="product-qty">Qty: {{ all_orders[order_id]['items'][items]['product_qty'] }}</p>
+            <p class="product-total">Total: ${{ "%.2f"|format(all_orders[order_id]['items'][items]['product_obj'].get_product_price() * all_orders[order_id]['items'][items]['product_qty']) }}</p>
+            <p></p>
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="m-3 mx-4">
+        <h4 class="total-paid">Total Paid: ${{ all_orders[order_id]['amt_paid'] }}</h4>
+    </div>
+</div>
+
+
+{% endfor %}
 
 {% endblock %}
 

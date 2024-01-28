@@ -371,12 +371,15 @@ def product(seller, product_id):
                 user_selected_product[product["seller"] + str(product["product_id"])] = saved_product
                 users_shopping_cart["selected_product"] = user_selected_product
                 shopping_cart_db[user] = users_shopping_cart
+            #Product not Added
             except:
                 if product["product_qty"] > product_stock:
                     return json.jsonify({"result": False, "reason": "added more than stock"})
 
+                product['product_obj'] = seller_saved_product
                 user_selected_product[product["seller"] + str(product["product_id"])] = product
                 users_shopping_cart["selected_product"] = user_selected_product
+
 
             # Update Cart Qty
             saved_cart_qty = 0
@@ -392,6 +395,7 @@ def product(seller, product_id):
             shopping_cart_db[user] = users_shopping_cart
             shopping_cart_db.close()
 
+            print(users_shopping_cart)
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user, form=search_form)
@@ -626,7 +630,7 @@ def payment(user):
             except:
                 print("No Record Found")
 
-            order_history_id = uuid.uuid4()
+            order_history_id = uuid.uuid4().hex[:8]
 
             # Saving Datas
             order_history['items'] = user_selected_product
@@ -731,12 +735,18 @@ def order_history(user):
     order_history_db = shelve.open('order_history.db')
 
     try:
-        orders = order_history_db[user]
+        all_orders = order_history_db[user]
     except:
-        pass
+
+        return render_template('customer/empty_order_history.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
+
+    for order_id in all_orders:
+        for items in all_orders[order_id]['items']:
+            print(all_orders[order_id]['items'][items])
+
+    return render_template('customer/order_history.html', user=user, saved_cart_qty=cart_qty(user), form=search_form, all_orders=all_orders)
 
 
-    return render_template('customer/order_history.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
 
 
 @app.route('/createUser', methods=['GET', 'POST'])
