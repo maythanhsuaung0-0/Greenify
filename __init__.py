@@ -127,9 +127,13 @@ def generate_password(length):
 def cart_qty(user):
     saved_cart_qty = 0
     shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+    print('start')
     try:
+        print('1')
         users_shopping_cart = shopping_cart_db[user]
+        print('2')
         saved_cart_qty = users_shopping_cart["cart_qty"]
+        print('3')
     except:
         print("Error in loading cart qty db")
     return saved_cart_qty
@@ -209,10 +213,10 @@ def home():
     if request.method == 'POST' and search_form.validate():
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
-
     try:
         user = session['user_id']
-        return render_template("customer/homepage.html", user=user, saved_cart_qty=cart_qty(user), form=search_form)
+        user_id_hash = session['user_id_hash']
+        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
     except:
         return render_template("customer/homepage.html", user = None, form=search_form)
 
@@ -223,8 +227,10 @@ def product(seller, product_id):
     last_url(url_for('product', seller=seller, product_id=product_id))
     try:
         user = session['user_id']
+        user_id_hash = session['user_id_hash']
     except:
         user = None
+        user_id_hash = None
 
     search_form = Search(request.form)
 
@@ -398,13 +404,16 @@ def product(seller, product_id):
             print(users_shopping_cart)
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user, form=search_form)
+    return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id, saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form)
 
 
-@app.route('/<user>/cart', methods=['GET', 'POST'])
-def shopping_cart(user):
-    last_url(url_for('shopping_cart', user=user))
+@app.route('/<user_id_hash>/cart', methods=['GET', 'POST'])
+def shopping_cart(user_id_hash):
+
+    user_id_hash = session['user_id_hash']
     user = session['user_id']
+
+    last_url(url_for('shopping_cart', user_id_hash=user))
 
     search_form = Search(request.form)
 
@@ -426,7 +435,7 @@ def shopping_cart(user):
         users_shopping_cart = shopping_cart_db[user]
         user_selected_product = users_shopping_cart["selected_product"]
     except KeyError:
-        return render_template("customer/empty_cart.html")
+        return render_template("customer/empty_cart.html", user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
     except:
         print("Error in retrieving User Shopping Cart Info in user_shopping_cart.db")
 
@@ -542,13 +551,15 @@ def shopping_cart(user):
 
             shopping_cart_db.close()
 
-            return json.jsonify({"redirect_link": url_for("payment", user=user)})
+            return json.jsonify({"redirect_link": url_for("payment", user_id_hash=user_id_hash)})
 
 
-    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user, saved_cart_qty=saved_cart_qty, form=search_form)
+    return render_template("customer/shopping_cart.html", display_shopping_cart=display_shopping_cart, user=user_id_hash, saved_cart_qty=saved_cart_qty, form=search_form)
 
-@app.route('/<user>/payment', methods=['GET', 'POST'])
-def payment(user):
+@app.route('/<user_id_hash>/payment', methods=['GET', 'POST'])
+def payment(user_id_hash):
+
+    user_id_hash = session['user_id_hash']
     user = session['user_id']
 
     search_form = Search(request.form)
@@ -652,15 +663,17 @@ def payment(user):
     user_info = user_dict[user]
     user_db.close()
 
-    return render_template("customer/payment.html", user=user, user_address=user_info.get_address(), user_name=user_info.get_name(), saved_cart_qty=cart_qty(user), form=search_form)
+    return render_template("customer/payment.html", user=user_id_hash, user_id=user, user_address=user_info.get_address(), user_name=user_info.get_name(), saved_cart_qty=cart_qty(user), form=search_form)
 
 
 @app.route('/product_search', methods=['GET', 'POST'])
 def product_search():
     try:
         user = session['user_id']
+        user_id_hash = session['user_id_hash']
     except:
         user = None
+        user_id_hash = None
     last_url(url_for('product_search'))
 
 
@@ -672,15 +685,17 @@ def product_search():
     search_db = shelve.open('search.db')
     result_list = search_db['result_list']
 
-    return render_template('customer/search_result.html', user=user, saved_cart_qty=cart_qty(user), result_list=result_list, form=search_form)
+    return render_template('customer/search_result.html', user=user_id_hash, saved_cart_qty=cart_qty(user), result_list=result_list, form=search_form)
 
 
 @app.route('/Product', methods=['GET', 'POST'])
 def product_all():
     try:
         user = session['user_id']
+        user_id_hash = session['user_id_hash']
     except:
         user = None
+        user_id_hash = None
     last_url(url_for('product_search'))
 
     search_form = Search(request.form)
@@ -701,15 +716,17 @@ def product_all():
             all_result.append([seller_name_search(seller_id), seller_products[product_id]])
 
 
-    return render_template('customer/product_all.html', user=user, saved_cart_qty=cart_qty(user), form=search_form, all_result=all_result)
+    return render_template('customer/product_all.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, all_result=all_result)
 
 
 @app.route('/success')
 def success_payment():
     try:
         user = session['user_id']
+        user_id_hash = session['user_id_hash']
     except:
         user = None
+        user_id_hash = None
 
     search_form = Search(request.form)
     global result_list
@@ -719,12 +736,15 @@ def success_payment():
     return render_template('customer/success_payment.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
 
 
-@app.route('/<user>/order_history', methods=['GET', 'POST'])
-def order_history(user):
+@app.route('/<user_id_hash>/order_history', methods=['GET', 'POST'])
+def order_history(user_id_hash):
     try:
         user = session['user_id']
+        user_id_hash = session['user_id_hash']
     except:
         user = None
+        user_id_hash = None
+
     last_url(url_for('product_search'))
 
     search_form = Search(request.form)
@@ -738,13 +758,13 @@ def order_history(user):
         all_orders = order_history_db[user]
     except:
 
-        return render_template('customer/empty_order_history.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
+        return render_template('customer/empty_order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
 
     for order_id in all_orders:
         for items in all_orders[order_id]['items']:
             print(all_orders[order_id]['items'][items])
 
-    return render_template('customer/order_history.html', user=user, saved_cart_qty=cart_qty(user), form=search_form, all_orders=all_orders)
+    return render_template('customer/order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, all_orders=all_orders)
 
 
 
@@ -800,6 +820,9 @@ def login():
                 if login_form.email.data in users_dict and login_form.password.data in passwords:
                     key = get_key(login_form.password.data, db['Users'])
                     if key == user.get_email():
+                        user_id_encode = user_id.encode()
+                        user_id_hash = hashlib.sha256(user_id_encode).hexdigest()
+                        session['user_id_hash'] = user_id_hash
                         session['user_id'] = user_id
                         session['logged_in'] = True
                         session['user_logged_in'] = True
@@ -830,6 +853,7 @@ def user_logout():
     if session.get('user_logged_in'):
         session.pop('user_logged_in', None)
         session.pop('user_id', None)
+        session.pop('user_id_hash', None)
     print(f"User login status = {session.get('user_logged_in')}")
     return "You have successfully logged out from your account."
 
@@ -841,12 +865,15 @@ def seller_logout():
     print(f"Seller login status = {session.get('seller_logged_in')}")
 
 
-@app.route('/<user>/profile', methods=['GET', 'POST'])
-def profile(user):
+@app.route('/<user_id_hash>/profile', methods=['GET', 'POST'])
+def profile(user_id_hash):
     try:
         user = session['user_id']
+        user_id_hash = session['user_id_hash']
     except:
         user = None
+        user_id_hash = None
+
     last_url(url_for('product_search'))
 
     search_form = Search(request.form)
@@ -855,7 +882,7 @@ def profile(user):
         return redirect(url_for('product_search'))
 
 
-    return render_template('customer/profile.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
+    return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
 
 @app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
 def update_user(email):
