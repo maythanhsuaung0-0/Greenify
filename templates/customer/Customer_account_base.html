@@ -10,8 +10,8 @@
 {% block body %}
 <div class="row m-5">
     <div class="nav col-4 d-flex flex-column">
-        <a href="{{ url_for('profile', user=user) }}" class="my-3"><p>Account</p></a>
-        <a href="{{ url_for('order_history', user=user) }}" class="my-3"><p>Order History</p></a>
+        <a href="{{ url_for('profile', user_id_hash=user) }}" class="my-3"><p>Account</p></a>
+        <a href="{{ url_for('order_history', user_id_hash=user) }}" class="my-3"><p>Order History</p></a>
     </div>
     <div class="content col-8">
         {% block content %}
