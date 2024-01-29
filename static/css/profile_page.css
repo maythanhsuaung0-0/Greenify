@@ -78,43 +78,6 @@
       color: inherit; /* Inherit the color from the parent */
     }
 
-
-.tab.active {
-  background-color: #CCC;
-}
-
-body {
-  padding: 0;
-  margin: 0;
-}
-
-.tabs {
-  display: flex;
-  justify-content: space-around;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  border-bottom: 1px solid black;
-}
-
-.tab {
-  cursor: pointer;
-  padding: 10px;
-}
-
-.tab.active {
-  background-color: #CCC;
-}
-
-.tab:hover {
-  background-color: #AAA;
-}
-
-.tab-content {
-  margin-left: 20px;
-  margin-right: 20px;
-}
-
 /* Password Input Styles */
 .custom-input-group {
     width: 76%;
@@ -149,8 +112,8 @@ body {
     font-size: 20px;
 }
 
-.control-label {
-margin-left: -22px;
+label {
+margin-left: 42px;
 }
 
 #confirm_password {
@@ -168,6 +131,14 @@ margin-left: -22px;
     margin-bottom: 15px;
     }
 
+#email-input {
+margin-left: 39px;
+}
+
+#name-input {
+margin-left: 39px;
+}
+
 #name {
     width: 76%;
     margin-left: 39px;
@@ -182,6 +153,10 @@ margin-left: -22px;
     margin-bottom: 10px;
     }
 
+#contact_number-input {
+margin-left: 39px;
+}
+
 #postal_code {
     width: 76%;
     margin-left: 39px;
@@ -189,9 +164,17 @@ margin-left: -22px;
     margin-bottom: 10px;
     }
 
+#postal_code-input {
+margin-left: 39px;
+}
+
 #address {
     width: 76%;
     margin-left: 39px;
     text-align: center;
     margin-bottom: 10px;
     }
+
+#address-input {
+margin-left: 39px;
+}

@@ -854,7 +854,6 @@ def login():
                         user_id_hash = uuid.uuid4().hex
                         session['user_id_hash'] = user_id_hash
                         session['user_id'] = user_id
-                        session['logged_in'] = True
                         session['user_logged_in'] = True
                         print(session['user_id'])
                         print(f"User login status = {session.get('user_logged_in')}")
@@ -911,11 +910,16 @@ def profile(user_id_hash):
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
 
-    return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
+    user_data = shelve.open('user.db')
+    users_dict = user_data.get('Users', {})
+
+    user_obj = users_dict.get(user)
+    return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, user_data=user_obj)
 
 
-@app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
-def update_user(email):
+@app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
+def update_user(user_id_hash):
+    user = session['user_id']
     error = None
     update_user_form = CreateUserForm(request.form)
 
@@ -924,7 +928,7 @@ def update_user(email):
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
-        user = users_dict.get(email)
+        user_obj = users_dict.get(user)
 
         if update_user_form.validate():
             if len(str(update_user_form.contact_number.data)) != 8:
@@ -934,12 +938,13 @@ def update_user(email):
             elif update_user_form.password.data != update_user_form.confirm_password.data:
                 error = 'Passwords must match.'
             else:
-                user.set_email(update_user_form.email.data)
-                user.set_password(update_user_form.password.data)
-                user.set_name(update_user_form.name.data)
-                user.set_contact_number(update_user_form.contact_number.data)
-                user.set_postal_code(update_user_form.postal_code.data)
-                user.set_address(update_user_form.address.data)
+                user_obj.set_email(update_user_form.email.data)
+                user_obj.set_password(update_user_form.password.data)
+                user_obj.set_name(update_user_form.name.data)
+                user_obj.set_contact_number(update_user_form.contact_number.data)
+                user_obj.set_postal_code(update_user_form.postal_code.data)
+                user_obj.set_address(update_user_form.address.data)
+                users_dict[user] = user_obj
                 error = "Update Successful."
         else:
             error = "Update Unsuccessful."
@@ -951,20 +956,20 @@ def update_user(email):
         users_dict = {}
         db = shelve.open('user.db', 'r')
         users_dict = db['Users']
+
+        user_obj = users_dict.get(user)
+        if user:
+            update_user_form.email.data = user_obj.get_email()
+            update_user_form.password.data = user_obj.get_password()
+            update_user_form.name.data = user_obj.get_name()
+            update_user_form.contact_number.data = user_obj.get_contact_number()
+            update_user_form.postal_code.data = user_obj.get_postal_code()
+            update_user_form.address.data = user_obj.get_address()
+
         db.close()
 
-        user = users_dict.get(email)
-        if user:
-            update_user_form.email.data = user.get_email()
-            update_user_form.password.data = user.get_password()
-            update_user_form.name.data = user.get_name()
-            update_user_form.contact_number.data = user.get_contact_number()
-            update_user_form.postal_code.data = user.get_postal_code()
-            update_user_form.address.data = user.get_address()
-
     if session.get('user_logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, email=email, error=error,
-                               user=user)
+        return render_template('customer/updateUser.html', form=update_user_form, error=error, user_data=user_obj, user_id_hash=user_id_hash)
     else:
         return redirect(url_for('login'))
 
