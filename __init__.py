@@ -64,6 +64,17 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+# Helper function to get initial reviews
+def get_initial_reviews(seller_id, product_id):
+    reviews_db = shelve.open('reviews.db', 'r')
+    ratings_reviews_dict = reviews_db.get('Reviews', {})
+
+    # Get the seller's dictionary
+    seller_reviews = ratings_reviews_dict.get(seller_id, {})
+
+    # Get the list of reviews for the product
+    return seller_reviews.get(product_id, [])
+
 # testing image upload
 # @app.route('/uploadimage')
 # def base():
@@ -284,8 +295,8 @@ def product(seller, product_id):
                 ratings_reviews_dict = reviews_db.get('Reviews', {})
 
                 # Get the seller ID and product ID from the sent data
-                seller_id = int(sent_data.get('seller_id', ''))  # Convert to string
-                product_id = int(sent_data.get('product_id', ''))  # Convert to string
+                seller_id = int(sent_data.get('seller_id', ''))  # Convert to int
+                product_id = int(sent_data.get('product_id', ''))  # Convert to int
 
                 # Ensure the seller ID is in the dictionary
                 if seller_id not in ratings_reviews_dict:
@@ -437,6 +448,15 @@ def product(seller, product_id):
 
             print(users_shopping_cart)
             return json.jsonify({"data": saved_cart_qty, "result": True})
+
+    # NEW
+    # Handle GET requests
+    # if request.method == "GET":
+    #     # Initial retrieval of reviews for the product
+    #     initial_reviews = get_initial_reviews(seller_id, product_id)
+    #     # print(initial_reviews)
+    #     return json.jsonify({'data': initial_reviews, 'result': True})
+
 
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
                            saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form,
