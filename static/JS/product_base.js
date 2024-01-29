@@ -117,6 +117,7 @@ function addToCart(product_id, seller_id, seller) {
     console.log('Product Id:', product_id)
 
 
+
         // You can proceed with your Ajax request here
         $.ajax({
             url: '',
@@ -132,6 +133,12 @@ function addToCart(product_id, seller_id, seller) {
             success: function (response) {
                 console.log("Feedback submitted successfully");
                 alert("Your feedback has been submitted successfully");
+//              console.log('Complete Response:', response);
+                var updatedReviewsList = response.data;
+                // Update the displayed reviews on the page
+                updateReviewsOnPage(updatedReviewsList);
+                console.log('Updated Reviews List:', updatedReviewsList);
+
             },
             error: function (error) {
                 console.error("Error submitting feedback:", error);
@@ -140,3 +147,19 @@ function addToCart(product_id, seller_id, seller) {
         });
     }
 
+
+
+// Function to update the displayed reviews on the page
+function updateReviewsOnPage(reviewsList) {
+    // Assuming you have an element with id 'reviews-list' to display reviews
+    var reviewsContainer = $('#reviews-list');
+
+    // Clear existing reviews
+    reviewsContainer.empty();
+
+    // Append the updated reviews to the container
+    reviewsList.forEach(function (review) {
+        var listItem = $('<li>').text('Rating: ' + review.rating +', Review: ' + review.review);
+        reviewsContainer.append(listItem);
+    });
+}

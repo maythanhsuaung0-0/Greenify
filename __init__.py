@@ -55,6 +55,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 #     return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
 
 UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
+# UPLOAD_IMG_FOLDER = url_for('static', filename='/product_image/')
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
@@ -321,6 +322,7 @@ def product(seller, product_id):
                 print("Error in handling customer feedback:", str(e))
             finally:
                 reviews_db.close()
+                return json.jsonify({"data": product_reviews, "result": True})
 
         # New
         # Retrieving r and r
@@ -336,6 +338,7 @@ def product(seller, product_id):
 
         # Get the list of reviews for the product
         product_reviews = seller_reviews.get(product_id, [])
+        # test codes 
         # print("seller_id:", seller_id)
         # print("product_id:", product_id)
         # print("ratings_reviews_dict:", ratings_reviews_dict)
@@ -437,7 +440,7 @@ def product(seller, product_id):
 
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
                            saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form,
-                           ratings_reviews_list=product_reviews)
+                           product_reviews=product_reviews)
 
 
 @app.route('/<user_id_hash>/cart', methods=['GET', 'POST'])
