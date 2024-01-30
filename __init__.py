@@ -923,6 +923,7 @@ def profile(user_id_hash):
 @app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
 def update_user(user_id_hash):
     user = session['user_id']
+    user_id_hash = session['user_id_hash']
     error = None
     update_user_form = CreateUserForm(request.form)
 
