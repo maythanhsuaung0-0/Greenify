@@ -92,7 +92,7 @@
   <h3>Product Review</h3>
   <div>
       <!-- Add this where you want to display reviews -->
-      <ul id="reviews-list">
+    <ul id="reviews-list" data-seller-id="{{ seller_id }}" data-product-id="{{ product.get_product_id() }}">
           {% for review in data %}
               <li>Rating: {{ review.rating }}, Review: {{ review.review }}</li>
           {% endfor %}
