@@ -993,18 +993,20 @@ def update_user(user_id_hash):
         db.close()
 
     if session.get('user_logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, error=error, user_data=user_obj, user_id_hash=user_id_hash)
+        return render_template('customer/updateUser.html', form=update_user_form, error=error, db=user_obj, user_id_hash=user_id_hash)
     else:
         return redirect(url_for('login'))
 
 
-@app.route('/deleteUser/<string:email>', methods=['POST'])
-def delete_user(email):
+@app.route('/<user_id_hash>/deleteUser', methods=['POST'])
+def delete_user(user_id_hash):
+    user = session['user_id']
+    user_id_hash = session['user_id_hash']
     users_dict = {}
     db = shelve.open('user.db', 'w')
     users_dict = db['Users']
 
-    users_dict.pop(email)
+    users_dict.pop(user)
 
     db['Users'] = users_dict
     db.close()

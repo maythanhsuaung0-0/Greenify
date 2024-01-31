@@ -1,16 +1,36 @@
-.main {
+#account_info {
+        background-color: #FFFFFF;
+        width: 400px;
+        margin: 7em auto;
+        margin-bottom: -30px;
+        border-radius: 1.5em;
+        box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+        margin-top: 45px;
+    }
+
+#address_info {
         background-color: #FFFFFF;
         width: 400px;
         margin: 7em auto;
         border-radius: 1.5em;
         box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+        margin-top: 60px;
+        margin-bottom: 30px;
     }
 
 .header {
-        padding-top: 40px;
+        padding-top: 100px;
         color: #000000;
         font-weight: bold;
         font-size: 23px;
+    }
+
+.sub-header {
+        padding-top: 10px;
+        margin-left: -5px;
+        color: #000000;
+        font-weight: bold;
+        font-size: 19px;
     }
 
 /* Password Input Styles */

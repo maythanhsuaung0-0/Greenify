@@ -16,15 +16,15 @@
 </a>
   </div>
 
-<div class="main">
 <h1 class="header" align="center">Register for an Account</h1>
-
+<div class="container">
   {% if error %}
         <p style="color: red; text-align: center;">{{ error }}</p>
   {% endif %}
 
 <form method="POST" action="">
   <div id="account_info">
+      <h3 class="sub-header" align="center">Account Info</h3>
       <div class="form-group" id="email">
         {{ render_field(form.email, class="form-control") }}
       </div>
@@ -48,8 +48,11 @@
         </span>
     </div>
 </div>
+</div>
 
+  <div class="container">
   <div id="address_info">
+      <h3 class="sub-header" align="center">Address Info</h3>
       <div class="form-group" id="name">
         {{ render_field(form.name, class="form-control") }}
       </div>
@@ -63,6 +66,7 @@
         {{ render_field(form.address, class="form-control") }}
       </div>
       <input type="submit" value="Sign Up" class="btn btn-primary" id="SignUp"/>
+  </div>
   </div>
 </form>
 
