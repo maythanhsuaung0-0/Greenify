@@ -1,6 +1,7 @@
 import nltk
 import numpy as np
-# nltk.download('punkt')  # package with pre-trained tokenizer
+
+nltk.download('punkt')  # package with pre-trained tokenizer
 from nltk.stem.porter import PorterStemmer
 
 stemmer = PorterStemmer()
@@ -24,7 +25,6 @@ def bag_of_words(tokenized_sentence, all_words):
         if w in tokenized_sentence:
             bag[idx] = 1.0  # if word in tokenized sentence present in all words, replace with 1.0
     return bag
-
 
 # test bag_of_words
 # sentence = ["hello", "how", "are", "you"]
