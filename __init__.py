@@ -21,6 +21,7 @@ import uuid
 from crud_functions import *
 from seller_order import SellerOrder
 from searchForm import Search
+from updateUser import update
 from chat import get_response
 
 app = Flask(__name__, static_url_path='/static')
@@ -884,16 +885,18 @@ def seller_logout():
 
 @app.route('/<user_id_hash>/profile', methods=['GET', 'POST'])
 def profile(user_id_hash):
-    try:
-        user = session['user_id']
-        user_id_hash = session['user_id_hash']
-    except:
-        user = None
-        user_id_hash = None
+    search_form = update(request.form)
+
+    if user_id_hash != session['user_id_hash']:
+        return render_template('error_msg.html', user=session['user_id_hash'],
+                               saved_cart_qty=cart_qty(session['user_id']), form=search_form)
+
+    user = session['user_id']
+    user_id_hash = session['user_id_hash']
 
     last_url(url_for('product_search'))
 
-    search_form = Search(request.form)
+    search_form = update(request.form)
     if request.method == 'POST' and search_form.validate():
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
@@ -902,13 +905,20 @@ def profile(user_id_hash):
     users_dict = user_data.get('Users', {})
 
     user_obj = users_dict.get(user)
-    return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, user_data=user_obj)
+    user_data.close()
+    return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
+                           form=search_form, user_data=user_obj)
 
 
 @app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
 def update_user(user_id_hash):
-    user = session['user_id']
+    search_form = update(request.form)
+
+    if user_id_hash != session['user_id_hash']:
+        return render_template('error_msg.html', user=session['user_id_hash'], saved_cart_qty=cart_qty(session['user_id']), form=search_form, user_id_hash=user_id_hash)
+
     user_id_hash = session['user_id_hash']
+    user = session['user_id']
     error = None
     update_user_form = CreateUserForm(request.form)
 
