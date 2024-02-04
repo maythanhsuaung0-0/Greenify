@@ -1,8 +1,12 @@
 {% extends "customer/Customer_Base.html" %}
 
 {% block Head_JS_CSS %}
+
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/homepage.css') }}">
 <script src="{{url_for('static', filename='JS/homepage1.js')}}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+<script>$SCRIPT_ROOT = {{ request.script_root|tojson }}</script>
+<script type="text/javascript" src="{{ url_for('static', filename='JS/chatbot.js') }}"></script>
 {% endblock %}
 
 {% block title%}Homepage{% endblock %}
@@ -16,6 +20,33 @@
         </div>
     </header>
 
+    <!-- chatbot -->
+    <div class="container">
+        <div class="chatbox">
+            <div class="chatbox__support">
+                <div class="chatbox__header">
+                    <div class="chatbox__image--header">
+                        <img src="https://img.icons8.com/color/48/000000/circled-user-female-skin-type-5--v1.png" alt="image">
+                    </div>
+                    <div class="chatbox__content--header">
+                        <h4 class="chatbox__heading--header">Chat support</h4>
+                        <p class="chatbox__description--header">Hello. My name is Greeny. How can I help you?</p>
+                    </div>
+                </div>
+                <div class="chatbox__messages">
+                    <div></div>
+                </div>
+                <div class="chatbox__footer">
+                    <input type="text" placeholder="Write a message...">
+                    <button class="chatbox__send--footer send__button">Send</button>
+                </div>
+            </div>
+            <!--to open chatbox-->
+            <div class="chatbox__button">
+                <button><img src="{{ url_for('static', filename='images/chatbot_icon.png') }}" /></button>
+            </div>
+        </div>
+    </div>
 
     <!-- The discount section -->
     <section class="product">

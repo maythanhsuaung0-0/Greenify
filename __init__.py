@@ -7,7 +7,7 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
-from set_image import create_image_set
+# from set_image import create_image_set
 import secrets
 import shutil
 import User_login
@@ -22,6 +22,7 @@ from crud_functions import *
 from seller_order import SellerOrder
 import hashlib
 from searchForm import Search
+from chat import get_response
 
 app = Flask(__name__, static_url_path='/static')
 user_logged_in = False
@@ -32,27 +33,6 @@ app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static
 
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-# @app.errorhandler(404)
-# def error_404(e):
-#     return render_template('error_msg.html')
-#
-# @app.errorhandler(403)
-# def error_403(e):
-#     return render_template('error_msg.html')
-#
-# @app.errorhandler(500)
-# def error_500(e):
-#     return render_template('error_msg.html')
-
-# # New
-# UPLOAD_IMAGE_FOLDER = 'static/product_image'
-# app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
-#
-#
-# @app.route('/uploads/<filename>')
-# def uploaded_image(filename):
-#     return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
 
 UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
 # UPLOAD_IMG_FOLDER = url_for('static', filename='/product_image/')
@@ -74,7 +54,6 @@ def get_initial_reviews(seller_id, product_id):
 
     # Get the list of reviews for the product
     return seller_reviews.get(product_id, [])
-
 
 
 def delete_folder(item):
@@ -182,6 +161,14 @@ def last_url(url):
     if not logged_in:
         session['last_url'] = url
 
+
+# chatbot
+@app.post("/predict")
+def predict():
+    text = request.get_json().get("message")
+    response = get_response(text)
+    message = {"answer": response}
+    return jsonify(message)
 
 @app.route("/", methods=['GET', 'POST'])
 def home():

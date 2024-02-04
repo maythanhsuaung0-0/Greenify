@@ -1,0 +1,126 @@
+{
+  "intents": [
+    {
+      "tag": "greeting",
+      "patterns": [
+        "Hi",
+        "Hey",
+        "How are you",
+        "Is anyone there?",
+        "Hello"
+      ],
+      "responses": [
+        "Hey :-)",
+        "Hello, thanks for visiting",
+        "Hi there, what can I do for you?",
+        "Hi there, how can I help?"
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": ["Bye", "See you later", "Goodbye"],
+      "responses": [
+        "See you later, thanks for visiting",
+        "Have a nice day",
+        "Bye! Come back again soon."
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": ["Thanks", "Thank you", "That's helpful", "Thanks a lot!"],
+      "responses": ["Happy to help!", "Any time!", "My pleasure"]
+    },
+    {
+      "tag": "items",
+      "patterns": [
+        "Which items do you have?",
+        "What kinds of items are there?",
+        "What do you sell?",
+        "What is Greenify?",
+        "What does Greenify have?"
+      ],
+      "responses": [
+        "We sell a wide range of sustainable products, such as reusable cutlery, sustainable water bottles, tote bags etc",
+        "We offer a variety of eco-friendly products, such as reusable cutlery, sustainable water bottles, tote bags etc"
+      ]
+    },
+    {
+      "tag": "payments",
+      "patterns": [
+        "Do you take credit cards?",
+        "Do you accept Mastercard?",
+        "Can I pay with Paypal?",
+        "Are you cash only?"
+      ],
+      "responses": [
+        "We accept VISA, Mastercard and Paypal",
+        "We accept majority of the credit cards, and Paypal"
+      ]
+    },
+    {
+      "tag": "delivery",
+      "patterns": [
+        "How long does delivery take?",
+        "How long does shipping take?",
+        "When do I get my delivery?",
+        "When will I receive my order?"
+      ],
+      "responses": [
+        "Delivery takes 2-4 days from the order date",
+        "Shipping takes 2-4 days from the order date",
+        "You'll usually receive it after 2-4 days"
+      ]
+    },
+    {
+      "tag": "offers",
+      "patterns": [
+        "How do I earn points",
+        "Where can I get vouchers",
+        "How do I redeem points?",
+        "Where can I get discounts?"
+      ],
+      "responses": [
+        "After earning points from the games, you can redeem them under the voucher system",
+        "Click on the games to earn points and redeem exclusive vouchers along the way"
+      ]
+    },
+    {
+      "tag": "contact_us",
+      "patterns": [
+        "What is your email address?",
+        "Where can I contact the staff?",
+        "How do I contact the customer support?",
+        "Can I talk to a human?",
+        "How can I contact you?",
+        "How do I contact Greenify?"
+      ],
+      "responses": [
+        "Contact us: enquiries@Greenify.com",
+        "Email us: enquiries@Greenify.com"
+      ]
+    },
+    {
+      "tag": "order_status",
+      "patterns": [
+        "Where is my order?",
+        "What's the status of my delivery?",
+        "Can you track my order?"
+      ],
+      "responses": [
+        "To check your order status, please log in to your account or email us with your order number.",
+        "To track your order, kindly log in to your account or email us with your order number."
+      ]
+    },
+    {
+      "tag": "return_policy",
+      "patterns": [
+        "Can I return a product?",
+        "What is your return policy?",
+        "How can I initiate a return?"
+      ],
+      "responses": [
+        "Our return policy allows returns within 14 days of delivery."
+      ]
+    }
+  ]
+}
