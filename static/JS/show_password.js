@@ -1,42 +1,14 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const passBtn = document.querySelector('#passBtn');
+function togglePasswordVisibility(passwordInputId, eyeIconClass) {
+    var passwordInput = document.getElementById(passwordInputId);
+    var eyeIcon = document.querySelector(eyeIconClass);
 
-    if (passBtn) {
-        passBtn.addEventListener('click', () => {
-            const passwordInput = document.querySelector('#password input');
-            const passwordIcon = document.querySelector('#password i');
-
-            passwordInput.getAttribute('type') === 'password' ? passwordInput.setAttribute('type', 'text') : passwordInput.setAttribute('type', 'password');
-
-            if (passwordInput.getAttribute('type') === 'text') {
-                passwordIcon.className = 'fa fa-eye-slash fa-fw';
-            } else {
-                passwordIcon.className = 'fa fa-eye fa-fw';
-            }
-        });
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        eyeIcon.classList.remove("fa-eye");
+        eyeIcon.classList.add("fa-eye-slash");
     } else {
-        console.error('passBtn not found in the document.');
+        passwordInput.type = "password";
+        eyeIcon.classList.remove("fa-eye-slash");
+        eyeIcon.classList.add("fa-eye");
     }
-});
-
-// for confirm_password
-document.addEventListener('DOMContentLoaded', function () {
-    const passBtn = document.querySelector('#passBtn2');
-
-    if (passBtn) {
-        passBtn.addEventListener('click', () => {
-            const passwordInput = document.querySelector('#confirm_password input');
-            const passwordIcon = document.querySelector('#confirm_password i');
-
-            passwordInput.getAttribute('type') === 'password' ? passwordInput.setAttribute('type', 'text') : passwordInput.setAttribute('type', 'password');
-
-            if (passwordInput.getAttribute('type') === 'text') {
-                passwordIcon.className = 'fa fa-eye-slash fa-fw';
-            } else {
-                passwordIcon.className = 'fa fa-eye fa-fw';
-            }
-        });
-    } else {
-        console.error('passBtn not found in the document.');
-    }
-});
+}

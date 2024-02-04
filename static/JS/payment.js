@@ -26,6 +26,7 @@ function creditCardValidation(creditCradNum) {
 //Pay
 function payment() {
   var credit_card_no = $('#card-no').val();
+  var credit_card_no = document.getElementbyId('card-no').value()
   var cvv = $('#card-cvv').val();
   var date = $('#card-exp-date').val();
   date = date.slice(0,7)

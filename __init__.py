@@ -7,7 +7,7 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
-from set_image import create_image_set
+# from set_image import create_image_set
 import secrets
 import shutil
 import User_login
@@ -21,6 +21,7 @@ import uuid
 from crud_functions import *
 from seller_order import SellerOrder
 from searchForm import Search
+from chat import get_response
 
 app = Flask(__name__, static_url_path='/static')
 user_logged_in = False
@@ -31,28 +32,8 @@ app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# @app.errorhandler(404)
-# def error_404(e):
-#     return render_template('error_msg.html')
-#
-# @app.errorhandler(403)
-# def error_403(e):
-#     return render_template('error_msg.html')
-#
-# @app.errorhandler(500)
-# def error_500(e):
-#     return render_template('error_msg.html')
-
-# # New
-# UPLOAD_IMAGE_FOLDER = 'static/product_image'
-# app.config['UPLOAD_IMAGE_FOLDER'] = UPLOAD_IMAGE_FOLDER
-#
-#
-# @app.route('/uploads/<filename>')
-# def uploaded_image(filename):
-#     return send_from_directory(app.config['UPLOAD_IMAGE_FOLDER'], filename)
-
 UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
+# UPLOAD_IMG_FOLDER = url_for('static', filename='/product_image/')
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
@@ -61,36 +42,16 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# testing image upload
-# @app.route('/uploadimage')
-# def base():
-#     return render_template('index.html')
-#
-#
-# @app.route('/uploadimage', methods=['POST'])
-# def upload_image():
-#     if 'file' not in request.files:
-#         flash('No file part')
-#         return redirect(request.url)
-#     file = request.files['file']
-#     if file.filename == '':
-#         flash('No image selected for uploading')
-#         return redirect(request.url)
-#     if file and allowed_file(file.filename):
-#         filename = secure_filename(file.filename)
-#         file.save(os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename))
-#         # print('upload_image filename: ' + filename)
-#         flash('Image successfully uploaded and displayed below')
-#         return render_template('index.html', filename=filename)
-#     else:
-#         flash('Allowed image types are - png, jpg, jpeg, gif')
-#         return redirect(request.url)
+# Helper function to get initial reviews
+def get_initial_reviews(seller_id, product_id):
+    reviews_db = shelve.open('reviews.db', 'r')
+    ratings_reviews_dict = reviews_db.get('Reviews', {})
 
+    # Get the seller's dictionary
+    seller_reviews = ratings_reviews_dict.get(seller_id, {})
 
-# @app.route('/display/<filename>')
-# def display_image(filename):
-#     # print('display_image filename: ' + filename)
-#     return redirect(url_for('static', filename='product_image/' + filename), code=301)
+    # Get the list of reviews for the product
+    return seller_reviews.get(product_id, [])
 
 
 def delete_folder(item):
@@ -199,6 +160,14 @@ def last_url(url):
         session['last_url'] = url
 
 
+# chatbot
+@app.post("/predict")
+def predict():
+    text = request.get_json().get("message")
+    response = get_response(text)
+    message = {"answer": response}
+    return jsonify(message)
+
 @app.route("/", methods=['GET', 'POST'])
 def home():
     last_url(url_for('home'))
@@ -281,8 +250,8 @@ def product(seller, product_id):
                 ratings_reviews_dict = reviews_db.get('Reviews', {})
 
                 # Get the seller ID and product ID from the sent data
-                seller_id = int(sent_data.get('seller_id', ''))  # Convert to string
-                product_id = int(sent_data.get('product_id', ''))  # Convert to string
+                seller_id = int(sent_data.get('seller_id', ''))  # Convert to int
+                product_id = int(sent_data.get('product_id', ''))  # Convert to int
 
                 # Ensure the seller ID is in the dictionary
                 if seller_id not in ratings_reviews_dict:
@@ -319,6 +288,7 @@ def product(seller, product_id):
                 print("Error in handling customer feedback:", str(e))
             finally:
                 reviews_db.close()
+                return json.jsonify({"data": product_reviews, "result": True})
 
         # New
         # Retrieving r and r
@@ -334,6 +304,7 @@ def product(seller, product_id):
 
         # Get the list of reviews for the product
         product_reviews = seller_reviews.get(product_id, [])
+        # test codes 
         # print("seller_id:", seller_id)
         # print("product_id:", product_id)
         # print("ratings_reviews_dict:", ratings_reviews_dict)
@@ -433,9 +404,18 @@ def product(seller, product_id):
             print(users_shopping_cart)
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
+    # NEW
+    # Handle GET requests
+    # if request.method == "GET":
+    #     # Initial retrieval of reviews for the product
+    #     initial_reviews = get_initial_reviews(seller_id, product_id)
+    #     # print(initial_reviews)
+    #     return json.jsonify({'data': initial_reviews, 'result': True})
+
+
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
                            saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form,
-                           ratings_reviews_list=product_reviews)
+                           product_reviews=product_reviews)
 
 
 @app.route('/<user_id_hash>/cart', methods=['GET', 'POST'])
@@ -862,7 +842,6 @@ def login():
                         user_id_hash = uuid.uuid4().hex
                         session['user_id_hash'] = user_id_hash
                         session['user_id'] = user_id
-                        session['logged_in'] = True
                         session['user_logged_in'] = True
                         print(session['user_id'])
                         print(f"User login status = {session.get('user_logged_in')}")
@@ -919,11 +898,17 @@ def profile(user_id_hash):
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
 
-    return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
+    user_data = shelve.open('user.db')
+    users_dict = user_data.get('Users', {})
+
+    user_obj = users_dict.get(user)
+    return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, user_data=user_obj)
 
 
-@app.route('/updateUser/<string:email>', methods=['GET', 'POST'])
-def update_user(email):
+@app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
+def update_user(user_id_hash):
+    user = session['user_id']
+    user_id_hash = session['user_id_hash']
     error = None
     update_user_form = CreateUserForm(request.form)
 
@@ -932,7 +917,7 @@ def update_user(email):
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
-        user = users_dict.get(email)
+        user_obj = users_dict.get(user)
 
         if update_user_form.validate():
             if len(str(update_user_form.contact_number.data)) != 8:
@@ -942,12 +927,13 @@ def update_user(email):
             elif update_user_form.password.data != update_user_form.confirm_password.data:
                 error = 'Passwords must match.'
             else:
-                user.set_email(update_user_form.email.data)
-                user.set_password(update_user_form.password.data)
-                user.set_name(update_user_form.name.data)
-                user.set_contact_number(update_user_form.contact_number.data)
-                user.set_postal_code(update_user_form.postal_code.data)
-                user.set_address(update_user_form.address.data)
+                user_obj.set_email(update_user_form.email.data)
+                user_obj.set_password(update_user_form.password.data)
+                user_obj.set_name(update_user_form.name.data)
+                user_obj.set_contact_number(update_user_form.contact_number.data)
+                user_obj.set_postal_code(update_user_form.postal_code.data)
+                user_obj.set_address(update_user_form.address.data)
+                users_dict[user] = user_obj
                 error = "Update Successful."
         else:
             error = "Update Unsuccessful."
@@ -959,31 +945,33 @@ def update_user(email):
         users_dict = {}
         db = shelve.open('user.db', 'r')
         users_dict = db['Users']
+
+        user_obj = users_dict.get(user)
+        if user:
+            update_user_form.email.data = user_obj.get_email()
+            update_user_form.password.data = user_obj.get_password()
+            update_user_form.name.data = user_obj.get_name()
+            update_user_form.contact_number.data = user_obj.get_contact_number()
+            update_user_form.postal_code.data = user_obj.get_postal_code()
+            update_user_form.address.data = user_obj.get_address()
+
         db.close()
 
-        user = users_dict.get(email)
-        if user:
-            update_user_form.email.data = user.get_email()
-            update_user_form.password.data = user.get_password()
-            update_user_form.name.data = user.get_name()
-            update_user_form.contact_number.data = user.get_contact_number()
-            update_user_form.postal_code.data = user.get_postal_code()
-            update_user_form.address.data = user.get_address()
-
     if session.get('user_logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, email=email, error=error,
-                               user=user)
+        return render_template('customer/updateUser.html', form=update_user_form, error=error, db=user_obj, user_id_hash=user_id_hash)
     else:
         return redirect(url_for('login'))
 
 
-@app.route('/deleteUser/<string:email>', methods=['POST'])
-def delete_user(email):
+@app.route('/<user_id_hash>/deleteUser', methods=['POST'])
+def delete_user(user_id_hash):
+    user = session['user_id']
+    user_id_hash = session['user_id_hash']
     users_dict = {}
     db = shelve.open('user.db', 'w')
     users_dict = db['Users']
 
-    users_dict.pop(email)
+    users_dict.pop(user)
 
     db['Users'] = users_dict
     db.close()
