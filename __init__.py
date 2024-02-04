@@ -1,5 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
-    send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, send_from_directory
 from Forms import CreateUserForm, StaffLoginForm, LoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
@@ -21,7 +20,7 @@ import uuid
 from crud_functions import *
 from seller_order import SellerOrder
 from searchForm import Search
-from chat import get_response
+# from chat import get_response
 
 app = Flask(__name__, static_url_path='/static')
 user_logged_in = False
@@ -167,6 +166,7 @@ def predict():
     response = get_response(text)
     message = {"answer": response}
     return jsonify(message)
+
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
@@ -680,9 +680,12 @@ def payment(user_id_hash):
     user_info = user_dict[user]
     user_db.close()
 
-    return render_template("customer/payment.html", user=user_id_hash, user_id=user,
-                           user_address=user_info.get_address(), user_name=user_info.get_name(),
-                           saved_cart_qty=cart_qty(user), form=search_form)
+    shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
+    users_shopping_cart = shopping_cart_db[user]
+    payable = users_shopping_cart['payable']
+    print(payable)
+
+    return render_template("customer/payment.html", user=user_id_hash, user_id=user, user_address=user_info.get_address(), user_name=user_info.get_name(), payable=payable, saved_cart_qty=cart_qty(user), form=search_form)
 
 
 @app.route('/product_search', methods=['GET', 'POST'])
