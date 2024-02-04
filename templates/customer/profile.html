@@ -49,7 +49,7 @@
           <label class="col-md-2 col-form-label">Address:</label>
           <div class="payment-content col-md-6 d-flex align-items-center"><span id="address">{{ user_data.get_address() }}</span></div>
       </div>
-<a href="{{ url_for('update_user', user_id_hash=user_id_hash) }}">
+<a href="{{ url_for('update_user', user_id_hash=user) }}">
     <button type="button" class="btn btn-primary" id="update">Update</button>
 </a>
   </div>
