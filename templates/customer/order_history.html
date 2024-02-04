@@ -28,7 +28,7 @@
         {% endfor %}
 
         <div class="m-3 mx-4">
-            <h4 class="total-paid">Total Paid: ${{ all_orders[order_id]['amt_paid'] }}</h4>
+            <h4 class="total-paid">Total Paid: ${{ "%.2f"|format(all_orders[order_id]['amt_paid']) }}</h4>
         </div>
     </div>
     {% endfor %}

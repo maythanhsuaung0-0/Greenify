@@ -20,7 +20,6 @@ from send_email import send_mail
 import uuid
 from crud_functions import *
 from seller_order import SellerOrder
-import hashlib
 from searchForm import Search
 
 app = Flask(__name__, static_url_path='/static')
@@ -29,7 +28,6 @@ seller_logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
-
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -245,7 +243,7 @@ def product(seller, product_id):
 
     if seller_id == False:
         print("Seller_id not found")
-        return render_template('customer/error_msg.html')
+        return render_template('error_msg.html')
 
     # Retrieving Product for html to display
     seller_products = {}
@@ -256,7 +254,7 @@ def product(seller, product_id):
         seller_products = seller_product_info['products']
     except:
         print("Product is not found")
-        return render_template('customer/error_msg.html')
+        return render_template('error_msg.html')
 
     product = seller_products[product_id]
     seller_product_db.close()
@@ -354,7 +352,7 @@ def product(seller, product_id):
                 seller_products = seller_product_info['products']
             except:
                 print("Product is not found")
-                return render_template('customer/error_msg.html')
+                return render_template('error_msg.html')
 
             product = seller_products[product_id]
             product_stock = product.get_product_stock()
@@ -391,7 +389,7 @@ def product(seller, product_id):
                 seller_products = seller_product_info['products']
             except:
                 print("Product is not found")
-                return render_template('customer/error_msg.html')
+                return render_template('error_msg.html')
 
             seller_saved_product = seller_products[product_id]
             product_stock = seller_saved_product.get_product_stock()
@@ -442,13 +440,6 @@ def product(seller, product_id):
 
 @app.route('/<user_id_hash>/cart', methods=['GET', 'POST'])
 def shopping_cart(user_id_hash):
-    user_id_hash = session['user_id_hash']
-    user = session['user_id']
-
-    last_url(url_for('shopping_cart', user_id_hash=user))
-
-    search_form = Search(request.form)
-
     def cart_qty(user):
         saved_cart_qty = 0
         shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
@@ -458,6 +449,17 @@ def shopping_cart(user_id_hash):
         except:
             print("Error in loading cart qty db")
         return saved_cart_qty
+
+    search_form = Search(request.form)
+
+    if user_id_hash != session['user_id_hash']:
+        return render_template('error_msg.html', user=session['user_id_hash'], saved_cart_qty=cart_qty(session['user_id']), form=search_form)
+
+    user_id_hash = session['user_id_hash']
+    user = session['user_id']
+
+    last_url(url_for('shopping_cart', user_id_hash=user))
+
 
     users_shopping_cart = {}
     user_selected_product = {}
@@ -590,10 +592,15 @@ def shopping_cart(user_id_hash):
 
 @app.route('/<user_id_hash>/payment', methods=['GET', 'POST'])
 def payment(user_id_hash):
+
+    search_form = Search(request.form)
+
+    if user_id_hash != session['user_id_hash']:
+        return render_template('error_msg.html', user=session['user_id_hash'], saved_cart_qty=cart_qty(session['user_id']), form=search_form)
+
     user_id_hash = session['user_id_hash']
     user = session['user_id']
 
-    search_form = Search(request.form)
 
     # Receive AJAX Request
     if request.method == "POST":
@@ -769,12 +776,13 @@ def success_payment():
 
 @app.route('/<user_id_hash>/order_history', methods=['GET', 'POST'])
 def order_history(user_id_hash):
-    try:
-        user = session['user_id']
-        user_id_hash = session['user_id_hash']
-    except:
-        user = None
-        user_id_hash = None
+
+    search_form = Search(request.form)
+
+    if user_id_hash != session['user_id_hash']:
+        return render_template('error_msg.html', user=session['user_id_hash'], saved_cart_qty=cart_qty(session['user_id']), form=search_form)
+    user = session['user_id']
+    user_id_hash = session['user_id_hash']
 
     last_url(url_for('product_search'))
 
