@@ -56,7 +56,7 @@ def get_response(msg):
             if tag == intent["tag"]:
                 return random.choice(intent['responses'])
     else:
-        return "Sorry, I do not understand..."
+        return "Sorry, I do not understand...Email us: enquiries@Greenify.com"
 
 
 
