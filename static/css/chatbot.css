@@ -15,8 +15,8 @@ body {
 
 /* change color to match theme */
 *, html {
-    --primaryGradient: linear-gradient(93.12deg, #26580F 0.52%, #37BB05 100%);
-    --secondaryGradient: linear-gradient(268.91deg, #26580F -2.14%, #37BB05 99.69%);
+    --primaryGradient: linear-gradient(93.12deg, #26580F 0.52%, #3b7321 100%);
+    --secondaryGradient: linear-gradient(268.91deg, #26580F -2.14%, #3b7321 99.69%);
     --primaryBoxShadow: 0px 10px 15px rgba(0, 0, 0, 0.1);
     --secondaryBoxShadow: 0px -10px 15px rgba(0, 0, 0, 0.1);
     --primary: #26580F;
