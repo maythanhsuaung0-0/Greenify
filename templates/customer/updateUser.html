@@ -23,7 +23,7 @@
         <p style="color: red; text-align: center;">{{ error }}</p>
   {% endif %}
 
-<form method="POST" action="{{url_for('update_user', user_id_hash=user_id_hash)}}">
+<form method="POST" action="{{ url_for('update_user', user_id_hash=user) }}">
   <div id="account_info">
       <h3 class="sub-header" align="center">Account Info</h3>
       <div class="row mb-3">
@@ -45,7 +45,7 @@
             <div class="custom-input-group">
             <input id="password-input" type="password" value='{{ db.get_password() }}'>
             <span class="input-group-addon custom-addon" role="button" title="Show Password" id="passBtn">
-                <i class="fa fa-eye fa-fw eye" aria-hidden="true" onclick="togglePasswordVisibility('password-input', '.eye')"></i>
+                <i class="fa fa-eye fa-fw eye" aria-hidden="true"></i>
             </span>
             <button type="button" class="btn btn-success" onclick="editField('password')"><i class="bi bi-check-lg"></i></button>
             </div>
@@ -61,7 +61,7 @@
             <div class="custom-input-group">
             <input id="confirm_password-input" type="password" value='{{ db.get_password() }}'>
             <span class="input-group-addon custom-addon" role="button" title="Show Password" id="passBtn2">
-                <i class="fa fa-eye fa-fw eye" aria-hidden="true" onclick="togglePasswordVisibility('confirm_password-input', '.eye-confirm')"></i>
+                <i class="fa fa-eye fa-fw eye" aria-hidden="true"></i>
             </span>
             <button type="button" class="btn btn-success" onclick="editField('confirm_password')"><i class="bi bi-check-lg"></i></button>
             </div>
@@ -114,7 +114,7 @@
 </form>
 </div>
 
-<form method="POST" action="{{url_for('delete_user', user_id_hash=user_id_hash)}}">
+<form method="POST" action="{{url_for('delete_user', user_id_hash=user)}}">
   <input value="Delete" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#myModal_{form.email.data}" align="center" id="delete"/>
 <!-- The Modal -->
 <div class="modal" id="myModal_{form.email.data}">

@@ -915,6 +915,7 @@ def profile(user_id_hash):
 
 @app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
 def update_user(user_id_hash):
+    print("user_id_hash:", user_id_hash)
     search_form = Search(request.form)
 
     if user_id_hash != session['user_id_hash']:
@@ -971,7 +972,7 @@ def update_user(user_id_hash):
         db.close()
 
     if session.get('user_logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, error=error, db=user_obj, user_id_hash=user_id_hash)
+        return render_template('customer/updateUser.html', form=update_user_form, error=error, db=user_obj, user=user_id_hash)
     else:
         return redirect(url_for('login'))
 
