@@ -1110,7 +1110,10 @@ def create_product(seller_id):
         seller_product_db.close()
 
         return redirect(url_for('retrieve_product', seller_id=seller_id))
-    return render_template('seller/createProduct.html', form=create_product_form)
+    if session.get('seller_logged_in'):
+        return render_template('seller/createProduct.html', form=create_product_form)
+    else:
+        return redirect(url_for('seller_login'))
 
 
 @app.route('/display_image/<filename>')
