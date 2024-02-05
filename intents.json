@@ -121,6 +121,18 @@
       "responses": [
         "Our return policy allows returns within 14 days of delivery."
       ]
+    },
+    {
+      "tag": "login",
+      "patterns": [
+        "How do I login?",
+        "Where can I register an account?",
+        "Where can I login to my account?",
+        "How do I register?"
+      ],
+      "responses": [
+        "Click on the user icon on the top right of the page to login/register to Greenify."
+      ]
     }
   ]
 }
