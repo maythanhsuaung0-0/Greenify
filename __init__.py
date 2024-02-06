@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
-    send_from_directory
-from Forms import CreateUserForm, StaffLoginForm
+    send_from_directory, flash
+
+import User_login
+from Forms import CreateUserForm, StaffLoginForm, LoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
@@ -941,6 +943,8 @@ def delete_product(seller_id, product_id):
 
 @app.route('/seller/<int:seller_id>/orders')
 def orders(seller_id):
+    seller_order_list = retrieve_db('seller_order.db', str(seller_id))
+    print(seller_order_list)
     return render_template('seller/orders.html')
 
 
@@ -959,7 +963,6 @@ def error():
     return render_template('staff/errorPage.html')
 
 
-@app.route("/register", methods=['GET', 'POST'])
 @app.route("/register", methods=['GET', 'POST'])
 def register():  # create
     global last_id
@@ -1269,7 +1272,7 @@ def dummy_index():
     return message
 
 
-@app.route('/game1')
+@app.route('/games/game1')
 def game1():
     user_id = session.get('user_id', 'Unknown Player')
     if session.get('logged_in'):
