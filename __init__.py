@@ -1111,6 +1111,7 @@ def create_product(seller_id):
 
         return redirect(url_for('retrieve_product', seller_id=seller_id))
     if session.get('seller_logged_in'):
+        print(seller_logged_in)
         return render_template('seller/createProduct.html', form=create_product_form)
     else:
         return redirect(url_for('seller_login'))
