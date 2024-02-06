@@ -1,0 +1,29 @@
+h1 {
+    font-weight: 600;
+}
+
+.indv-order {
+    border: 0.2px solid rgba(232,232,232,255);
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.total-paid {
+    font-weight: 600;
+}
+
+.indv-prod {
+    border: 0.2px solid rgba(232,232,232,255);
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    margin: 20px;
+}
+
+.product-img img {
+    width: 100px;
+    height: 100px;
+}
+
+p.product-name {
+    font-weight: 700;
+}

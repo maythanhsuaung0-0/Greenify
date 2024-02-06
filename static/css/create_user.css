@@ -1,17 +1,119 @@
-.main {
+#account_info {
         background-color: #FFFFFF;
         width: 400px;
-        height: 500px;
+        margin: 7em auto;
+        margin-bottom: -30px;
+        border-radius: 1.5em;
+        box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+        margin-top: 45px;
+    }
+
+#address_info {
+        background-color: #FFFFFF;
+        width: 400px;
         margin: 7em auto;
         border-radius: 1.5em;
         box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+        margin-top: 60px;
+        margin-bottom: 30px;
     }
 
 .header {
-        padding-top: 40px;
+        padding-top: 100px;
         color: #000000;
         font-weight: bold;
         font-size: 23px;
+    }
+
+.sub-header {
+        padding-top: 10px;
+        margin-left: -5px;
+        color: #000000;
+        font-weight: bold;
+        font-size: 19px;
+    }
+
+/* Password Input Styles */
+.custom-input-group {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
+    display: flex;
+}
+
+#password {
+    width: 93%;
+    margin-left: 20px;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+/* Eye Icon Styles */
+.custom-addon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    width: 38px;
+    cursor: pointer;
+}
+
+#passBtn {
+    font-size: 20px;
+}
+
+#passBtn2 {
+    font-size: 20px;
+}
+
+.control-label {
+margin-left: -22px;
+}
+
+#confirm_password {
+    width: 93%;
+    margin-left: 20px;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+
+#email {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    }
+
+#name {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    }
+
+#contact_number {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
+    }
+
+#postal_code {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
+    }
+
+#address {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
     }
 
 #SignUp {
@@ -25,25 +127,8 @@
         padding-bottom: 10px;
         padding-top: 10px;
         margin-top: 20px;
-        margin-left: 35%;
-        margin-bottom:21px;
-        font-size: 13px;
-        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
-    }
-
-#Next {
-      cursor: pointer;
-        border-radius: 5em;
-        color: #fff;
-        background: linear-gradient(to right, #020202, #090909);
-        border: 0;
-        padding-left: 40px;
-        padding-right: 40px;
-        padding-bottom: 10px;
-        padding-top: 10px;
-        margin-top: 20px;
-        margin-left: 35%;
-        margin-bottom:21px;
+        margin-left: 130px;
+        margin-bottom: 50px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
@@ -51,6 +136,7 @@
 .login-link {
     color: #007bff;
     text-decoration: none;
+    margin-top: 0px;
 }
 
 .login-link:hover {
@@ -59,6 +145,7 @@
 
 .info {
     text-align: center;
+    margin-top: -80px;
 }
 
 .logo {
@@ -70,53 +157,4 @@
 
 img {
   width: 150%
-}
-
-[data-tab-content] {
-  display: none;
-}
-
-.active[data-tab-content] {
-  display: block;
-}
-
-.inactive[data-tab-content] {
-  display: none;
-  visibility: hidden;
-}
-
-.tab.active {
-  background-color: #CCC;
-}
-
-body {
-  padding: 0;
-  margin: 0;
-}
-
-.tabs {
-  display: flex;
-  justify-content: space-around;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  border-bottom: 1px solid black;
-}
-
-.tab {
-  cursor: pointer;
-  padding: 10px;
-}
-
-.tab.active {
-  background-color: #CCC;
-}
-
-.tab:hover {
-  background-color: #AAA;
-}
-
-.tab-content {
-  margin-left: 20px;
-  margin-right: 20px;
 }

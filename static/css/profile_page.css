@@ -1,17 +1,36 @@
-.main {
+#account_info {
         background-color: #FFFFFF;
         width: 400px;
-        height: 530px;
+        margin: 7em auto;
+        margin-bottom: -30px;
+        border-radius: 1.5em;
+        box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+        margin-top: 45px;
+    }
+
+#address_info {
+        background-color: #FFFFFF;
+        width: 400px;
         margin: 7em auto;
         border-radius: 1.5em;
         box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
+        margin-top: 60px;
+        margin-bottom: 30px;
     }
 
 .header {
         padding-top: 40px;
+        margin-left: 60px;
         color: #000000;
         font-weight: bold;
         font-size: 23px;
+    }
+
+.sub-header {
+        padding-top: 10px;
+        color: #000000;
+        font-weight: bold;
+        font-size: 19px;
     }
 
 #update {
@@ -25,24 +44,7 @@
         padding-bottom: 10px;
         padding-top: 10px;
         margin-top: 20px;
-        margin-left: 105px;
-        margin-bottom:5px;
-        font-size: 13px;
-        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
-    }
-
-#Next {
-      cursor: pointer;
-        border-radius: 5em;
-        color: #fff;
-        background: linear-gradient(to right, #020202, #090909);
-        border: 0;
-        padding-left: 48px;
-        padding-right: 48px;
-        padding-bottom: 10px;
-        padding-top: 10px;
-        margin-left: 12px;
-        margin-top: 50px;
+        margin-left: 134px;
         margin-bottom:5px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
@@ -58,7 +60,7 @@
         padding-right: 46px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 35%;
+        margin-left: 489px;
         margin-bottom:5px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
@@ -74,7 +76,7 @@
         padding-right: 40px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 35%;
+        margin-left: 490px;
         margin-bottom:5px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
@@ -96,51 +98,103 @@
       color: inherit; /* Inherit the color from the parent */
     }
 
-[data-tab-content] {
-  display: none;
+/* Password Input Styles */
+.custom-input-group {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 15px;
+    display: flex;
 }
 
-.active[data-tab-content] {
-  display: block;
+#password {
+    width: 93%;
+    margin-left: 20px;
+    text-align: center;
+    margin-bottom: 5px;
 }
 
-.inactive[data-tab-content] {
-  display: none;
-  visibility: hidden;
+/* Eye Icon Styles */
+.custom-addon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    width: 38px;
+    cursor: pointer;
 }
 
-.tab.active {
-  background-color: #CCC;
+#passBtn {
+    font-size: 20px;
 }
 
-body {
-  padding: 0;
-  margin: 0;
+#passBtn2 {
+    font-size: 20px;
 }
 
-.tabs {
-  display: flex;
-  justify-content: space-around;
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-  border-bottom: 1px solid black;
+label {
+margin-left: 42px;
 }
 
-.tab {
-  cursor: pointer;
-  padding: 10px;
+#confirm_password {
+    width: 93%;
+    margin-left: 20px;
+    text-align: center;
+    margin-bottom: 5px;
 }
 
-.tab.active {
-  background-color: #CCC;
+#email {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    }
+
+#email-input {
+margin-left: 39px;
 }
 
-.tab:hover {
-  background-color: #AAA;
+#name-input {
+margin-left: 39px;
 }
 
-.tab-content {
-  margin-left: 20px;
-  margin-right: 20px;
+#name {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 10px;
+    }
+
+#contact_number {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 10px;
+    }
+
+#contact_number-input {
+margin-left: 39px;
+}
+
+#postal_code {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 10px;
+    }
+
+#postal_code-input {
+margin-left: 39px;
+}
+
+#address {
+    width: 76%;
+    margin-left: 39px;
+    text-align: center;
+    margin-bottom: 10px;
+    }
+
+#address-input {
+margin-left: 39px;
 }

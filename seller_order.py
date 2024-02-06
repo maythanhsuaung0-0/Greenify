@@ -4,6 +4,7 @@ class SellerOrder:
         self.__email = email
         self.__address = address
         self.__order_products = []
+        self.__sent_out = False
 
     def set_name(self, name):
         self.__name = name
@@ -17,6 +18,10 @@ class SellerOrder:
     def set_order_products(self, id, qty):
         self.__order_products.append({'product_id': id, 'quantity': qty})
 
+
+    def set_sent_out(self, status):
+        self.__sent_out = status
+
     def get_name(self):
         return self.__name
 
@@ -28,3 +33,6 @@ class SellerOrder:
 
     def get_order_products(self):
         return self.__order_products
+
+    def get_sent_out(self):
+        return self.__sent_out

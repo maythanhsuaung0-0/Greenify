@@ -1,7 +1,6 @@
 .main {
         background-color: #FFFFFF;
         width: 400px;
-        height: 400px;
         margin: 7em auto;
         border-radius: 1.5em;
         box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
@@ -14,12 +13,39 @@
         font-size: 23px;
     }
 
-#password {
+/* Password Input Styles */
+.custom-input-group {
     width: 76%;
-    margin-left: 46px;
+    margin-left: 39px;
     text-align: center;
-    margin-bottom: 40px;
-    }
+    margin-bottom: 15px;
+    display: flex;
+}
+
+#password {
+    width: 95.5%;
+    margin-left: 26px;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+/* Eye Icon Styles */
+.custom-addon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 38px;
+    width: 38px;
+    cursor: pointer;
+}
+
+#passBtn {
+    font-size: 20px;
+}
+
+.control-label {
+margin-left: -22px;
+}
 
 #email {
     width: 76%;
@@ -38,7 +64,7 @@
         padding-right: 40px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 35%;
+        margin-left: 36%;
         margin-bottom:20px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);

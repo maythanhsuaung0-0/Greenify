@@ -1,6 +1,7 @@
 {% extends "customer/Customer_Base.html" %}
 
 {% block Head_JS_CSS %}
+
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/homepage.css') }}">
 <script src="{{url_for('static', filename='JS/homepage1.js')}}"></script>
 {% endblock %}
@@ -8,7 +9,6 @@
 {% block title%}Homepage{% endblock %}
 
 {% block body %}
-
     <!-- hero section -->
     <header class="hero-section">
         <div class="content">
@@ -16,7 +16,6 @@
             <img src="{{ url_for('static', filename='images/#') }}" alt="jsfdj i need a nicer pic" height = 525px width = 2000px>
         </div>
     </header>
-
 
     <!-- The discount section -->
     <section class="product">
@@ -191,7 +190,7 @@
     <footer>
         <div class="footer-container">
             <p class="footer-title">about company</p>
-            <p class="info">support emails - help@cherylisdying.com, customersupport@clothing.com</p>
+            <p class="info">support emails - enquiries@Greenify.com, customersupport@Greenify.com</p>
             <p class="info">telephone - 63 1234 4488, 4321 8844</p>
             <div class="footer-social-container">
                 <div>

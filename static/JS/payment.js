@@ -1,13 +1,26 @@
 $(document).ready(function () {
-  $(".datepicker").datepicker({
+    var date = new Date();
+    date.setDate(date.getDate()-1);
+
+    $(".datepicker").datepicker({
     format: "mm-yyyy",
+    startDate: date,
     viewMode: "months",
     maxViewMode: "years",
     minViewMode: "months",
     orientation: "bottom",
     autoclose: true
-  });
+    });
 });
+
+var form = document.getElementById('payment-form')
+function submitForm(event) {
+    event.preventDefault();
+}
+
+form.addEventListener('submit', submitForm)
+
+
 
 //Credit Card Checker
 function creditCardValidation(creditCradNum) {
@@ -22,12 +35,16 @@ function creditCardValidation(creditCradNum) {
   }
 }
 
+
 //Pay
 function payment() {
   var credit_card_no = $('#card-no').val();
   var cvv = $('#card-cvv').val();
   var date = $('#card-exp-date').val();
-
+  month = date.slice(0,2);
+  year = date.slice(3,7);
+  date_verify = new Date(year, month);
+  current_date = new Date();
 
   if (cvv.length < 3 && cvv.length != 0) {
     $('#invalid-cvv').css('display', 'block');
@@ -35,12 +52,11 @@ function payment() {
     $('#invalid-cvv').css('display', 'none');
   }
 
-  if (date.match(/[\d]{2}\-[\d]{4}/)) {
+  if (date.match(/[\d]{2}\-[\d]{4}/) && date.length < 8 && month < 13 && date_verify > current_date) {
     $('#invalid-exp-date').css('display', 'none');
   } else if (date.length != 0) {
     $('#invalid-exp-date').css('display', 'block');
   }
-
   if (creditCardValidation(credit_card_no)) {
     $('#invalid-exp-date').css('display', 'none');
 

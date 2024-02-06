@@ -4,7 +4,7 @@ class SellerProduct:
         self.__product_name = product_name
         self.__product_price = product_price
         self.__product_stock = product_stock
-        self.__image = None
+        self.__image = ""
         self.__description = description
 
     def set_product_id(self, id):

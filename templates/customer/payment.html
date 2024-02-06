@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/payment.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/js/bootstrap-datepicker.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.10.0/dist/css/bootstrap-datepicker3.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% endblock %}
 
 {% block title %} Payment {% endblock %}
@@ -12,7 +13,7 @@
 {% block body %}
 
 <div class="container-md mx-auto mt-5">
-    <form>
+    <form id="payment-form">
         <div class="row row-cols-1 row-cols-lg-2">
             <div class="shopping-address">
                 <h1 class="my-5">Shipping Address</h1>
@@ -27,7 +28,7 @@
                 </div>
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label">Email Address:</label>
-                    <div class="payment-content col-md-6 d-flex align-items-center"><span id="email">{{ user }}</span></div>                    
+                    <div class="payment-content col-md-6 d-flex align-items-center"><span id="email">{{ user_id }}</span></div>
                 </div>
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label"> Shipping Address:</label>
@@ -54,7 +55,7 @@
                 <div class="row mb-3">
                     <label class="col-md-2 col-form-label">CVV:</label>
                    <div class="payment-content col-md-3">
-                        <input type="number" class='form-control' id="card-cvv" max="3" placeholder="CVV" required>
+                        <input type="number" class='form-control' id="card-cvv" maxlength="3" placeholder="CVV" required>
                         <div class="invalid-div" id="invalid-cvv"><p class='invalid'>Please Enter A Valid CVV</p></div>
                     </div>
                 </div>
@@ -69,7 +70,10 @@
                     </div>
                 </div>
 
-                <button class="btn btn-warning w-25" onclick="payment()">Pay</button>
+                <div class="my-5">
+                    <h4 class="d-inline me-5 fw-semibold">Total: ${{ "%.2f"|format(payable) }}</h4>
+                    <input type="submit" class="btn btn-warning w-25" onclick="payment()" value="Pay">
+                </div>
             </div>
         </div>
     </form>

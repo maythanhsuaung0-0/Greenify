@@ -13,21 +13,24 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/Customer base.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+    <script>$SCRIPT_ROOT = {{ request.script_root|tojson }}</script>
+    <script type="text/javascript" src="{{ url_for('static', filename='JS/chatbot.js') }}"></script>
+
     {% block Head_JS_CSS %}{% endblock %}
     <title>{% block title %}{% endblock%}</title>
 </head>
 <body>
     <nav class="custom-nav navbar navbar-expand-lg bg-body-tertiary border-bottom border-bottom-dark sticky-top">
         <div class="container-fluid px-5">
-
             <a class="navbar-brand col-1" href="{{ url_for('home') }}">
-           <img src="{{ url_for('static', filename='images/favicon.svg') }}"
+            <img src="{{ url_for('static', filename='images/favicon.svg') }}"
                 alt="Greenify Trademark" class="trademark">
 
             </a>
 
             <!-- Hamburg Icon -->
-            <button class="navbar-toggler col-1 m-auto float-start" type="button" data-bs-toggle="offcanvas"
+            <button class="navbar-toggler col-1 float-start" type="button" data-bs-toggle="offcanvas"
                 data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -44,8 +47,9 @@
                 <!-- Offcanvas Body -->
                 <div class="offcanvas-body text-center d-flex ">
                     <ul class="navbar-nav justify-content-start align-items-center fs-5 flex-grow-1">
-                        <li class="nav-item"><a href="#">Home</a></li>
-                        <li class="nav-item"><a href="#">About Us</a></li>
+
+                        <li class="nav-item"><a href="{{ url_for('home') }}">Home</a></li>
+                        <li class="nav-item"><a href="{{ url_for('product_all') }}">Product</a></li>
                         <li class="nav-item"><a href="/games/game1">Games</a></li>
                     </ul>
                 </div>
@@ -53,9 +57,10 @@
 
             <!-- Search Engine -->
             <div>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2 search" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-sm custom-btn" type="submit">Search</button>
+                <form method="POST" action="" class="d-flex" role="search">
+                    {% from "includes/_formHelper.html" import render_field %}
+                    {{ render_field(form.search_query, class="form-control", placeholder='Search') }}
+                    <button class="btn btn-sm custom-btn mx-3" type="submit">Search</button>
                 </form>
             </div>
 
@@ -63,29 +68,71 @@
             {% if user == None %}
             <a href="{{ url_for('login') }}" class="btn cart-container col-1 position-relative">
                 <i class="bi bi-bag"></i>
-                <span id="cart-item-qty" class="badge rounded-pill text-black">{{ saved_cart_qty }}</span>
+                <span id="cart-item-qty" class="badge rounded-pill text-black">0</span>
             </a>
             {% else %}
-            <a href="{{ url_for('shopping_cart', user=user) }}" class="btn cart-container col-1 position-relative">
+            <a href="{{ url_for('shopping_cart', user_id_hash=user) }}" class="btn cart-container col-1 position-relative">
                 <i class="bi bi-bag"></i>
                 <span id="cart-item-qty" class="badge rounded-pill text-black">{{ saved_cart_qty }}</span>
             </a>
             {% endif %}
 
             <!--Account-->
+            {% if user == None %}
             <div class="dropdown col-1">
-                <a class="btn d-flex justify-content-center account w-20">
+                <a href="{{ url_for('login') }}" class="btn d-flex justify-content-center account w-20">
                     <i class="bi bi-person-circle" id="dropdownIcon" onclick="toggleDropdown()"></i>
                 </a>
                  <!-- Dropdown content -->
                 <div class="dropdown-content" id="myDropdown">
                     <a href="/login">Login as User</a>
                     <a href="/stafflogin">Login as Staff</a>
-                    <a href="/sellerlogin">Login as Seller</a>
+                    <a href="/seller/login">Login as Seller</a>
                 </div>
             </div>
+            {% else %}
+            <div class="dropdown col-1">
+                <a href="{{ url_for('profile', user_id_hash=user) }}" class="btn d-flex justify-content-center account w-20">
+                    <i class="bi bi-person-circle" id="dropdownIcon" onclick="toggleDropdown()"></i>
+                </a>
+                 <!-- Dropdown content -->
+                <div class="dropdown-content" id="myDropdown">
+                    <a href="/login">Login as User</a>
+                    <a href="/stafflogin">Login as Staff</a>
+                    <a href="/seller/login">Login as Seller</a>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </nav>
+
+    <!-- chatbot -->
+    <div class="container">
+        <div class="chatbox">
+            <div class="chatbox__support">
+                <div class="chatbox__header">
+                    <div class="chatbox__image--header">
+                        <img src="https://img.icons8.com/color/48/000000/circled-user-female-skin-type-5--v1.png" alt="image">
+                    </div>
+                    <div class="chatbox__content--header">
+                        <h4 class="chatbox__heading--header">Chat support</h4>
+                        <p class="chatbox__description--header">Hello. My name is Greeny. How can I help you?</p>
+                    </div>
+                </div>
+                <div class="chatbox__messages">
+                    <div></div>
+                </div>
+                <div class="chatbox__footer">
+                    <input type="text" placeholder="Write a message...">
+                    <button class="chatbox__send--footer send__button">Send</button>
+                </div>
+            </div>
+            <!--to open chatbox-->
+            <div class="chatbox__button">
+                <button><img src="{{ url_for('static', filename='images/chatbot_icon.png') }}" /></button>
+            </div>
+        </div>
+    </div>
 
     <div class="container-md content" id="content-body">
         {% block body %}{% endblock %}

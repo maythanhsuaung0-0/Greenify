@@ -1,0 +1,17 @@
+.nav-box {
+    border: 0.2px solid rgba(232,232,232,255);
+    border-radius: 10px;
+    width: 200px;
+    position: sticky;
+    top: 300px;
+    user-select: none;
+}
+
+.nav-box a {
+    text-decoration: none;
+    color: black;
+    transition: 0.2s
+}
+.nav-box a:hover {
+    color: rgb(113, 182, 70);
+}
