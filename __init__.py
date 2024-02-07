@@ -1031,10 +1031,13 @@ def seller_login():
             print(i)
             if login_form.email.data == i["email"] and login_form.password.data == i["pw"]:
                 seller_id = i['id']
+                seller_id_hash = uuid.uuid4().hex
+                session['seller_id_hash'] = seller_id_hash
+                session['seller_id'] = seller_id
                 session['seller_logged_in'] = True
                 print(f"Seller login status = {session.get('seller_logged_in')}")
                 if session.get('seller_logged_in'):
-                    return redirect(url_for('seller_dashboard', seller_id=seller_id))
+                    return redirect(url_for('seller_dashboard', seller_id_hash=seller_id_hash))
             else:
                 error = 'Email or Password is incorrect, please try again.'
     return render_template('seller/seller_login.html', form=login_form, seller_logged_in=seller_logged_in, error=error)
@@ -1239,14 +1242,19 @@ def delete_product(seller_id, product_id):
         return "Error in deleting product from seller-product db"
 
 
-@app.route('/seller/<int:seller_id>/orders')
-def orders(seller_id):
-    return render_template('seller/orders.html')
+@app.route('/seller/<seller_id_hash>/orders')
+def orders(seller_id_hash):
+    print(seller_id_hash)
+    # seller_order_list = retrieve_db('seller_order.db', seller_id)
+    # print(seller_order_list)
+    print('seller:',session['seller_id'])
+    return render_template('seller/orders.html',seller = seller_id_hash)
 
 
-@app.route('/seller/<int:seller_id>/dashboard')
-def seller_dashboard(seller_id):
-    return render_template('seller/dashboard.html')
+@app.route('/seller/<seller_id_hash>/dashboard')
+def seller_dashboard(seller_id_hash):
+    print(seller_id_hash)
+    return render_template('seller/dashboard.html',seller = seller_id_hash)
 
 
 @app.route('/respond')
@@ -1259,7 +1267,6 @@ def error():
     return render_template('staff/errorPage.html')
 
 
-@app.route("/register", methods=['GET', 'POST'])
 @app.route("/register", methods=['GET', 'POST'])
 def register():  # create
     global last_id
@@ -1286,7 +1293,6 @@ def register():  # create
         application_form[appForm.get_application_id()] = appForm
         today = date.today()
         appForm.set_date(today)
-        print(appForm.get_date())
         if 'support_document' in request.files:
             support_docs = request.files['support_document']
             if support_docs:
@@ -1569,7 +1575,7 @@ def dummy_index():
     return message
 
 
-@app.route('/game1')
+@app.route('/games/game1')
 def game1():
     user_id = session.get('user_id', 'Unknown Player')
     if session.get('logged_in'):
