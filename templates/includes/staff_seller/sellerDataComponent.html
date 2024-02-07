@@ -32,7 +32,7 @@
                 <a href="{{ url_for('update_product', seller_id_hash=seller_id_hash, product_id=product_id) }}">
                     <button class="btn btn-primary btn-sm my-2">Update</button>
                 </a>
-                <form action="{{ url_for('delete_product', seller_id_hash=seller_id_hash, product_id=product_id) }}" method="POST">
+                <form action="{{ url_for('delete_product', seller_id=seller_id, product_id=product_id) }}" method="POST">
                     <!-- Button to Open the Modal -->
                     <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#myModal_{{product_id}}">
                         Delete
