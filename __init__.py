@@ -26,6 +26,7 @@ from chat import get_response
 app = Flask(__name__, static_url_path='/static')
 user_logged_in = False
 seller_logged_in = False
+staff_logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
@@ -879,11 +880,20 @@ def user_logout():
     return "You have successfully logged out from your account."
 
 
+@app.route('/staff/logout')
+def staff_logout():
+    if session.get('staff_logged_in'):
+        session.pop('staff_logged_in', None)
+    print(f"Staff login status = {session.get('staff_logged_in')}")
+    return "You have successfully logged out from your account."
+
+
 @app.route('/seller/logout')
 def seller_logout():
     if session.get('seller_logged_in'):
         session.pop('seller_logged_in', None)
     print(f"Seller login status = {session.get('seller_logged_in')}")
+    return "You have successfully logged out from your account."
 
 
 @app.route('/<user_id_hash>/profile', methods=['GET', 'POST'])
@@ -899,16 +909,15 @@ def profile(user_id_hash):
 
     last_url(url_for('product_search'))
 
-    search_form = Search(request.form)
     if request.method == 'POST' and search_form.validate():
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
 
     user_data = shelve.open('user.db')
     users_dict = user_data.get('Users', {})
-
     user_obj = users_dict.get(user)
     user_data.close()
+
     return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
                            form=search_form, user_data=user_obj)
 
@@ -931,7 +940,8 @@ def update_user(user_id_hash):
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
-        user_obj = users_dict.get(user)
+        email = update_user_form.email.data
+        user_obj = users_dict.get(email)
 
         if update_user_form.validate():
             if len(str(update_user_form.contact_number.data)) != 8:
@@ -960,7 +970,8 @@ def update_user(user_id_hash):
         db = shelve.open('user.db', 'r')
         users_dict = db['Users']
 
-        user_obj = users_dict.get(user)
+        email = update_user_form.email.data
+        user_obj = users_dict.get(email)
         if user:
             update_user_form.email.data = user_obj.get_email()
             update_user_form.password.data = user_obj.get_password()
@@ -999,6 +1010,8 @@ def staff_login():
     staff_login_form = StaffLoginForm(request.form)
     if request.method == 'POST' and staff_login_form.validate():
         if staff_login_form.admin_email.data == 'admin@gmail.com' and staff_login_form.admin_password.data == 'admin_password':
+            session['staff_logged_in'] = True
+            print(f"Staff login status = {session.get('staff_logged_in')}")
             return redirect(url_for('retrieveApplicationForms'))
         else:
             error = 'Email or Password is incorrect, please try again.'
