@@ -1,3 +1,8 @@
+function isFieldEmpty(input_change) {
+    const field = document.getElementById(input_change);
+    return field.value.trim() === '';
+}
+
 function editField(input_change) {
   input_class = `#${input_change}-edit`;
   data_status = $(input_class).data("status");
@@ -16,3 +21,23 @@ function editField(input_change) {
 
   $(input_class).data("status", data_status);
 }
+
+function validateEmail(email) {
+            const re = /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/;
+            return re.test(String(email).toLowerCase());
+        }
+
+function validateEmailAndSubmit(input_change) {
+    const input_class = `#${input_change}-edit`;
+    const data_status = $(input_class).data("status");
+    const emailInput = $(`#${input_change}`);
+    const email = emailInput.text();
+
+    if (validateEmail(email) != true) {
+        alert('Please enter a valid email address.');
+        return; // Exit the function if email is invalid
+    } else {
+        editField('email')
+    }
+}
+
