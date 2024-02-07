@@ -1064,12 +1064,17 @@ def seller_login():
     return render_template('seller/seller_login.html', form=login_form, seller_logged_in=seller_logged_in, error=error)
 
 
-@app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
-def create_product(seller_id):
+@app.route('/seller/<seller_id_hash>/createProduct', methods=['GET', 'POST'])
+def create_product(seller_id_hash):
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
 
+    seller_id_hash = session['seller_id_hash']
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
     approved_sellers = approved_db['Approved_sellers']
+    seller_id = session['seller_id']
     if seller_id not in approved_sellers:
         return "seller not found"
     approved_db.close()
@@ -1134,10 +1139,10 @@ def create_product(seller_id):
         #
         seller_product_db.close()
 
-        return redirect(url_for('retrieve_product', seller_id=seller_id))
+        return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
     if session.get('seller_logged_in'):
         print(seller_logged_in)
-        return render_template('seller/createProduct.html', form=create_product_form)
+        return render_template('seller/createProduct.html', seller=seller_id_hash,seller_id = seller_id, form=create_product_form)
     else:
         return redirect(url_for('seller_login'))
 
@@ -1178,13 +1183,19 @@ def retrieve_product(seller_id_hash):
     for product_id, product in seller_products.items():
         product_list.append(product)
 
-    return render_template('seller/retrieveProducts.html',seller= seller_id_hash,seller_id= seller_id, count=len(product_list),
+    return render_template('seller/retrieveProducts.html',seller=seller_id_hash,seller_id = seller_id, count=len(product_list),
                            product_list=product_list)
 
 
-@app.route('/seller/<int:seller_id>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
-def update_product(seller_id, product_id):
+@app.route('/seller/<seller_id_hash>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
+def update_product(seller_id_hash, product_id):
     update_product_form = CreateProductForm(request.form)
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
     if request.method == 'POST' and update_product_form.validate():
 
         seller_product_db = shelve.open('seller-product.db', 'c')
@@ -1224,7 +1235,7 @@ def update_product(seller_id, product_id):
             seller_product_db[str(seller_id)] = seller_products
             seller_product_db.close()
 
-            return redirect(url_for('retrieve_product', seller_id=seller_id))
+            return redirect(url_for('retrieve_product', seller=seller_id_hash))
 
     else:
         seller_product_db = shelve.open('seller-product.db', 'r')
@@ -1238,13 +1249,19 @@ def update_product(seller_id, product_id):
             update_product_form.product_stock.data = sellerProduct.get_product_stock()
             update_product_form.description.data = sellerProduct.get_description()
 
-            return render_template('/seller/updateProduct.html', form=update_product_form, seller_id=seller_id,
+            return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash, seller_id = seller_id,
                                    product_id=product_id)
     return "Product not found"
 
 
-@app.route('/seller/<int:seller_id>/deleteProduct/<int:product_id>/', methods=['POST'])
-def delete_product(seller_id, product_id):
+@app.route('/seller/<seller_id_hash>/deleteProduct/<int:product_id>/', methods=['POST'])
+def delete_product(seller_id_hash, product_id):
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
     try:
         seller_product_db = shelve.open('seller-product.db', 'c')
         seller_products = seller_product_db[str(seller_id)]
@@ -1265,7 +1282,7 @@ def delete_product(seller_id, product_id):
                 os.remove(deleted_image_path)
                 print(f"Deleted image file at: {deleted_image_path}")
 
-        return redirect(url_for('retrieve_product', seller_id=seller_id))
+        return redirect(url_for('retrieve_product', seller=seller_id_hash))
     except:
         return "Error in deleting product from seller-product db"
 

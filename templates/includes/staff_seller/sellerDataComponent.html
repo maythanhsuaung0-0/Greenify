@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/components.css') }}">
     {% block JS_CSS %}{% endblock %}
 </head>
-{% macro dataComponent(seller_id, product_id, product_name, description, product_price, product_stock, image) -%}
+{% macro dataComponent(seller_id_hash,seller_id, product_id, product_name, description, product_price, product_stock, image) -%}
     <div class='card'>
         <div class="row card-body">
             <div class="col-1 text-center">{{product_id}}</div>
@@ -29,10 +29,10 @@
             </div>
 
             <div class="col-2 text-center">
-                <a href="{{ url_for('update_product', seller_id=seller_id, product_id=product_id) }}">
+                <a href="{{ url_for('update_product', seller_id_hash=seller_id_hash, product_id=product_id) }}">
                     <button class="btn btn-primary btn-sm my-2">Update</button>
                 </a>
-                <form action="{{ url_for('delete_product', seller_id=seller_id, product_id=product_id) }}" method="POST">
+                <form action="{{ url_for('delete_product', seller_id_hash=seller_id_hash, product_id=product_id) }}" method="POST">
                     <!-- Button to Open the Modal -->
                     <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#myModal_{{product_id}}">
                         Delete
