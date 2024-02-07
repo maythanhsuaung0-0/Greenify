@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
+    send_from_directory
 from Forms import CreateUserForm, StaffLoginForm, LoginForm
 import shelve, User, SellerProduct, application
 from sellerproductForm import CreateProductForm
@@ -30,31 +31,19 @@ staff_logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Define the relative path to the upload directory within the 'static' folder
+# supporting document upload folder
 UPLOAD_RELATIVE_PATH = 'documents/uploads'
 UPLOAD_DIRECTORY = os.path.join(app.root_path, 'static', UPLOAD_RELATIVE_PATH)
 app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
-# app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
+
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
+# UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
+UPLOAD_IMG_FOLDER = os.path.join(app.root_path,'static','uploads/product_image')
 # UPLOAD_IMG_FOLDER = url_for('static', filename='/product_image/')
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
-
-#Error Handling
-@app.errorhandler(404)
-def error_404(e):
-    return render_template('error_msg.html')
-
-@app.errorhandler(403)
-def error_403(e):
-    return render_template('error_msg.html')
-
-@app.errorhandler(500)
-def error_500(e):
-    return render_template('error_msg.html')
 
 
 def allowed_file(filename):
@@ -325,7 +314,7 @@ def product(seller, product_id):
 
         # Get the list of reviews for the product
         product_reviews = seller_reviews.get(product_id, [])
-        # test codes 
+        # test codes
         # print("seller_id:", seller_id)
         # print("product_id:", product_id)
         # print("ratings_reviews_dict:", ratings_reviews_dict)
@@ -433,7 +422,6 @@ def product(seller, product_id):
     #     # print(initial_reviews)
     #     return json.jsonify({'data': initial_reviews, 'result': True})
 
-
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
                            saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form,
                            product_reviews=product_reviews)
@@ -454,13 +442,13 @@ def shopping_cart(user_id_hash):
     search_form = Search(request.form)
 
     if user_id_hash != session['user_id_hash']:
-        return render_template('error_msg.html', user=session['user_id_hash'], saved_cart_qty=cart_qty(session['user_id']), form=search_form)
+        return render_template('error_msg.html', user=session['user_id_hash'],
+                               saved_cart_qty=cart_qty(session['user_id']), form=search_form)
 
     user_id_hash = session['user_id_hash']
     user = session['user_id']
 
     last_url(url_for('shopping_cart', user_id_hash=user))
-
 
     users_shopping_cart = {}
     user_selected_product = {}
@@ -593,15 +581,14 @@ def shopping_cart(user_id_hash):
 
 @app.route('/<user_id_hash>/payment', methods=['GET', 'POST'])
 def payment(user_id_hash):
-
     search_form = Search(request.form)
 
     if user_id_hash != session['user_id_hash']:
-        return render_template('error_msg.html', user=session['user_id_hash'], saved_cart_qty=cart_qty(session['user_id']), form=search_form)
+        return render_template('error_msg.html', user=session['user_id_hash'],
+                               saved_cart_qty=cart_qty(session['user_id']), form=search_form)
 
     user_id_hash = session['user_id_hash']
     user = session['user_id']
-
 
     # Receive AJAX Request
     if request.method == "POST":
@@ -706,7 +693,9 @@ def payment(user_id_hash):
     payable = users_shopping_cart['payable']
     print(payable)
 
-    return render_template("customer/payment.html", user=user_id_hash, user_id=user, user_address=user_info.get_address(), user_name=user_info.get_name(), payable=payable, saved_cart_qty=cart_qty(user), form=search_form)
+    return render_template("customer/payment.html", user=user_id_hash, user_id=user,
+                           user_address=user_info.get_address(), user_name=user_info.get_name(), payable=payable,
+                           saved_cart_qty=cart_qty(user), form=search_form)
 
 
 @app.route('/product_search', methods=['GET', 'POST'])
@@ -780,11 +769,11 @@ def success_payment():
 
 @app.route('/<user_id_hash>/order_history', methods=['GET', 'POST'])
 def order_history(user_id_hash):
-
     search_form = Search(request.form)
 
     if user_id_hash != session['user_id_hash']:
-        return render_template('error_msg.html', user=session['user_id_hash'], saved_cart_qty=cart_qty(session['user_id']), form=search_form)
+        return render_template('error_msg.html', user=session['user_id_hash'],
+                               saved_cart_qty=cart_qty(session['user_id']), form=search_form)
     user = session['user_id']
     user_id_hash = session['user_id_hash']
 
@@ -904,7 +893,7 @@ def staff_logout():
     if session.get('staff_logged_in'):
         session.pop('staff_logged_in', None)
     print(f"Staff login status = {session.get('staff_logged_in')}")
-    return "You have successfully logged out from your account."
+    return "You have successfully logged out from the account."
 
 
 @app.route('/seller/logout')
@@ -934,7 +923,7 @@ def profile(user_id_hash):
 
     user_data = shelve.open('user.db')
     users_dict = user_data.get('Users', {})
-    user_obj = users_dict.get(user)
+    user_obj = users_dict[user]
     user_data.close()
 
     return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
@@ -943,11 +932,13 @@ def profile(user_id_hash):
 
 @app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
 def update_user(user_id_hash):
+    global user_obj
     print("user_id_hash:", user_id_hash)
     search_form = Search(request.form)
 
     if user_id_hash != session['user_id_hash']:
-        return render_template('error_msg.html', user=session['user_id_hash'], saved_cart_qty=cart_qty(session['user_id']), form=search_form, user_id_hash=user_id_hash)
+        return render_template('error_msg.html', user=session['user_id_hash'],
+                               saved_cart_qty=cart_qty(session['user_id']), form=search_form, user_id_hash=user_id_hash)
 
     user_id_hash = session['user_id_hash']
     user = session['user_id']
@@ -959,7 +950,7 @@ def update_user(user_id_hash):
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
-        user_obj = users_dict.get(user)
+        user_obj = users_dict[user]
 
         if update_user_form.validate():
             if len(str(update_user_form.contact_number.data)) != 8:
@@ -975,7 +966,6 @@ def update_user(user_id_hash):
                 user_obj.set_contact_number(update_user_form.contact_number.data)
                 user_obj.set_postal_code(update_user_form.postal_code.data)
                 user_obj.set_address(update_user_form.address.data)
-                users_dict[user] = user_obj
                 error = "Update Successful."
         else:
             error = "Update Unsuccessful."
@@ -988,7 +978,8 @@ def update_user(user_id_hash):
         db = shelve.open('user.db', 'r')
         users_dict = db['Users']
 
-        user_obj = users_dict.get(user)
+        user_obj = users_dict[user]
+
         if user:
             update_user_form.email.data = user_obj.get_email()
             update_user_form.password.data = user_obj.get_password()
@@ -1000,7 +991,8 @@ def update_user(user_id_hash):
         db.close()
 
     if session.get('user_logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, error=error, db=user_obj, user=user_id_hash)
+        return render_template('customer/updateUser.html', form=update_user_form, error=error, db=user_obj,
+                               user=user_id_hash)
     else:
         return redirect(url_for('login'))
 
@@ -1073,11 +1065,17 @@ def seller_login():
     return render_template('seller/seller_login.html', form=login_form, seller_logged_in=seller_logged_in, error=error)
 
 
-@app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
-def create_product(seller_id):
+@app.route('/seller/<seller_id_hash>/createProduct', methods=['GET', 'POST'])
+def create_product(seller_id_hash):
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
     approved_sellers = approved_db['Approved_sellers']
+    seller_id = session['seller_id']
     if seller_id not in approved_sellers:
         return "seller not found"
     approved_db.close()
@@ -1142,10 +1140,10 @@ def create_product(seller_id):
         #
         seller_product_db.close()
 
-        return redirect(url_for('retrieve_product', seller_id=seller_id))
+        return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
     if session.get('seller_logged_in'):
         print(seller_logged_in)
-        return render_template('seller/createProduct.html', form=create_product_form)
+        return render_template('seller/createProduct.html', seller=seller_id_hash,seller_id = seller_id, form=create_product_form)
     else:
         return redirect(url_for('seller_login'))
 
@@ -1157,8 +1155,14 @@ def display_image(filename):
     return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
-@app.route('/seller/<seller_id>/retrieveProducts')
-def retrieve_product(seller_id):
+@app.route('/seller/<seller_id_hash>/retrieveProducts')
+def retrieve_product(seller_id_hash):
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
     approved_sellers = approved_db['Approved_sellers']
@@ -1180,13 +1184,19 @@ def retrieve_product(seller_id):
     for product_id, product in seller_products.items():
         product_list.append(product)
 
-    return render_template('seller/retrieveProducts.html', seller_id=seller_id, count=len(product_list),
+    return render_template('seller/retrieveProducts.html',seller=seller_id_hash,seller_id = seller_id, count=len(product_list),
                            product_list=product_list)
 
 
-@app.route('/seller/<int:seller_id>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
-def update_product(seller_id, product_id):
+@app.route('/seller/<seller_id_hash>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
+def update_product(seller_id_hash, product_id):
     update_product_form = CreateProductForm(request.form)
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
     if request.method == 'POST' and update_product_form.validate():
 
         seller_product_db = shelve.open('seller-product.db', 'c')
@@ -1226,7 +1236,7 @@ def update_product(seller_id, product_id):
             seller_product_db[str(seller_id)] = seller_products
             seller_product_db.close()
 
-            return redirect(url_for('retrieve_product', seller_id=seller_id))
+            return redirect(url_for('retrieve_product', seller=seller_id_hash))
 
     else:
         seller_product_db = shelve.open('seller-product.db', 'r')
@@ -1240,13 +1250,19 @@ def update_product(seller_id, product_id):
             update_product_form.product_stock.data = sellerProduct.get_product_stock()
             update_product_form.description.data = sellerProduct.get_description()
 
-            return render_template('/seller/updateProduct.html', form=update_product_form, seller_id=seller_id,
+            return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash, seller_id = seller_id,
                                    product_id=product_id)
     return "Product not found"
 
 
-@app.route('/seller/<int:seller_id>/deleteProduct/<int:product_id>/', methods=['POST'])
-def delete_product(seller_id, product_id):
+@app.route('/seller/<seller_id_hash>/deleteProduct/<int:product_id>/', methods=['POST'])
+def delete_product(seller_id_hash, product_id):
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
     try:
         seller_product_db = shelve.open('seller-product.db', 'c')
         seller_products = seller_product_db[str(seller_id)]
@@ -1267,7 +1283,7 @@ def delete_product(seller_id, product_id):
                 os.remove(deleted_image_path)
                 print(f"Deleted image file at: {deleted_image_path}")
 
-        return redirect(url_for('retrieve_product', seller_id=seller_id))
+        return redirect(url_for('retrieve_product', seller=seller_id_hash))
     except:
         return "Error in deleting product from seller-product db"
 
@@ -1276,7 +1292,12 @@ def delete_product(seller_id, product_id):
 def orders(seller_id_hash):
     print(seller_id_hash)
     seller_id = session['seller_id']
-    print('seller:',session['seller_id'])
+
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
     seller_order_list = retrieve_db('seller_order.db', seller_id)
     print(seller_order_list)
     return render_template('seller/orders.html',seller = seller_id_hash)
@@ -1284,14 +1305,8 @@ def orders(seller_id_hash):
 
 @app.route('/seller/<seller_id_hash>/dashboard')
 def seller_dashboard(seller_id_hash):
-
-    if seller_id_hash != session['seller_id_hash']:
-        print('route error')
-        return render_template('error_msg.html')
-
-    seller_id_hash = session['seller_id_hash']
-
-    return render_template('seller/dashboard.html',seller = seller_id_hash)
+    print(seller_id_hash)
+    return render_template('seller/dashboard.html', seller=seller_id_hash)
 
 
 @app.route('/respond')
@@ -1523,7 +1538,7 @@ def update_seller(seller_id):
         update_seller_form.support_document.data = seller.get_doc()
         # update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id=seller_id)
+        return render_template('/seller/updateSeller.html', form=update_seller_form)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
