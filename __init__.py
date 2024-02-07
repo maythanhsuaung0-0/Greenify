@@ -110,6 +110,7 @@ def seller_id_search(seller_name):
     for id in approved_sellers:
         if seller_name == approved_sellers[id].get_name():
             seller_id = approved_sellers[id].get_application_id()
+            print('seller_id', seller_id)
             return seller_id
 
 
@@ -123,7 +124,7 @@ def seller_name_search(seller_id):
         return False
     for id in approved_sellers:
         if seller_id == id:
-            return approved_sellers[seller_id].get_seller_name()
+            return approved_sellers[seller_id].get_name()
 
 
 def search_engine(search_query):
@@ -228,9 +229,13 @@ def product(seller, product_id):
     seller_products = {}
     seller_product_info = {}
     seller_product_db = shelve.open('seller-product.db', 'c')
+    print('id', seller_id)
+    print(seller_product_db[str(seller_id)])
     try:
         seller_product_info = seller_product_db[str(seller_id)]
+        print('a',seller_product_info)
         seller_products = seller_product_info['products']
+        print('b', seller_products)
     except:
         print("Product is not found")
         return render_template('error_msg.html')
@@ -1174,6 +1179,7 @@ def retrieve_product(seller_id_hash):
     seller_product_db = shelve.open('seller-product.db', 'r')
 
     try:
+        print(seller_id)
         seller_products = seller_product_db[str(seller_id)]['products']
     except KeyError:
         print("Error in retrieving products from seller-product.db.")
