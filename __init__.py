@@ -940,8 +940,7 @@ def update_user(user_id_hash):
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
-        email = update_user_form.email.data
-        user_obj = users_dict.get(email)
+        user_obj = users_dict.get(user)
 
         if update_user_form.validate():
             if len(str(update_user_form.contact_number.data)) != 8:
@@ -970,8 +969,7 @@ def update_user(user_id_hash):
         db = shelve.open('user.db', 'r')
         users_dict = db['Users']
 
-        email = update_user_form.email.data
-        user_obj = users_dict.get(email)
+        user_obj = users_dict.get(user)
         if user:
             update_user_form.email.data = user_obj.get_email()
             update_user_form.password.data = user_obj.get_password()
