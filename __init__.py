@@ -307,7 +307,7 @@ def product(seller, product_id):
 
         # Get the list of reviews for the product
         product_reviews = seller_reviews.get(product_id, [])
-        # test codes 
+        # test codes
         # print("seller_id:", seller_id)
         # print("product_id:", product_id)
         # print("ratings_reviews_dict:", ratings_reviews_dict)
