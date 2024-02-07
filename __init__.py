@@ -1075,6 +1075,7 @@ def seller_login():
 
 @app.route('/seller/<int:seller_id>/createProduct', methods=['GET', 'POST'])
 def create_product(seller_id):
+
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
     approved_sellers = approved_db['Approved_sellers']
@@ -1157,8 +1158,14 @@ def display_image(filename):
     return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
-@app.route('/seller/<seller_id>/retrieveProducts')
-def retrieve_product(seller_id):
+@app.route('/seller/<seller_id_hash>/retrieveProducts')
+def retrieve_product(seller_id_hash):
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
     approved_sellers = approved_db['Approved_sellers']
@@ -1180,7 +1187,7 @@ def retrieve_product(seller_id):
     for product_id, product in seller_products.items():
         product_list.append(product)
 
-    return render_template('seller/retrieveProducts.html', seller_id=seller_id, count=len(product_list),
+    return render_template('seller/retrieveProducts.html',seller= seller_id_hash,seller_id= seller_id, count=len(product_list),
                            product_list=product_list)
 
 
@@ -1277,7 +1284,11 @@ def orders(seller_id_hash):
     print(seller_id_hash)
     seller_id = session['seller_id']
 
-    print('seller:',session['seller_id'])
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
     seller_order_list = retrieve_db('seller_order.db', seller_id)
     print(seller_order_list)
     return render_template('seller/orders.html',seller = seller_id_hash)
@@ -1524,7 +1535,7 @@ def update_seller(seller_id):
         update_seller_form.support_document.data = seller.get_doc()
         # update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id=seller_id)
+        return render_template('/seller/updateSeller.html', form=update_seller_form)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
