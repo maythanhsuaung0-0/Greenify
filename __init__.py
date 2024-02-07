@@ -1209,15 +1209,79 @@ def retrieve_product(seller_id_hash):
                            product_list=product_list)
 
 
-@app.route('/seller/<seller_id_hash>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
-def update_product(seller_id_hash, product_id):
-    update_product_form = CreateProductForm(request.form)
-    if seller_id_hash != session['seller_id_hash']:
-        print('route error')
-        return render_template('error_msg.html')
+# @app.route('/seller/<seller_id_hash>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
+# def update_product(seller_id_hash, product_id):
+#     update_product_form = CreateProductForm(request.form)
+#     if seller_id_hash != session['seller_id_hash']:
+#         print('route error')
+#         return render_template('error_msg.html')
+#
+#     seller_id_hash = session['seller_id_hash']
+#     seller_id = session['seller_id']
+#     if request.method == 'POST' and update_product_form.validate():
+#
+#         seller_product_db = shelve.open('seller-product.db', 'c')
+#         seller_products = seller_product_db[str(seller_id)]
+#
+#         # check if product exists in seller_products
+#         if product_id in seller_products['products']:
+#             sellerProduct = seller_products['products'][product_id]
+#             sellerProduct.set_product_name(update_product_form.product_name.data)
+#             sellerProduct.set_product_price(update_product_form.product_price.data)
+#             sellerProduct.set_product_stock(update_product_form.product_stock.data)
+#             sellerProduct.set_description(update_product_form.description.data)
+#
+#             # Handle image update
+#             if 'image' in request.files and request.files['image'].filename != '':
+#                 image = request.files['image']
+#                 if image and allowed_file(image.filename):
+#                     # Delete previous image if it exists
+#                     if sellerProduct.get_image():
+#                         previous_image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], sellerProduct.get_image())
+#                         if os.path.exists(previous_image_path):
+#                             os.remove(previous_image_path)
+#                             print(f"Previous image deleted at: {previous_image_path}")
+#
+#                     # Save the uploaded image
+#                     filename = secure_filename(image.filename)
+#                     image_path = os.path.join(app.config['UPLOAD_IMG_FOLDER'], filename)
+#                     image.save(image_path)
+#                     print(f"New image saved at: {image_path}")
+#
+#                     # Call the create_image_set function if needed (not sure yet)
+#                     # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
+#
+#                     # Set the image field in your SellerProduct instance
+#                     sellerProduct.set_image(filename)
+#
+#             seller_product_db[str(seller_id)] = seller_products
+#             seller_product_db.close()
+#
+#             return redirect(url_for('retrieve_product', seller=seller_id_hash))
+#
+#     else:
+#         seller_product_db = shelve.open('seller-product.db', 'r')
+#         seller_products = seller_product_db[str(seller_id)]
+#         seller_product_db.close()
+#
+#         if product_id in seller_products['products']:
+#             sellerProduct = seller_products['products'][product_id]
+#             update_product_form.product_name.data = sellerProduct.get_product_name()
+#             update_product_form.product_price.data = sellerProduct.get_product_price()
+#             update_product_form.product_stock.data = sellerProduct.get_product_stock()
+#             update_product_form.description.data = sellerProduct.get_description()
+#
+#             return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash, seller_id = seller_id,
+#                                    product_id=product_id)
+#     return "Product not found"
 
+@app.route('/seller/<int:seller_id>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
+def update_product(seller_id, product_id):
+    if 'seller_id' not in session:
+        return "Error: Seller ID not found in session"
     seller_id_hash = session['seller_id_hash']
-    seller_id = session['seller_id']
+
+    update_product_form = CreateProductForm(request.form)
     if request.method == 'POST' and update_product_form.validate():
 
         seller_product_db = shelve.open('seller-product.db', 'c')
@@ -1257,7 +1321,7 @@ def update_product(seller_id_hash, product_id):
             seller_product_db[str(seller_id)] = seller_products
             seller_product_db.close()
 
-            return redirect(url_for('retrieve_product', seller=seller_id_hash))
+            return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
 
     else:
         seller_product_db = shelve.open('seller-product.db', 'r')
@@ -1271,7 +1335,7 @@ def update_product(seller_id_hash, product_id):
             update_product_form.product_stock.data = sellerProduct.get_product_stock()
             update_product_form.description.data = sellerProduct.get_description()
 
-            return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash, seller_id = seller_id,
+            return render_template('/seller/updateProduct.html', form=update_product_form, seller_id_hash=seller_id_hash, seller_id = seller_id,
                                    product_id=product_id)
     return "Product not found"
 
