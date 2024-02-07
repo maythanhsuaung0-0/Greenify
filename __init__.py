@@ -28,7 +28,12 @@ user_logged_in = False
 seller_logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
+
+# Define the relative path to the upload directory within the 'static' folder
+UPLOAD_RELATIVE_PATH = 'documents/uploads'
+UPLOAD_DIRECTORY = os.path.join(app.root_path, 'static', UPLOAD_RELATIVE_PATH)
+app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
+# app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -1245,9 +1250,10 @@ def delete_product(seller_id, product_id):
 @app.route('/seller/<seller_id_hash>/orders')
 def orders(seller_id_hash):
     print(seller_id_hash)
-    # seller_order_list = retrieve_db('seller_order.db', seller_id)
-    # print(seller_order_list)
+    seller_id = session['seller_id']
     print('seller:',session['seller_id'])
+    seller_order_list = retrieve_db('seller_order.db', seller_id)
+    print(seller_order_list)
     return render_template('seller/orders.html',seller = seller_id_hash)
 
 
