@@ -30,15 +30,16 @@ staff_logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
-# Define the relative path to the upload directory within the 'static' folder
+# supporting document upload folder
 UPLOAD_RELATIVE_PATH = 'documents/uploads'
 UPLOAD_DIRECTORY = os.path.join(app.root_path, 'static', UPLOAD_RELATIVE_PATH)
 app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
-# app.config['UPLOAD_DIRECTORY'] = "C:/Users/mayth/PycharmProjects/Greenify/static/documents/uploads"
+
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
+# UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
+UPLOAD_IMG_FOLDER = os.path.join(app.root_path,'static','uploads/product_image')
 # UPLOAD_IMG_FOLDER = url_for('static', filename='/product_image/')
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
@@ -1262,6 +1263,7 @@ def delete_product(seller_id, product_id):
 def orders(seller_id_hash):
     print(seller_id_hash)
     seller_id = session['seller_id']
+
     print('seller:',session['seller_id'])
     seller_order_list = retrieve_db('seller_order.db', seller_id)
     print(seller_order_list)
