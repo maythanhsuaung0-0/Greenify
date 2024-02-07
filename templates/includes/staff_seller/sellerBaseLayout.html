@@ -24,12 +24,12 @@
             <div class="logo" id="mylogo">
                  <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="logo">
             </div>
-            <a class="side-nav-link" id="dashboard" href="url_for('seller_dashboard',seller_id_hash=seller)">
+            <a class="side-nav-link" id="dashboard" href="{{ url_for('seller_dashboard',seller_id_hash=seller) }}">
                 <i class="fa-solid fa-chart-line"></i>
                 <span class="nav-link-text">Dashboard</span>
             </a>
 <!--            if direct click on side bar, error -->
-            <a class="side-nav-link" id="retrieve" href="url_for('retrieve_product',seller_id_hash=seller)">
+            <a class="side-nav-link" id="retrieve" href="{{ url_for('retrieve_product',seller_id=seller) }}">
                 <i class="fa-solid fa-users"></i>
                 <span class="nav-link-text">Products</span>
             </a>

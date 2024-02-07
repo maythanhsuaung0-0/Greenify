@@ -44,6 +44,19 @@ UPLOAD_IMG_FOLDER = os.path.join(app.root_path,'static','uploads/product_image')
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
+#Error Handling
+@app.errorhandler(404)
+def error_404(e):
+    return render_template('error_msg.html')
+
+@app.errorhandler(403)
+def error_403(e):
+    return render_template('error_msg.html')
+
+@app.errorhandler(500)
+def error_500(e):
+    return render_template('error_msg.html')
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -1144,7 +1157,7 @@ def display_image(filename):
     return send_from_directory(app.config['UPLOAD_IMG_FOLDER'], filename)
 
 
-@app.route('/seller/<int:seller_id>/retrieveProducts')
+@app.route('/seller/<seller_id>/retrieveProducts')
 def retrieve_product(seller_id):
     approved_sellers = {}
     approved_db = shelve.open('approved_sellers.db', 'r')
@@ -1272,7 +1285,13 @@ def orders(seller_id_hash):
 
 @app.route('/seller/<seller_id_hash>/dashboard')
 def seller_dashboard(seller_id_hash):
-    print(seller_id_hash)
+
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
+
     return render_template('seller/dashboard.html',seller = seller_id_hash)
 
 
