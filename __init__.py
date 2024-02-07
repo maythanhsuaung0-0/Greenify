@@ -26,6 +26,7 @@ from chat import get_response
 app = Flask(__name__, static_url_path='/static')
 user_logged_in = False
 seller_logged_in = False
+staff_logged_in = False
 app.secret_key = 'my_secret_key'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
@@ -884,11 +885,20 @@ def user_logout():
     return "You have successfully logged out from your account."
 
 
+@app.route('/staff/logout')
+def staff_logout():
+    if session.get('staff_logged_in'):
+        session.pop('staff_logged_in', None)
+    print(f"Staff login status = {session.get('staff_logged_in')}")
+    return "You have successfully logged out from your account."
+
+
 @app.route('/seller/logout')
 def seller_logout():
     if session.get('seller_logged_in'):
         session.pop('seller_logged_in', None)
     print(f"Seller login status = {session.get('seller_logged_in')}")
+    return "You have successfully logged out from your account."
 
 
 @app.route('/<user_id_hash>/profile', methods=['GET', 'POST'])
@@ -904,16 +914,15 @@ def profile(user_id_hash):
 
     last_url(url_for('product_search'))
 
-    search_form = Search(request.form)
     if request.method == 'POST' and search_form.validate():
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
 
     user_data = shelve.open('user.db')
     users_dict = user_data.get('Users', {})
-
     user_obj = users_dict.get(user)
     user_data.close()
+
     return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
                            form=search_form, user_data=user_obj)
 
@@ -1004,6 +1013,8 @@ def staff_login():
     staff_login_form = StaffLoginForm(request.form)
     if request.method == 'POST' and staff_login_form.validate():
         if staff_login_form.admin_email.data == 'admin@gmail.com' and staff_login_form.admin_password.data == 'admin_password':
+            session['staff_logged_in'] = True
+            print(f"Staff login status = {session.get('staff_logged_in')}")
             return redirect(url_for('retrieveApplicationForms'))
         else:
             error = 'Email or Password is incorrect, please try again.'
