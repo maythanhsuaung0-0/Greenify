@@ -205,6 +205,7 @@ def home():
         return render_template("customer/homepage.html", user=None, form=search_form)
 
 
+
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
 def product(seller, product_id):
     last_url(url_for('product', seller=seller, product_id=product_id))
@@ -865,7 +866,7 @@ def login():
                     if key == user.get_email():
                         user_id_hash = uuid.uuid4().hex
                         session['user_id_hash'] = user_id_hash
-                        session['user_id'] = user_id
+                        session['user_id'] = user.get_email()
                         session['user_logged_in'] = True
                         print(session['user_id'])
                         print(f"User login status = {session.get('user_logged_in')}")
