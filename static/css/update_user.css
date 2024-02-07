@@ -18,7 +18,7 @@
 
 .header {
         padding-top: 40px;
-        margin-left: 10px;
+        margin-left: 60px;
         color: #000000;
         font-weight: bold;
         font-size: 23px;
@@ -44,6 +44,39 @@
         margin-left: 134px;
         margin-bottom:5px;
         font-size: 13px;
+        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+    }
+
+#delete {
+      cursor: pointer;
+        border-radius: 5em;
+        color: #fff;
+        background-color: #FF0000;
+        border: 0;
+        padding-left: 40px;
+        padding-right: 46px;
+        padding-bottom: 10px;
+        padding-top: 10px;
+        margin-left: 489px;
+        margin-bottom:5px;
+        font-size: 13px;
+        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+    }
+
+#logout {
+      cursor: pointer;
+        border-radius: 5em;
+        color: #fff;
+        background-color: #0000FF;
+        border: 0;
+        padding-left: 40px;
+        padding-right: 40px;
+        padding-bottom: 10px;
+        padding-top: 10px;
+        margin-left: 489px;
+        margin-bottom:5px;
+        font-size: 13px;
+        box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
 
 .home-icon {
