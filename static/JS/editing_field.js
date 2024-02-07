@@ -30,10 +30,10 @@ function validateEmail(email) {
 function validateEmailAndSubmit(input_change) {
     const input_class = `#${input_change}-edit`;
     const data_status = $(input_class).data("status");
-    const emailInput = $(`#${input_change}`);
+    const emailInput = $(`#${input_change}-input`);
     const email = emailInput.text();
 
-    if (validateEmail(email) != true) {
+    if (validateEmail(email) == false) {
         alert('Please enter a valid email address.');
         return; // Exit the function if email is invalid
     } else {
