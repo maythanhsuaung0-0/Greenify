@@ -1270,24 +1270,23 @@ def update_product(seller_id_hash, product_id):
     return "Product not found"
 
 
-@app.route('/seller/<seller_id_hash>/deleteProduct/<int:product_id>/', methods=['POST'])
-def delete_product(seller_id_hash, product_id):
-    if seller_id_hash != session['seller_id_hash']:
-        print('route error')
-        return render_template('error_msg.html')
-
-    seller_id_hash = session['seller_id_hash']
-    seller_id = session['seller_id']
+@app.route('/seller/<int:seller_id>/deleteProduct/<int:product_id>/', methods=['POST'])
+def delete_product(seller_id, product_id):
     try:
+        # Retrieve seller_id from session
+        if 'seller_id' not in session:
+            return "Error: Seller ID not found in session"
+        seller_id_hash = session['seller_id_hash']
+
         seller_product_db = shelve.open('seller-product.db', 'c')
-        seller_products = seller_product_db[str(seller_id)]
+        seller_products = seller_product_db.get(str(seller_id), {'products': {}})
 
         # Get the product and its image filename
         deleted_product = seller_products['products'][product_id]
         deleted_image_filename = deleted_product.get_image()
 
         # Delete the product from the dictionary
-        seller_products['products'].pop(product_id)
+        del seller_products['products'][product_id]
         seller_product_db[str(seller_id)] = seller_products
         seller_product_db.close()
 
@@ -1298,8 +1297,9 @@ def delete_product(seller_id_hash, product_id):
                 os.remove(deleted_image_path)
                 print(f"Deleted image file at: {deleted_image_path}")
 
-        return redirect(url_for('retrieve_product', seller=seller_id_hash))
-    except:
+        return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
+    except Exception as e:
+        print("Error:", str(e))
         return "Error in deleting product from seller-product db"
 
 
