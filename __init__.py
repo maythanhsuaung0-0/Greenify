@@ -678,9 +678,11 @@ def payment(user_id_hash):
             order_history_id = uuid.uuid4().hex[:8]
 
             # Saving Datas
+            today = date.today()
             order_history['items'] = user_selected_product
             order_history['shipping_info'] = {'name': name, 'address': address}
             order_history['amt_paid'] = amt_paid
+            order_history['date'] = today.strftime("%d %B, %Y")
 
             user_order_history[str(order_history_id)] = order_history
             order_history_db[email] = user_order_history
@@ -773,7 +775,7 @@ def success_payment():
     if request.method == 'POST' and search_form.validate():
         result_list = search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
-    return render_template('customer/success_payment.html', user=user, saved_cart_qty=cart_qty(user), form=search_form)
+    return render_template('customer/success_payment.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
 
 
 @app.route('/<user_id_hash>/order_history', methods=['GET', 'POST'])
@@ -797,14 +799,17 @@ def order_history(user_id_hash):
 
     try:
         all_orders = order_history_db[user]
+        all_orders = dict(reversed(all_orders.items()))
     except:
-
         return render_template('customer/empty_order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
                                form=search_form)
 
-    for order_id in all_orders:
-        for items in all_orders[order_id]['items']:
-            print(all_orders[order_id]['items'][items])
+    for i in all_orders:
+        for j in all_orders[i]:
+            print(j)
+            print()
+            print(all_orders[i][j])
+        print('-----------------------')
 
     return render_template('customer/order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
                            form=search_form, all_orders=all_orders)
