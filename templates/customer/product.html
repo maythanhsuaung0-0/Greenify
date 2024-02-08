@@ -122,7 +122,13 @@
         <textarea name="review" id="review" rows="5" class="form-control" placeholder="Enter your review..." required></textarea>
     </div>
     <div class="pt-3">
+        {% if user == None %}
+        <button type="button" class="btn btn-secondary">
+            <a href="{{ url_for('login') }}" style="text-decoration: none; color:white;">Submit</a>
+        </button>
+        {% else %}
         <button type="button" class="btn btn-secondary" id="customer_feedback" onclick="customer_feedback({{ seller_id }}, {{ product.get_product_id() }})">Submit</button>
+        {% endif %}
     </div>
 
 </div>
