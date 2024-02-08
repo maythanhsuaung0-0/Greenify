@@ -598,6 +598,8 @@ def payment(user_id_hash):
             email = sent_data['email']
             address = sent_data['address']
             date_purchased = date.today()
+            order_id = uuid.uuid4().hex
+
 
             # Open User Shopping Cart
             user_shopping_cart_db = shelve.open('user_shopping_cart.db')
@@ -607,6 +609,9 @@ def payment(user_id_hash):
 
             # Accessing Info of each individual product bought
             order_history_db = shelve.open('order_history.db')
+
+            # Creating a Seller Order List
+            seller_order_dict = {}
 
             for itemName in user_selected_product:
                 seller_product_db = shelve.open('seller-product.db')
@@ -623,6 +628,9 @@ def payment(user_id_hash):
                 product_qty = product.get_product_stock()
                 product_qty -= bought_qty
 
+                # Retrieve Unit Amount
+                product_unit_price = product.get_product_price()
+
                 # Save Qty
                 product.set_product_stock(product_qty)
                 seller_products[product_id] = product
@@ -630,24 +638,43 @@ def payment(user_id_hash):
                 seller_product_db[str(seller_id)] = seller_product_info
                 seller_product_db.close()
 
-                # Creating a Seller Order
-                seller_orders = {}
-                seller_order_db = shelve.open('seller_order.db')
+
+                #Creating Seller Order
+                #Getting Order Stored or Create if Not Found
+                if seller_id in seller_order_dict.keys():
+                    order = seller_order_dict[seller_id]
+                else:
+                    order = SellerOrder(name, email, address, date_purchased.strftime('%Y-%m-%d'), order_id)
+
+
+                #Calculating Total Price for both Product and Order
+                total_price = order.get_total()
+                product_price = product_unit_price * bought_qty
+                total_price += product_price
+
+                #Saving Data into order
+                order.set_order_products(product_id, bought_qty, product_price)
+
+
+                #Saving Everything to seller_order_dict
+                seller_id = item['seller_id']
+                seller_order_dict[seller_id] = order
+
+            #Updating New Orders to db
+            seller_order_db = shelve.open('seller_order.db')
+
+            for seller_id in seller_order_dict:
                 try:
-                    seller_orders = seller_order_db[str(seller_id)]
-                    order = seller_orders[email]
-                    order.set_order_products(product_id, bought_qty, date_purchased.strftime('%Y-%m-%d'))
-                    print(order.get_order_products())
+                    seller_order_list = seller_order_db[str(seller_id)]
+                    seller_order_list.append({order_id: seller_order_dict[seller_id]})
+                    seller_order_db[str(seller_id)] = seller_order_list
+                except:
+                    seller_order_list = []
+                    seller_order_list.append({order_id: seller_order_dict[seller_id]})
+                    seller_order_db[str(seller_id)] = seller_order_list
 
-                except KeyError:
-                    order = SellerOrder(name, email, address)
-                    order.set_order_products(product_id, bought_qty, date_purchased.strftime('%Y-%m-%d'))
-                    print(order.get_order_products())
+            seller_order_db.close()
 
-
-                seller_orders[email] = order
-                seller_order_db[str(seller_id)] = seller_orders
-                seller_order_db.close()
 
             # Create Order History
             order_history = {}
@@ -660,15 +687,14 @@ def payment(user_id_hash):
             except:
                 print("No Record Found")
 
-            order_history_id = uuid.uuid4().hex[:8]
 
-            # Saving Datas
+            # Saving Datas into Order History
             order_history['items'] = user_selected_product
             order_history['shipping_info'] = {'name': name, 'address': address}
             order_history['amt_paid'] = amt_paid
             order_history['date'] = date_purchased.strftime("%d %B, %Y")
 
-            user_order_history[str(order_history_id)] = order_history
+            user_order_history[str(order_id)] = order_history
             order_history_db[email] = user_order_history
             order_history_db.close()
 
@@ -686,7 +712,6 @@ def payment(user_id_hash):
     shopping_cart_db = shelve.open("user_shopping_cart.db", flag="c")
     users_shopping_cart = shopping_cart_db[user]
     payable = users_shopping_cart['payable']
-    print(payable)
 
     return render_template("customer/payment.html", user=user_id_hash, user_id=user,
                            user_address=user_info.get_address(), user_name=user_info.get_name(), payable=payable,
@@ -1507,6 +1532,8 @@ def update_seller(seller_id_hash):
     seller_id = session['seller_id']
 
     update_seller_form = ApplicationForm(request.form)
+    print(update_seller_form.validate())
+    print('ok')
     if request.method == 'POST' and update_seller_form.validate():
         updated_sellers = {}
         db = shelve.open('updated_sellers.db', 'c')
@@ -1529,21 +1556,21 @@ def update_seller(seller_id_hash):
 
         return render_template('/seller/update_successful.html', form=update_seller_form, seller_id_hash=seller_id_hash,
                                seller_id=seller_id)
-    else:
-        approved_sellers = {}
-        approved_db = shelve.open('approved_sellers.db', 'r')
-        approved_sellers = approved_db['Approved_sellers']
-        approved_db.close()
 
-        seller = approved_sellers.get(seller_id)
-        update_seller_form.business_name.data = seller.get_seller_name()
-        update_seller_form.seller_email.data = seller.get_email()
-        update_seller_form.business_name.data = seller.get_name()
-        update_seller_form.business_desc.data = seller.get_desc()
-        update_seller_form.support_document.data = seller.get_doc()
+    approved_sellers = {}
+    approved_db = shelve.open('approved_sellers.db', 'r')
+    approved_sellers = approved_db['Approved_sellers']
+    approved_db.close()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id_hash=seller_id_hash,
-                               seller_id=seller_id)
+    seller = approved_sellers.get(seller_id)
+    update_seller_form.business_name.data = seller.get_seller_name()
+    update_seller_form.seller_email.data = seller.get_email()
+    update_seller_form.business_name.data = seller.get_name()
+    update_seller_form.business_desc.data = seller.get_desc()
+    update_seller_form.support_document.data = seller.get_doc()
+
+    return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id_hash=seller_id_hash,
+                           seller_id=seller_id)
 
 
 @app.route('/seller/<seller_id_hash>/deleteSeller', methods=['POST'])

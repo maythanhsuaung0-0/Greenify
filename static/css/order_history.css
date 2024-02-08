@@ -11,7 +11,8 @@ h1 {
 
 
 span.date-span {
-    font-style: italic;
+    font-weight: 600;
+    color: #53ca6c;
 }
 
 .total-paid {

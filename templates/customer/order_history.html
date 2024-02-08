@@ -11,8 +11,8 @@
     <h1>Order History</h1>
     {% for order_id in all_orders %}
     <div class="indv-order my-5">
-        <h3 class="order-id m-3 mx-4">Order ID: <span class="id-span">{{ order_id }}</span></h3>
-        <p class="m-3 mx-4 fs-5">Date: <span class="date-span">{{ all_orders[order_id]['date'] }}</span></p>
+        <h3 class="m-3 mx-4 fs-4">Date: <span class="date-span">{{ all_orders[order_id]['date'] }}</span></h3>
+        <p class="order-id m-3 mx-4">Order ID: <span class="id-span">{{ order_id }}</span></p>
         {% for items in all_orders[order_id]['items'] %}
         <div class="indv-prod d-flex">
             <div class="product-img mx-5 my-3">
