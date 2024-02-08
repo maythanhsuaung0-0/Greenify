@@ -26,8 +26,7 @@ function handleButton(id,name,action) {
 
 function filter(filter_by){
 console.log(filter_by)
-if (filter_by == 'certificate'){
- $.ajax({
+$.ajax({
              url: '',
              type: 'POST',
              contentType: 'application/json',
@@ -38,7 +37,7 @@ if (filter_by == 'certificate'){
              success: function (response) {
                  // Handle success if needed
                  if(response.result){
-                 console.log(response.result,"Delete successful");
+                 console.log(response.result,"filtered successful");
                  alert('Successfully '+ action+'d '+name)}
              },
              error: function (xhr, status, error) {
@@ -46,5 +45,4 @@ if (filter_by == 'certificate'){
                  console.error("Error:", error);
              }
          });
-}
 }

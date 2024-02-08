@@ -1043,9 +1043,6 @@ def staff_login():
 def seller_login():
     global seller_password
     error = None
-    if session['seller_logged_in'] == True and session['seller_id_hash']:
-        seller_id_hash = session['seller_id_hash']
-        return redirect(url_for('seller_dashboard', seller_id_hash=seller_id_hash))
     login_form = LoginForm(request.form)
     if request.method == 'POST' and login_form.validate():
         approved_sellers = {}
@@ -1060,7 +1057,6 @@ def seller_login():
             seller_data['email'] = i.get_email()
             seller_data['pw'] = i.get_password()
             sellers.append(seller_data)
-        print(sellers)
         for j in sellers_list:
             seller_email.append(j.get_email())
         print(seller_email)
@@ -1313,8 +1309,9 @@ def orders(seller_id_hash):
         return render_template('error_msg.html')
 
     seller_id_hash = session['seller_id_hash']
-    seller_order_list = retrieve_db('seller_order.db', seller_id)
-    print(seller_order_list)
+    print('sellerid:::',seller_id)
+    # seller_order_list = retrieve_db('seller_order.db', seller_id)
+    # print(seller_order_list)
     return render_template('seller/orders.html',seller = seller_id_hash)
 
 
@@ -1436,7 +1433,8 @@ def retrieveApplicationForms():
 
             send_mail(approved.get_email(), True, approved.get_seller_name(), password)
         if data_to_modify['request_type'] == 'filter':
-            if data_to_modify['filter_by'] == 'certificate':
+            print(" got filered")
+            if data_to_modify['id'] == '1':
                 certify = []
                 print('filtered')
                 for i in app_list:
@@ -1494,6 +1492,21 @@ def retrieveSellers():  # read
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
+        if data_to_modify['request_type'] == 'filter':
+            print(" got filered")
+            print(data_to_modify['filter_by'])
+            if data_to_modify['filter_by'] == 'certificate':
+                certify = []
+                print('filtered')
+                for i in sellers_list:
+                    print(i)
+                    if i.get_doc():
+                        print('have certificate')
+                        certify.append(i)
+                        print('certified sellers', i.get_name())
+                print('certified', certify)
+                return render_template('staff/retrieveSellers.html', count=len(certify), sellers=certify)
+
     return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
 
 
