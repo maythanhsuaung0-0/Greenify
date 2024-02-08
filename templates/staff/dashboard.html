@@ -2,21 +2,23 @@
 {% from "includes/staff_seller/accordion_component.html" import accordionComponent%}
 {% block title %}Application Forms{% endblock %}
 {% block content %}
-<h3>Staff's Dashboard</h3>
+<h4>Staff's Dashboard</h4>
 <div class="row mt-4">
     <div class="col-md-3">
-        <div class="card" >
-          <div class="card-body">
-            <small class="text-sm">Total number of Sellers</small>
-              <h3 class="card-title mt-2">{{sellers_count}}</h3>
+        <div class="shadow-sm p-3 mb-5 bg-body rounded">
+          <div class="p-2">
+              <div class="text-success"><i class="fa-solid fa-user-group"></i></div>
+              <h3 class="mt-2">{{sellers_count}}</h3>
+               <small class="text-sm">Total number of Sellers</small>
           </div>
         </div>
     </div>
-    <div class="col-md-3">
-         <div class="card">
-          <div class="card-body">
-            <small>Total number of Users</small>
-              <h3 class="card-title mt-2">{{users_count}}</h3>
+     <div class="col-md-4">
+        <div class="shadow-sm p-3 mb-5 bg-body rounded">
+          <div class="p-2">
+              <div class="text-success"><i class="fa-solid fa-user-group"></i></div>
+              <h3 class="mt-2">{{users_count}}</h3>
+               <small class="text-sm">Total number of Website Users</small>
           </div>
         </div>
     </div>

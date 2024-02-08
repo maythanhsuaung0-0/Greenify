@@ -13,7 +13,7 @@
 }
 
 div.offcanvas-body ul li a {
-    color: var(--theme-black);
+    color: var(--theme-black) ;
     text-decoration: none;
     margin: auto 50px;
     font-size: 16px;
@@ -21,7 +21,8 @@ div.offcanvas-body ul li a {
 }
 
 div.offcanvas-body ul li a:hover {
-    color: #53ca6c;
+    color: #000;
+    font-weight:bold;
 }
 
 input.search{

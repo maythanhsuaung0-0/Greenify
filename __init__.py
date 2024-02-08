@@ -7,6 +7,7 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
+import re
 import secrets
 import shutil
 import User_login
@@ -20,6 +21,7 @@ import uuid
 from crud_functions import *
 from seller_order import SellerOrder
 from searchForm import Search
+from email_validator import validate_email, EmailNotValidError
 from updateUser import update
 from chat import get_response
 
@@ -914,8 +916,10 @@ def staff_logout():
     return "You have successfully logged out from the account."
 
 
-@app.route('/seller/logout')
-def seller_logout():
+@app.route('/seller/<seller_id_hash>/logout')
+def seller_logout(seller_id_hash):
+    seller_id = session['seller_id']
+    seller_id_hash = session['seller_id_hash']
     if session.get('seller_logged_in'):
         session.pop('seller_logged_in', None)
     print(f"Seller login status = {session.get('seller_logged_in')}")
@@ -954,7 +958,6 @@ def profile(user_id_hash):
 @app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
 def update_user(user_id_hash):
     global user_obj
-    print("user_id_hash:", user_id_hash)
     search_form = Search(request.form)
 
     if user_id_hash != session['user_id_hash']:
@@ -1076,7 +1079,6 @@ def seller_login():
             seller_data['email'] = i.get_email()
             seller_data['pw'] = i.get_password()
             sellers.append(seller_data)
-        print(sellers)
         for j in sellers_list:
             seller_email.append(j.get_email())
         print(seller_email)
@@ -1312,16 +1314,26 @@ def delete_product(seller_id, product_id):
 @app.route('/seller/<seller_id_hash>/orders')
 def orders(seller_id_hash):
     print(seller_id_hash)
-    seller_id = session['seller_id']
+    seller_id = str(session['seller_id'])
 
     if seller_id_hash != session['seller_id_hash']:
         print('route error')
         return render_template('error_msg.html')
 
     seller_id_hash = session['seller_id_hash']
-    seller_order_list = retrieve_db('seller_order.db', seller_id)
-    print(seller_order_list)
-    return render_template('seller/orders.html',seller = seller_id_hash)
+    print('sellerid:::',seller_id)
+    seller_orders = retrieve_db('seller_order.db',seller_id)
+    print(seller_orders)
+    sent_out_orders = []
+    to_send_orders = []
+    product = retrieve_db('seller-product.db', seller_id)
+    print(product)
+    for i in seller_orders:
+        if i.get_sent_out():
+            sent_out_orders.append(i)
+        else:
+            to_send_orders.append(i)
+    return render_template('seller/orders.html',seller = seller_id_hash, sent = sent_out_orders, to_send = to_send_orders, products= product)
 
 
 @app.route('/seller/<seller_id_hash>/dashboard')
@@ -1442,7 +1454,8 @@ def retrieveApplicationForms():
 
             send_mail(approved.get_email(), True, approved.get_seller_name(), password)
         if data_to_modify['request_type'] == 'filter':
-            if data_to_modify['filter_by'] == 'certificate':
+            print(" got filered")
+            if data_to_modify['id'] == '1':
                 certify = []
                 print('filtered')
                 for i in app_list:
@@ -1505,7 +1518,20 @@ def retrieveSellers():  # read
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
-
+        if data_to_modify['request_type'] == 'filter':
+            print(" got filered")
+            print(data_to_modify['filter_by'])
+            if data_to_modify['filter_by'] == 'certificate':
+                certify = []
+                print('filtered')
+                for i in sellers_list:
+                    print(i)
+                    if i.get_doc():
+                        print('have certificate')
+                        certify.append(i)
+                        print('certified sellers', i.get_name())
+                print('certified', certify)
+                return render_template('staff/retrieveSellers.html', count=len(certify), sellers=certify)
     if session.get('staff_logged_in'):
         return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
     else:
@@ -1524,6 +1550,8 @@ def dashboard():
 
 @app.route('/seller/<seller_id_hash>/updateSeller', methods=['GET', 'POST'])
 def update_seller(seller_id_hash):
+    error = None
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if seller_id_hash != session['seller_id_hash']:
         print('route error')
         return render_template('error_msg.html')
@@ -1532,9 +1560,7 @@ def update_seller(seller_id_hash):
     seller_id = session['seller_id']
 
     update_seller_form = ApplicationForm(request.form)
-    print(update_seller_form.validate())
-    print('ok')
-    if request.method == 'POST' and update_seller_form.validate():
+    if request.method == 'POST':
         updated_sellers = {}
         db = shelve.open('updated_sellers.db', 'c')
         approved_sellers = {}
@@ -1544,8 +1570,8 @@ def update_seller(seller_id_hash):
         seller = approved_sellers.get(seller_id)
 
         seller.set_seller_name(update_seller_form.business_name.data)
-        seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
+        seller.set_email(update_seller_form.seller_email.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
 
@@ -1557,20 +1583,24 @@ def update_seller(seller_id_hash):
         return render_template('/seller/update_successful.html', form=update_seller_form, seller_id_hash=seller_id_hash,
                                seller_id=seller_id)
 
-    approved_sellers = {}
-    approved_db = shelve.open('approved_sellers.db', 'r')
-    approved_sellers = approved_db['Approved_sellers']
-    approved_db.close()
+    else:
+        approved_sellers = {}
+        approved_db = shelve.open('approved_sellers.db', 'r')
+        approved_sellers = approved_db['Approved_sellers']
+        approved_db.close()
 
-    seller = approved_sellers.get(seller_id)
-    update_seller_form.business_name.data = seller.get_seller_name()
-    update_seller_form.seller_email.data = seller.get_email()
-    update_seller_form.business_name.data = seller.get_name()
-    update_seller_form.business_desc.data = seller.get_desc()
-    update_seller_form.support_document.data = seller.get_doc()
+        seller = approved_sellers.get(seller_id)
+        update_seller_form.business_name.data = seller.get_seller_name()
+        update_seller_form.seller_email.data = seller.get_email()
+        update_seller_form.business_name.data = seller.get_name()
+        update_seller_form.business_desc.data = seller.get_desc()
+        update_seller_form.support_document.data = seller.get_doc()
 
-    return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id_hash=seller_id_hash,
-                           seller_id=seller_id)
+        if session.get('seller_logged_in'):
+            return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id_hash=seller_id_hash,
+                                   seller_id=seller_id)
+        else:
+            return redirect(url_for('seller_login'))
 
 
 @app.route('/seller/<seller_id_hash>/deleteSeller', methods=['POST'])
