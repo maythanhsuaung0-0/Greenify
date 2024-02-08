@@ -1,5 +1,6 @@
 from wtforms import Form, EmailField, validators, PasswordField, StringField, IntegerField
 
+
 class CreateUserForm(Form):
     email = EmailField('Email', [validators.DataRequired(), validators.Email()])
     password = PasswordField('', [validators.DataRequired(), validators.length(min=8, max=30)])
