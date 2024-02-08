@@ -15,8 +15,8 @@ class SellerOrder:
     def set_address(self, address):
         self.__address = address
 
-    def set_order_products(self, id, qty):
-        self.__order_products.append({'product_id': id, 'quantity': qty})
+    def set_order_products(self, id, qty, date):
+        self.__order_products.append({'product_id': id, 'quantity': qty, 'date': date})
 
 
     def set_sent_out(self, status):

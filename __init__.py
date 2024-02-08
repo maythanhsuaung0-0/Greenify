@@ -597,6 +597,7 @@ def payment(user_id_hash):
             name = sent_data['name']
             email = sent_data['email']
             address = sent_data['address']
+            date_purchased = date.today()
 
             # Open User Shopping Cart
             user_shopping_cart_db = shelve.open('user_shopping_cart.db')
@@ -635,11 +636,14 @@ def payment(user_id_hash):
                 try:
                     seller_orders = seller_order_db[str(seller_id)]
                     order = seller_orders[email]
-                    order.set_order_products(product_id, bought_qty)
+                    order.set_order_products(product_id, bought_qty, date_purchased.strftime('%Y-%m-%d'))
+                    print(order.get_order_products())
 
                 except KeyError:
                     order = SellerOrder(name, email, address)
-                    order.set_order_products(product_id, bought_qty)
+                    order.set_order_products(product_id, bought_qty, date_purchased.strftime('%Y-%m-%d'))
+                    print(order.get_order_products())
+
 
                 seller_orders[email] = order
                 seller_order_db[str(seller_id)] = seller_orders
@@ -659,11 +663,10 @@ def payment(user_id_hash):
             order_history_id = uuid.uuid4().hex[:8]
 
             # Saving Datas
-            today = date.today()
             order_history['items'] = user_selected_product
             order_history['shipping_info'] = {'name': name, 'address': address}
             order_history['amt_paid'] = amt_paid
-            order_history['date'] = today.strftime("%d %B, %Y")
+            order_history['date'] = date_purchased.strftime("%d %B, %Y")
 
             user_order_history[str(order_history_id)] = order_history
             order_history_db[email] = user_order_history
@@ -784,13 +787,6 @@ def order_history(user_id_hash):
     except:
         return render_template('customer/empty_order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
                                form=search_form)
-
-    for i in all_orders:
-        for j in all_orders[i]:
-            print(j)
-            print()
-            print(all_orders[i][j])
-        print('-----------------------')
 
     return render_template('customer/order_history.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
                            form=search_form, all_orders=all_orders)
