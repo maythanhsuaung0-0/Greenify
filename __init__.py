@@ -1550,7 +1550,8 @@ def update_seller(seller_id_hash):
         db['Updated_sellers'] = updated_sellers
         db.close()
 
-        return 'Your info will be sent to our staff for review :)'
+        return render_template('/seller/update_successful.html', form=update_seller_form, seller_id_hash=seller_id_hash,
+                               seller_id=seller_id)
     else:
         approved_sellers = {}
         approved_db = shelve.open('approved_sellers.db', 'r')
