@@ -6,6 +6,7 @@ class SellerOrder:
         self.__date = date
         self.__order_id = order_id
         self.__order_products = []
+        self.__total_products = 0
         self.__sent_out = False
         self.__total = 0
 
@@ -32,7 +33,11 @@ class SellerOrder:
         self.__order_id = order_id
 
     def set_total(self, total):
-        self.__total = total
+        self.__total += int(total)
+
+    def set_total_products(self,product):
+        print(product)
+        self.__total_products += int(product)
 
     def get_name(self):
         return self.__name
@@ -57,3 +62,6 @@ class SellerOrder:
 
     def get_total(self):
         return self.__total
+
+    def get_total_products(self):
+        return self.__total_products

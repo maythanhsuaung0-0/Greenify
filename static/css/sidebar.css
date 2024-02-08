@@ -52,6 +52,8 @@ body {
   .head{
     font-weight: bold;
 }
+.my-card{
+min-height:11em}
   @media screen and (max-width: 700px) {
     .side-nav {
       width: 100%;

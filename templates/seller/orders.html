@@ -26,12 +26,11 @@
              <div class='card'>
                 <div class="row card-body head">
                     <div class="col-2 text-center">Customer</div>
-                     <div class="col-2 text-center">No. of Types</div>
-                    <div class="col-2 text-center">No. of Products</div>
-                    <div class="col-2 text-center">Total Costs</div>
-                    <div class="col-2 text-center">Date</div>
-                    <div class="col-1 text-center">
-
+                       <div class="col-2 text-center">Email Address</div>
+                        <div class="col-3 text-center">Shipping Address</div>
+                        <div class="col-1 text-center">No. of Types</div>
+                        <div class="col-2 text-center">Date</div>
+                        <div class="col-1 text-center">
                     </div>
                      <div class="col-1 text-center">
 
@@ -40,7 +39,7 @@
              </div>
            {% for i in to_send %}
            <div>
-                {{orderComponent(i.get_name(),i.get_email(),i.get_order_products(),i.get_address(),products)}}
+                {{orderComponent(i,products,orders)}}
            </div>
            {% endfor %}
          </div>

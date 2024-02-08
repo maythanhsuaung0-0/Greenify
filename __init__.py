@@ -40,7 +40,7 @@ app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-UPLOAD_IMG_FOLDER = os.path.join(app.root_path,'static','uploads/product_image')
+UPLOAD_IMG_FOLDER = os.path.join(app.root_path, 'static', 'uploads/product_image')
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
@@ -212,7 +212,6 @@ def home():
                                form=search_form)
     except:
         return render_template("customer/homepage.html", user=None, form=search_form)
-
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
@@ -602,7 +601,6 @@ def payment(user_id_hash):
             date_purchased = date.today()
             order_id = uuid.uuid4().hex
 
-
             # Open User Shopping Cart
             user_shopping_cart_db = shelve.open('user_shopping_cart.db')
             users_shopping_cart = user_shopping_cart_db[email]
@@ -640,29 +638,26 @@ def payment(user_id_hash):
                 seller_product_db[str(seller_id)] = seller_product_info
                 seller_product_db.close()
 
-
-                #Creating Seller Order
-                #Getting Order Stored or Create if Not Found
+                # Creating Seller Order
+                # Getting Order Stored or Create if Not Found
                 if seller_id in seller_order_dict.keys():
                     order = seller_order_dict[seller_id]
                 else:
                     order = SellerOrder(name, email, address, date_purchased.strftime('%Y-%m-%d'), order_id)
 
-
-                #Calculating Total Price for both Product and Order
+                # Calculating Total Price for both Product and Order
                 total_price = order.get_total()
                 product_price = product_unit_price * bought_qty
                 total_price += product_price
 
-                #Saving Data into order
+                # Saving Data into order
                 order.set_order_products(product_id, bought_qty, product_price)
 
-
-                #Saving Everything to seller_order_dict
+                # Saving Everything to seller_order_dict
                 seller_id = item['seller_id']
                 seller_order_dict[seller_id] = order
 
-            #Updating New Orders to db
+            # Updating New Orders to db
             seller_order_db = shelve.open('seller_order.db')
 
             for seller_id in seller_order_dict:
@@ -677,7 +672,6 @@ def payment(user_id_hash):
 
             seller_order_db.close()
 
-
             # Create Order History
             order_history = {}
             user_order_history = {}
@@ -688,7 +682,6 @@ def payment(user_id_hash):
                 user_order_history = order_history_db[email]
             except:
                 print("No Record Found")
-
 
             # Saving Datas into Order History
             order_history['items'] = user_selected_product
@@ -786,7 +779,8 @@ def success_payment():
     if request.method == 'POST' and search_form.validate():
         result_list = search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
-    return render_template('customer/success_payment.html', user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form)
+    return render_template('customer/success_payment.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
+                           form=search_form)
 
 
 @app.route('/<user_id_hash>/order_history', methods=['GET', 'POST'])
@@ -1170,7 +1164,8 @@ def create_product(seller_id_hash):
         return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
     if session.get('seller_logged_in'):
         print(seller_logged_in)
-        return render_template('seller/createProduct.html', seller=seller_id_hash,seller_id = seller_id, form=create_product_form)
+        return render_template('seller/createProduct.html', seller=seller_id_hash, seller_id=seller_id,
+                               form=create_product_form)
     else:
         return redirect(url_for('seller_login'))
 
@@ -1212,7 +1207,8 @@ def retrieve_product(seller_id_hash):
     for product_id, product in seller_products.items():
         product_list.append(product)
 
-    return render_template('seller/retrieveProducts.html',seller=seller_id_hash,seller_id = seller_id, count=len(product_list),
+    return render_template('seller/retrieveProducts.html', seller=seller_id_hash, seller_id=seller_id,
+                           count=len(product_list),
                            product_list=product_list)
 
 
@@ -1273,7 +1269,8 @@ def update_product(seller_id, product_id):
             update_product_form.product_stock.data = sellerProduct.get_product_stock()
             update_product_form.description.data = sellerProduct.get_description()
 
-            return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash, seller_id = seller_id,
+            return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash,
+                                   seller_id=seller_id,
                                    product_id=product_id)
     return "Product not found"
 
@@ -1321,25 +1318,45 @@ def orders(seller_id_hash):
         return render_template('error_msg.html')
 
     seller_id_hash = session['seller_id_hash']
-    print('sellerid:::',seller_id)
-    seller_orders = retrieve_db('seller_order.db',seller_id)
-    print(seller_orders)
+    print('sellerid:::', seller_id)
+    orders_db = shelve.open('seller_order.db', 'r')
+    seller_orders = orders_db[seller_id]
     sent_out_orders = []
     to_send_orders = []
-    product = retrieve_db('seller-product.db', seller_id)
-    print(product)
-    for i in seller_orders:
-        if i.get_sent_out():
-            sent_out_orders.append(i)
-        else:
-            to_send_orders.append(i)
-    return render_template('seller/orders.html',seller = seller_id_hash, sent = sent_out_orders, to_send = to_send_orders, products= product)
+    seller_products = retrieve_db('seller-product.db', seller_id)
+    print(seller_products)
+    total_orders = []
+    for order in seller_orders:
+        for order_id in order:
+            if order[order_id].get_sent_out():
+                sent_out_orders.append(order[order_id])
+            else:
+                to_send_orders.append(order[order_id])
+        total_orders.append(order)
+    return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
+                           to_send=to_send_orders,products = seller_products,orders = total_orders)
 
 
 @app.route('/seller/<seller_id_hash>/dashboard')
 def seller_dashboard(seller_id_hash):
-    print(seller_id_hash)
-    return render_template('seller/dashboard.html', seller=seller_id_hash)
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+    seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
+    orders_db = shelve.open('seller_order.db', 'r')
+    seller_orders = orders_db[str(seller_id)]
+    customers = 0
+    sold_out = 0
+    earning = 0
+    for order in seller_orders:
+        for order_id in order:
+            customers += 1
+            for i in order[order_id].get_order_products():
+                sold_out += i['quantity']
+                earning += i['product_price']
+    print(customers,sold_out,earning)
+    return render_template('seller/dashboard.html', seller=seller_id_hash, customers = customers, sold_out = sold_out, earning = earning)
 
 
 @app.route('/respond')
