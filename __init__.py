@@ -1461,8 +1461,10 @@ def retrieveApplicationForms():
                         print('certified sellers', i.get_name())
                 print('certified', certify)
                 return render_template('staff/retrieveAppForms.html', count=len(certify), app_list=certify)
-
-    return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
+    if session.get('staff_logged_in'):
+        return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
+    else:
+        return redirect(url_for('staff_login'))
 
 
 @app.route('/staff/retrieveUpdateForms', methods=['POST', 'GET'])
@@ -1493,7 +1495,10 @@ def retrieveUpdateForms():  # for approving updates
             # seller.set_doc(approved.get_doc())
             sellers_db['Approved_sellers'] = sellers
             sellers_db.close()
-    return render_template('staff/retrieveUpdateForms.html', count=len(waiting_list), waiting_list=waiting_list)
+    if session.get('staff_logged_in'):
+        return render_template('staff/retrieveUpdateForms.html', count=len(waiting_list), waiting_list=waiting_list)
+    else:
+        return redirect(url_for('staff_login'))
 
 
 @app.route('/staff/retrieveSellers', methods=['POST', 'GET'])
@@ -1508,18 +1513,31 @@ def retrieveSellers():  # read
             deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
             if deleted_item.get_doc():
                 delete_folder(deleted_item)
-    return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
+
+    if session.get('staff_logged_in'):
+        return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
+    else:
+        return redirect(url_for('staff_login'))
 
 
 @app.route('/staff/dashboard')
 def dashboard():
     sellers = retrieve_db('approved_sellers.db', 'Approved_sellers')
     users = retrieve_db('user.db', 'Users')
-    return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
+    if session.get('staff_logged_in'):
+        return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
+    else:
+        return redirect(url_for('staff_login'))
 
 
-@app.route('/seller/<int:seller_id>/profile', methods=['GET', 'POST'])
-def update_seller(seller_id):
+@app.route('/seller/<seller_id_hash>/profile', methods=['GET', 'POST'])
+def update_seller(seller_id_hash):
+    if seller_id_hash != session['seller_id_hash']:
+        print('route error')
+        return render_template('error_msg.html')
+
+    seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
     filename = session.get('filename', '/images/placeholder.jpg')
     update_seller_form = ApplicationForm(request.form)
     if request.method == 'POST' and update_seller_form.validate():
@@ -1567,7 +1585,8 @@ def update_seller(seller_id):
         update_seller_form.support_document.data = seller.get_doc()
         # update_seller_form.profile_pic.data = seller.get_profile_image()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form)
+        return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id_hash=seller_id_hash,
+                               seller_id=seller_id)
 
 
 @app.route('/deleteSeller/<int:seller_id>', methods=['POST'])
