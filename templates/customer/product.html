@@ -14,7 +14,7 @@
   <div class="row justify-content-between">
     <div class="col-6">
       <div class="image container">
-        <img src="{{ url_for('static', filename='images/Tupperware 2.jpg') }}">
+        <img src="{{ url_for('static', filename='uploads/product_image/' + product.get_image()) }}">
       </div>
     </div>
     <form method="post" class="col-6 d-none d-lg-flex flex-column justify-content-center align-items-center">

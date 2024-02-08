@@ -41,7 +41,6 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
 UPLOAD_IMG_FOLDER = os.path.join(app.root_path,'static','uploads/product_image')
-# UPLOAD_IMG_FOLDER = url_for('static', filename='/product_image/')
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
@@ -249,13 +248,9 @@ def product(seller, product_id):
     seller_products = {}
     seller_product_info = {}
     seller_product_db = shelve.open('seller-product.db', 'c')
-    print('id', seller_id)
-    print(seller_product_db[str(seller_id)])
     try:
         seller_product_info = seller_product_db[str(seller_id)]
-        print('a',seller_product_info)
         seller_products = seller_product_info['products']
-        print('b', seller_products)
     except:
         print("Product is not found")
         return render_template('error_msg.html')
@@ -435,6 +430,7 @@ def product(seller, product_id):
     #     # print(initial_reviews)
     #     return json.jsonify({'data': initial_reviews, 'result': True})
 
+    print(product.get_image())
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
                            saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form,
                            product_reviews=product_reviews)
@@ -1046,9 +1042,12 @@ def staff_login():
 def seller_login():
     global seller_password
     error = None
-    if session['seller_logged_in'] == True and session['seller_id_hash']:
-        seller_id_hash = session['seller_id_hash']
-        return redirect(url_for('seller_dashboard', seller_id_hash=seller_id_hash))
+    try:
+        if session['seller_logged_in'] == True and session['seller_id_hash']:
+            seller_id_hash = session['seller_id_hash']
+            return redirect(url_for('seller_dashboard', seller_id_hash=seller_id_hash))
+    except:
+        pass
     login_form = LoginForm(request.form)
     if request.method == 'POST' and login_form.validate():
         approved_sellers = {}
@@ -1273,11 +1272,12 @@ def retrieve_product(seller_id_hash):
 #                                    product_id=product_id)
 #     return "Product not found"
 
-@app.route('/seller/<int:seller_id>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
+@app.route('/seller/<seller_id>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
 def update_product(seller_id, product_id):
     if 'seller_id' not in session:
         return "Error: Seller ID not found in session"
     seller_id_hash = session['seller_id_hash']
+    seller_id = session['seller_id']
 
     update_product_form = CreateProductForm(request.form)
     if request.method == 'POST' and update_product_form.validate():

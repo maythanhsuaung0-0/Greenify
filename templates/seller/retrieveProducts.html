@@ -35,7 +35,7 @@
         </div>
 <!--        no need to pass image: referring to file name-->
         {% for i in product_list %}
-            <div>{{ dataComponent(seller_id_hash, seller_id, i.get_product_id(), i.get_product_name(), i.get_description(), i.get_product_price(), i.get_product_stock(), i.get_image()) }}</div>
+            <div>{{ dataComponent(seller, seller_id, i.get_product_id(), i.get_product_name(), i.get_description(), i.get_product_price(), i.get_product_stock(), i.get_image()) }}</div>
         {% endfor %}
 
     </div>
