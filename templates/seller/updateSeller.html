@@ -4,29 +4,61 @@
 {% block content %}
 {% from "includes/_formHelper.html" import render_field %}
 
-<h1 class="display-4">Update Account Details</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/update_seller.css') }}">
+
+<div class="main">
+<h1 class="header">Update Account Details</h1>
 
 {% if error %}
 <p>{{ error }}</p>
 {% endif %}
 
-<form class="grid-box" method="POST" action="{{ url_for('update_seller', seller_id_hash=seller) }}" enctype="multipart/form-data">
-        <div class="form-group">
+<form class="grid-box" method="POST" action="{{ url_for('update_seller', seller_id_hash=seller_id_hash) }}" enctype="multipart/form-data">
+        <div class="form-group" id="name">
             {{render_field(form.business_name, class="form-control mt-1")}}
           </div>
-        <div class="form-group">
+        <div class="form-group" id="email">
             {{render_field(form.seller_email, class="form-control mt-1")}}
         </div>
-        <div class="form-group">
+        <div class="form-group" id="desc">
             {{render_field(form.business_desc, class="form-control mt-1")}}
           </div>
 
-            <div class="form-group">
+            <div class="form-group" id="doc">
             {{render_field(form.support_document, class="form-control mt-1")}}
             </div>
         <div class="pt-3">
-            <button type="submit" class="btn btn-lg custom-btn">Submit</button>
+            <button type="submit" class="btn btn-lg custom-btn" id="update">Update</button>
         </div>
+</form>
+    </div>
+
+<form method="POST" action="{{url_for('delete_seller', seller_id_hash=seller_id_hash)}}">
+  <input value="Delete" type="button" class="btn btn-danger" data-bs-toggle="modal" align="center" id="delete"/>
+<!-- The Modal -->
+<div class="modal">
+<div class="modal-dialog">
+<div class="modal-content">
+<!-- Modal Header -->
+<div class="modal-header">
+<h4 class="modal-title">Delete Confirmation</h4>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+<!-- Modal body -->
+<div class="modal-body">
+Are you sure you want to delete your account?
+</div>
+<!-- Modal footer -->
+<div class="modal-footer">
+<input type="submit" value="Delete" class="btn btn-danger">
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+</div>
+</div>
+</div>
+</div>
+</form>
+<form method="GET" action="{{url_for('seller_logout', seller_id_hash=seller_id_hash)}}">
+  <input value="Logout" type="submit" class="btn btn-danger" id="logout"/>
 </form>
 {% endblock %}
 

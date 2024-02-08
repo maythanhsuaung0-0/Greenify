@@ -889,8 +889,10 @@ def staff_logout():
     return "You have successfully logged out from the account."
 
 
-@app.route('/seller/logout')
-def seller_logout():
+@app.route('/seller/<seller_id_hash>/logout')
+def seller_logout(seller_id_hash):
+    seller_id = session['seller_id']
+    seller_id_hash = session['seller_id_hash']
     if session.get('seller_logged_in'):
         session.pop('seller_logged_in', None)
     print(f"Seller login status = {session.get('seller_logged_in')}")
@@ -929,7 +931,6 @@ def profile(user_id_hash):
 @app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
 def update_user(user_id_hash):
     global user_obj
-    print("user_id_hash:", user_id_hash)
     search_form = Search(request.form)
 
     if user_id_hash != session['user_id_hash']:
@@ -1530,7 +1531,7 @@ def update_seller(seller_id_hash):
     seller_id = session['seller_id']
 
     update_seller_form = ApplicationForm(request.form)
-    if request.method == 'POST' and update_seller_form.validate():
+    if request.method == 'POST':
         updated_sellers = {}
         db = shelve.open('updated_sellers.db', 'c')
         approved_sellers = {}
@@ -1538,7 +1539,6 @@ def update_seller(seller_id_hash):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
-
         seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
