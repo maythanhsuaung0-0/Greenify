@@ -180,6 +180,29 @@ function addToCart(product_id, seller_id, seller) {
         });
     }
 
+// Function to fetch reviews
+function fetchReviews(seller_id, product_id) {
+    $.ajax({
+        url: '',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            "request_type": "fetch_reviews",
+            "seller_id" : seller_id,
+            "product_id" : product_id
+        }),
+        success: function(response) {
+            console.log("Reviews fetched successfully");
+            var reviewsList = response.data;
+            updateReviewsOnPage(reviewsList);
+        },
+        error: function(error) {
+            console.error("Error fetching reviews:", error);
+            alert("An error occurred while fetching reviews");
+        }
+    });
+}
+
 
 // Function to update the displayed reviews on the page
 function updateReviewsOnPage(reviewsList) {
