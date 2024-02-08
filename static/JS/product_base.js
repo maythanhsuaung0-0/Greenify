@@ -170,7 +170,6 @@ function fetchReviews(seller_id, product_id) {
     });
 }
 
-
 // Function to update the displayed reviews on the page
 function updateReviewsOnPage(reviewsList) {
     var reviewsContainer = $('#reviews-list');
@@ -178,8 +177,25 @@ function updateReviewsOnPage(reviewsList) {
     if (Array.isArray(reviewsList) && reviewsList.length >  0) {
         reviewsContainer.empty();
         reviewsList.forEach(function (review) {
-            var listItem = $('<li>').text('Rating: ' + review.rating + ', Review: ' + review.review);
-            reviewsContainer.append(listItem);
+            // Create a new Date object from the review's timestamp
+            var reviewDate = new Date(review.timestamp);
+
+            // Format the date as desired (e.g., "Month Day, Year")
+            var formattedDate = reviewDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Create star rating HTML
+            var starRatingHTML = '';
+            for (var i = 0; i < review.rating; i++) {
+                starRatingHTML += '<img src="images/star.png" width="20">';
+            }
+
+            // Create review HTML
+            var reviewHTML = '<p>Date: ' + formattedDate + '</p>' +
+                             '<p>Rating: ' + starRatingHTML + '</p>' +
+                             '<p>Review: ' + review.review + '</p>';
+
+            // Append the review HTML to the container
+            reviewsContainer.append(reviewHTML);
         });
     } else {
         // If reviewsList is empty, display "No reviews"

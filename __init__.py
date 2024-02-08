@@ -64,6 +64,7 @@ def allowed_file(filename):
 
 
 def fetch_reviews(seller_id, product_id):
+
     # Retrieving r and r
     reviews_db = shelve.open('reviews.db', 'r')
     ratings_reviews_dict = reviews_db.get('Reviews', {})
@@ -304,7 +305,8 @@ def product(seller, product_id):
                 # Get the new feedback
                 new_feedback = {
                     'rating': sent_data.get('ratings', 0),
-                    'review': sent_data.get('reviews', '')
+                    'review': sent_data.get('reviews', ''),
+                    'timestamp': date.today()
                 }
 
                 # Add the new feedback to the list under the product ID
