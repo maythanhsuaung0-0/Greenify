@@ -889,8 +889,10 @@ def check_login():
     return user_logged_in
 
 
-@app.route('/user/logout')
-def user_logout():
+@app.route('/<user_id_hash>/user/logout')
+def user_logout(user_id_hash):
+    user = session['user_id']
+    user_id_hash = session['user_id_hash']
     if session.get('user_logged_in'):
         session.pop('user_logged_in', None)
         session.pop('user_id', None)
@@ -937,13 +939,16 @@ def profile(user_id_hash):
     user_obj = users_dict[user]
     user_data.close()
 
-    return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
-                           form=search_form, user_data=user_obj)
+    if session.get('user_logged_in'):
+        return render_template('customer/profile.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
+                               form=search_form, user_data=user_obj)
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
 def update_user(user_id_hash):
-    global user_obj, email, password, confirm_password, name, contact_number, postal_code, address
+    global user_obj
     print("user_id_hash:", user_id_hash)
     search_form = Search(request.form)
 
@@ -969,7 +974,9 @@ def update_user(user_id_hash):
 
         user_obj = users_dict[user]
 
-        if len(str(contact_number)) != 8:
+        if len(str(password)) < 8 or len(str(confirm_password)) < 8:
+            error = 'Passwords must have at least 8 characters.'
+        elif len(str(contact_number)) != 8:
             error = 'Phone number must be 8 digits.'
         elif len(str(postal_code)) != 6:
             error = 'Postal code must be 6 digits.'
