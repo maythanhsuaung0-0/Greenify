@@ -7,6 +7,7 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
+import re
 import secrets
 import shutil
 import User_login
@@ -20,6 +21,7 @@ import uuid
 from crud_functions import *
 from seller_order import SellerOrder
 from searchForm import Search
+from email_validator import validate_email, EmailNotValidError
 from updateUser import update
 from chat import get_response
 
@@ -1523,6 +1525,8 @@ def dashboard():
 
 @app.route('/seller/<seller_id_hash>/updateSeller', methods=['GET', 'POST'])
 def update_seller(seller_id_hash):
+    error = None
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if seller_id_hash != session['seller_id_hash']:
         print('route error')
         return render_template('error_msg.html')
@@ -1539,9 +1543,10 @@ def update_seller(seller_id_hash):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
+
         seller.set_seller_name(update_seller_form.business_name.data)
-        seller.set_email(update_seller_form.seller_email.data)
         seller.set_name(update_seller_form.business_name.data)
+        seller.set_email(update_seller_form.seller_email.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
 
@@ -1552,6 +1557,7 @@ def update_seller(seller_id_hash):
 
         return render_template('/seller/update_successful.html', form=update_seller_form, seller_id_hash=seller_id_hash,
                                seller_id=seller_id)
+
     else:
         approved_sellers = {}
         approved_db = shelve.open('approved_sellers.db', 'r')
@@ -1565,8 +1571,11 @@ def update_seller(seller_id_hash):
         update_seller_form.business_desc.data = seller.get_desc()
         update_seller_form.support_document.data = seller.get_doc()
 
-        return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id_hash=seller_id_hash,
-                               seller_id=seller_id)
+        if session.get('seller_logged_in'):
+            return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id_hash=seller_id_hash,
+                                   seller_id=seller_id)
+        else:
+            return redirect(url_for('seller_login'))
 
 
 @app.route('/seller/<seller_id_hash>/deleteSeller', methods=['POST'])

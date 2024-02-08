@@ -15,6 +15,10 @@
         font-size: 23px;
     }
 
+.form-control {
+        text-align: center;
+    }
+
 #update {
       cursor: pointer;
         border-radius: 5em;
@@ -66,8 +70,8 @@
     }
 
 #desc {
-    width: 93%;
-    margin-left: 18px;
+    width: 340px;
+    margin-left: 50px;
     text-align: center;
     margin-bottom: 5px;
 }

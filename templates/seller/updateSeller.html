@@ -9,11 +9,7 @@
 <div class="main">
 <h1 class="header">Update Account Details</h1>
 
-{% if error %}
-<p>{{ error }}</p>
-{% endif %}
-
-<form class="grid-box" method="POST" action="{{ url_for('update_seller', seller_id_hash=seller_id_hash) }}" enctype="multipart/form-data">
+<form class="grid-box" method="POST" action="{{ url_for('update_seller', seller_id_hash=seller_id_hash) }}" enctype="multipart/form-data" onsubmit="return validateForm()">
         <div class="form-group" id="name">
             {{render_field(form.business_name, class="form-control mt-1")}}
           </div>
@@ -60,5 +56,23 @@ Are you sure you want to delete your account?
 <form method="GET" action="{{url_for('seller_logout', seller_id_hash=seller_id_hash)}}">
   <input value="Logout" type="submit" class="btn btn-danger" id="logout"/>
 </form>
+
+<script>
+function validateForm() {
+    // Get the email input field
+    var emailInput = document.getElementById('seller_email');
+
+    // Validate email using regex
+    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(emailInput.value)) {
+        // If email is invalid, display pop-up with error message
+        alert("Please enter a valid email.");
+        // Prevent form submission
+        return false;
+    }
+    // Allow form submission if email is valid
+    return true;
+}
+</script>
 {% endblock %}
 
