@@ -171,7 +171,11 @@ margin-left: 39px;
     }
 
 #contact_number-input {
-margin-left: 39px;
+    margin-left: 39px;
+}
+
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    display: none;
 }
 
 #postal_code {

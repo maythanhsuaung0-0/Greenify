@@ -116,6 +116,10 @@ margin-left: -22px;
     margin-bottom: 15px;
     }
 
+input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
+    display: none;
+}
+
 #SignUp {
       cursor: pointer;
         border-radius: 5em;

@@ -97,9 +97,8 @@
                 </a>
                  <!-- Dropdown content -->
                 <div class="dropdown-content" id="myDropdown">
-                    <a href="/login">Login as User</a>
-                    <a href="/stafflogin">Login as Staff</a>
-                    <a href="/seller/login">Login as Seller</a>
+                    <a href="{{ url_for('profile', user_id_hash=user) }}"><i class="bi bi-person-circle mx-2"></i> Profile</a>   
+                    <a href="{{ url_for('user_logout', user_id_hash=user) }}" style="color: red;"><i class="bi bi-box-arrow-right mx-2 fs-5"></i>   Logout</a>                 
                 </div>
             </div>
             {% endif %}
