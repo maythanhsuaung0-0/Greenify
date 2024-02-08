@@ -91,14 +91,19 @@
 <div class="item product-review">
   <h3>Product Review</h3>
   <div>
-      <!-- Add this where you want to display reviews -->
-    <ul id="reviews-list" data-seller-id="{{ seller_id }}" data-product-id="{{ product.get_product_id() }}">
-          {% for review in data %}
-              <li>Rating: {{ review.rating }}, Review: {{ review.review }}</li>
-          {% endfor %}
-
-      </ul>
-
+        <div id="reviews-list" data-seller-id="{{ seller_id }}" data-product-id="{{ product.get_product_id() }}">
+            {% for review in data %}
+            <div class="review">
+                <p>Date: {{ review.timestamp }}</p>
+                <p>Rating:
+                    {% for _ in range(review.rating) %}
+                    <img src="{{url_for('static', filename='images/star.png')}}" width="20">
+                    {% endfor %}
+                </p>
+                <p>Review: {{ review.review }}</p>
+            </div>
+            {% endfor %}
+        </div>
   </div>
   <div class="pt-3 mb-4">
         <button type="button" class="btn btn-secondary" onclick="fetchReviews({{ seller_id }}, {{ product.get_product_id() }})">See Reviews</button>
