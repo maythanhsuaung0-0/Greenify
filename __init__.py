@@ -1380,7 +1380,7 @@ def delete_product(seller_id, product_id):
 @app.route('/seller/<seller_id_hash>/orders')
 def orders(seller_id_hash):
     print(seller_id_hash)
-    seller_id = session['seller_id']
+    seller_id = str(session['seller_id'])
 
     if seller_id_hash != session['seller_id_hash']:
         print('route error')
@@ -1388,9 +1388,18 @@ def orders(seller_id_hash):
 
     seller_id_hash = session['seller_id_hash']
     print('sellerid:::',seller_id)
-    # seller_order_list = retrieve_db('seller_order.db', seller_id)
-    # print(seller_order_list)
-    return render_template('seller/orders.html',seller = seller_id_hash)
+    seller_orders = retrieve_db('seller_order.db',seller_id)
+    print(seller_orders)
+    sent_out_orders = []
+    to_send_orders = []
+    product = retrieve_db('seller-product.db', seller_id)
+    print(product)
+    for i in seller_orders:
+        if i.get_sent_out():
+            sent_out_orders.append(i)
+        else:
+            to_send_orders.append(i)
+    return render_template('seller/orders.html',seller = seller_id_hash, sent = sent_out_orders, to_send = to_send_orders, products= product)
 
 
 @app.route('/seller/<seller_id_hash>/dashboard')
