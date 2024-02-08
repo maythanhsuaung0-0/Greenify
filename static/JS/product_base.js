@@ -177,28 +177,20 @@ function updateReviewsOnPage(reviewsList) {
     if (Array.isArray(reviewsList) && reviewsList.length >  0) {
         reviewsContainer.empty();
         reviewsList.forEach(function (review) {
-            // Create a new Date object from the review's timestamp
             var reviewDate = new Date(review.timestamp);
 
-            // Format the date as desired (e.g., "Month Day, Year")
+            // Format date
             var formattedDate = reviewDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-            // Create star rating HTML
-            var starRatingHTML = '';
-            for (var i = 0; i < review.rating; i++) {
-                starRatingHTML += '<img src="images/star.png" width="20">';
-            }
+            var reviewHTML =
+                 '<p><strong>Date:</strong> ' + formattedDate + '</p>' +
+                 '<p><strong>Rating:</strong> ' + review.rating + '</p>' +
+                 '<p><strong>Review:</strong> ' + review.review + '</p>' +
+                 '<hr style="border-top: 3px solid #bbb">';
 
-            // Create review HTML
-            var reviewHTML = '<p>Date: ' + formattedDate + '</p>' +
-                             '<p>Rating: ' + starRatingHTML + '</p>' +
-                             '<p>Review: ' + review.review + '</p>';
-
-            // Append the review HTML to the container
             reviewsContainer.append(reviewHTML);
         });
     } else {
-        // If reviewsList is empty, display "No reviews"
         reviewsContainer.empty();
         var noReviewsMessage = $('<p>').text('No reviews');
         reviewsContainer.append(noReviewsMessage);

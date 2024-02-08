@@ -95,11 +95,7 @@
             {% for review in data %}
             <div class="review">
                 <p>Date: {{ review.timestamp }}</p>
-                <p>Rating:
-                    {% for _ in range(review.rating) %}
-                    <img src="{{url_for('static', filename='images/star.png')}}" width="20">
-                    {% endfor %}
-                </p>
+                <p>Rating: {{ review.rating }}</p>
                 <p>Review: {{ review.review }}</p>
             </div>
             {% endfor %}
