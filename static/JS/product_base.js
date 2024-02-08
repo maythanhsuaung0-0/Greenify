@@ -73,39 +73,6 @@ function addToCart(product_id, seller_id, seller) {
         })
 }
 
-// Fetch initial reviews
-//function fetchInitialReviews(seller_id, product_id) {
-//    $.ajax({
-//        url: '',
-//        type: 'GET',
-//        contentType: 'application/json',
-//        data: JSON.stringify({
-//            "seller_id": seller_id,
-//            "product_id": product_id,
-//        }),
-//        success: function (response) {
-//            console.log("Initial reviews fetched successfully");
-//            console.log('Received Data:', response);
-//            updateReviewsOnPage(response.data);
-//        },
-//        error: function (error) {
-//            console.error("Error fetching initial reviews:", error);
-//        },
-//    });
-//}
-
-
-
-// Call fetchInitialReviews when the page loads
-//$(document).ready(function () {
-//    // Retrieve seller_id and product_id from the data attributes of the ul element
-//    var seller_id = $('#reviews-list').data('seller-id');
-//    var product_id = $('#reviews-list').data('product-id');
-//
-//    // Call fetchInitialReviews with retrieved seller_id and product_id
-//    fetchInitialReviews(seller_id, product_id);
-//});
-
 
  function updateStarRating(clickedRating) {
         const stars = document.querySelectorAll('.rating-wrapper img');
@@ -180,7 +147,7 @@ function addToCart(product_id, seller_id, seller) {
         });
     }
 
-// Function to fetch reviews
+// Function to fetch reviews for the see reviews button
 function fetchReviews(seller_id, product_id) {
     $.ajax({
         url: '',
@@ -206,15 +173,19 @@ function fetchReviews(seller_id, product_id) {
 
 // Function to update the displayed reviews on the page
 function updateReviewsOnPage(reviewsList) {
-    if (reviewsList && Array.isArray(reviewsList)) {
-        var reviewsContainer = $('#reviews-list');
-        reviewsContainer.empty();
+    var reviewsContainer = $('#reviews-list');
 
+    if (Array.isArray(reviewsList) && reviewsList.length >  0) {
+        reviewsContainer.empty();
         reviewsList.forEach(function (review) {
             var listItem = $('<li>').text('Rating: ' + review.rating + ', Review: ' + review.review);
             reviewsContainer.append(listItem);
         });
     } else {
+        // If reviewsList is empty, display "No reviews"
+        reviewsContainer.empty();
+        var noReviewsMessage = $('<p>').text('No reviews');
+        reviewsContainer.append(noReviewsMessage);
         console.error('Invalid reviewsList:', reviewsList);
     }
 }

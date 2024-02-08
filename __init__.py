@@ -58,20 +58,11 @@ def error_403(e):
 def error_500(e):
     return render_template('error_msg.html')
 
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# # Helper function to get initial reviews
-# def get_initial_reviews(seller_id, product_id):
-#     reviews_db = shelve.open('reviews.db', 'r')
-#     ratings_reviews_dict = reviews_db.get('Reviews', {})
-#
-#     # Get the seller's dictionary
-#     seller_reviews = ratings_reviews_dict.get(seller_id, {})
-#
-#     # Get the list of reviews for the product
-#     return seller_reviews.get(product_id, [])
 def fetch_reviews(seller_id, product_id):
     # Retrieving r and r
     reviews_db = shelve.open('reviews.db', 'r')
@@ -88,6 +79,7 @@ def fetch_reviews(seller_id, product_id):
     product_reviews = seller_reviews.get(product_id, [])
     reviews_db.close()
     return product_reviews
+
 
 def delete_folder(item):
     filename = item.get_doc()
