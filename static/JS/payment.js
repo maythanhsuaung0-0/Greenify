@@ -87,21 +87,27 @@ function payment() {
 
 }
 
-
 function editField(input_change) {
   input_class = `#${input_change}-edit`;
   data_status = $(input_class).data("status");
-  if (data_status == "on") {
-    $(input_class).css('display','none');
-    data_status = 'off';
 
-    var new_input = $(`#${input_change}-input`).val();
+  if (data_status == "on") {
+    var new_input = $(`#${input_change}-input`).val().trim();
     var target_input = `#${input_change}`;
+
+    if (new_input === "") {
+      alert("Input cannot be empty.");
+      return;
+    }
+
     $(target_input).text(new_input);
 
+    // Hide the input field
+    $(input_class).css('display', 'none');
+    data_status = 'off';
   } else if (data_status == "off") {
-    $(input_class).css('display','block')
-    data_status = "on"
+    $(input_class).css('display', 'block');
+    data_status = "on";
   }
 
   $(input_class).data("status", data_status);

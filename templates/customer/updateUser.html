@@ -16,9 +16,11 @@
 </div>
 <h1 class="header" align="center">Profile Page</h1>
 <div class="container">
-  {% if error %}
-        <p style="color: red; text-align: center;">{{ error }}</p>
-  {% endif %}
+    {% if error %}
+      <p style="text-align: center; {% if error == 'Update Successful.' %}color: LimeGreen;{% else %}color: red;{% endif %}">
+        {{ error }}
+      </p>
+    {% endif %}
 
 <form method="POST" action="{{ url_for('update_user', user_id_hash=user) }}">
   <div id="account_info">
@@ -29,7 +31,7 @@
                     <button type="button" class="btn col-md-1" onclick="editField('email')"><i class="bi bi-pencil-square"></i></button>
                     <div class="hidden-field"  id="email-edit" data-status="off" style="display: none;">
                         <input id="email-input" name="email-input" type="email" value='{{ db.get_email() }}'>
-                        <button type="button" class="btn btn-success" onclick="validateEmailAndSubmit('email')"><i class="bi bi-check-lg"></i></button>
+                        <button type="button" class="btn btn-success" onclick="editField('email')"><i class="bi bi-check-lg"></i></button>
                     </div>
                 </div>
     <div class="row mb-3">
@@ -135,7 +137,7 @@ Are you sure you want to delete your account?
 </div>
 </div>
 </form>
-<form method="GET" action="{{url_for('user_logout')}}">
+<form method="GET" action="{{url_for('user_logout', user_id_hash=user)}}">
   <input value="Logout" type="submit" class="btn btn-danger" data-bs-target="#myModal_{form.email.data}" id="logout"/>
 </form>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
