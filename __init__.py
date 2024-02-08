@@ -62,17 +62,32 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-# Helper function to get initial reviews
-def get_initial_reviews(seller_id, product_id):
+# # Helper function to get initial reviews
+# def get_initial_reviews(seller_id, product_id):
+#     reviews_db = shelve.open('reviews.db', 'r')
+#     ratings_reviews_dict = reviews_db.get('Reviews', {})
+#
+#     # Get the seller's dictionary
+#     seller_reviews = ratings_reviews_dict.get(seller_id, {})
+#
+#     # Get the list of reviews for the product
+#     return seller_reviews.get(product_id, [])
+def fetch_reviews(seller_id, product_id):
+    # Retrieving r and r
     reviews_db = shelve.open('reviews.db', 'r')
     ratings_reviews_dict = reviews_db.get('Reviews', {})
+
+    # Get the seller ID and product ID
+    seller_id = int(seller_id)
+    product_id = int(product_id)
 
     # Get the seller's dictionary
     seller_reviews = ratings_reviews_dict.get(seller_id, {})
 
     # Get the list of reviews for the product
-    return seller_reviews.get(product_id, [])
-
+    product_reviews = seller_reviews.get(product_id, [])
+    reviews_db.close()
+    return product_reviews
 
 def delete_folder(item):
     filename = item.get_doc()
@@ -317,28 +332,15 @@ def product(seller, product_id):
                 reviews_db.close()
                 return json.jsonify({"data": product_reviews, "result": True})
 
-        # New
-        # Retrieving r and r
-        reviews_db = shelve.open('reviews.db', 'r')
-        ratings_reviews_dict = reviews_db.get('Reviews', {})
+        elif sent_data["request_type"] == 'fetch_reviews':
+            seller_id = int(sent_data.get('seller_id', ''))
+            product_id = int(sent_data.get('product_id', ''))
 
-        # Get the seller ID and product ID
-        seller_id = int(seller_id)
-        product_id = int(product_id)
+            if seller_id == '' or product_id == '':
+                return jsonify({"error": "Incomplete data for fetching reviews"}), 400
 
-        # Get the seller's dictionary
-        seller_reviews = ratings_reviews_dict.get(seller_id, {})
-
-        # Get the list of reviews for the product
-        product_reviews = seller_reviews.get(product_id, [])
-        # test codes
-        # print("seller_id:", seller_id)
-        # print("product_id:", product_id)
-        # print("ratings_reviews_dict:", ratings_reviews_dict)
-        # print("seller_reviews:", seller_reviews)
-        # print("product_reviews:", product_reviews)
-        # Close the database after retrieving data
-        reviews_db.close()
+            product_reviews = fetch_reviews(seller_id, product_id)
+            return jsonify({"data": product_reviews, "result": True})
 
         # Check Product Stock
         if sent_data["request_type"] == "product_stock":
