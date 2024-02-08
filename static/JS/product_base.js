@@ -73,7 +73,7 @@ function addToCart(product_id, seller_id, seller) {
         })
 }
 
-
+// Ratings and Reviews
  function updateStarRating(clickedRating) {
         const stars = document.querySelectorAll('.rating-wrapper img');
 
@@ -89,27 +89,37 @@ function addToCart(product_id, seller_id, seller) {
         document.getElementById('rating').value = clickedRating;
     }
 
-    function clearStarRating() {
-        const stars = document.querySelectorAll('.rating-wrapper img');
+function clearStarRating() {
+    const stars = document.querySelectorAll('.rating-wrapper img');
 
-        // Remove 'rating-checked' class from all stars
-        stars.forEach(star => star.classList.remove('rating-checked'));
+    // Remove 'rating-checked' class from all stars
+    stars.forEach(star => star.classList.remove('rating-checked'));
 
-        // Clear the hidden input field
-        document.getElementById('rating').value = '';
+    // Clear the hidden input field
+    document.getElementById('rating').value = '';
+}
+
+// Function to clear the rating and review inputs
+function clearRatingAndReviewInputs() {
+    // Clear the rating input
+    $('#rating').val('');
+
+    // Clear the review textarea
+    $('#review').val('');
+
+    // Clear the star rating display
+    clearStarRating();
+}
+
+function customer_feedback(seller_id, product_id) {
+    var rating = $('#rating').val();
+    var review = $('#review').val();
+
+    // Check if both fields are filled
+    if (rating.trim() === '' || review.trim() === '') {
+        alert("Please fill in both rating and review before submitting.");
+        return;
     }
-
-
-    function customer_feedback(seller_id, product_id) {
-        var rating = $('#rating').val();
-        var review = $('#review').val();
-
-        // Check if both fields are filled
-        if (rating.trim() === '' || review.trim() === '') {
-            alert("Please fill in both rating and review before submitting.");
-            return;
-        }
-
 
     // Testing codes
     console.log('Selected Rating:', rating);
@@ -117,35 +127,34 @@ function addToCart(product_id, seller_id, seller) {
     console.log('Seller Id:', seller_id)
     console.log('Product Id:', product_id)
 
+    // You can proceed with your Ajax request here
+    $.ajax({
+        url: '',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            "request_type": "customer_feedback",
+            "seller_id" : seller_id,
+            "product_id" : product_id,
+            "ratings": parseInt(rating),
+            "reviews": review,
+        }),
+        success: function (response) {
+            console.log("Feedback submitted successfully");
+            alert("Your feedback has been submitted successfully");
+            var updatedReviewsList = response.data;
+            // Update the displayed reviews on the page
+            updateReviewsOnPage(updatedReviewsList);
+            console.log('Updated Reviews List:', updatedReviewsList);
+            clearRatingAndReviewInputs();
 
-
-        // You can proceed with your Ajax request here
-        $.ajax({
-            url: '',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                "request_type": "customer_feedback",
-                "seller_id" : seller_id,
-                "product_id" : product_id,
-                "ratings": parseInt(rating),
-                "reviews": review,
-            }),
-            success: function (response) {
-                console.log("Feedback submitted successfully");
-                alert("Your feedback has been submitted successfully");
-                var updatedReviewsList = response.data;
-                // Update the displayed reviews on the page
-                updateReviewsOnPage(updatedReviewsList);
-                console.log('Updated Reviews List:', updatedReviewsList);
-
-            },
-            error: function (error) {
-                console.error("Error submitting feedback:", error);
-                alert("An error occurred");
-            },
-        });
-    }
+        },
+        error: function (error) {
+            console.error("Error submitting feedback:", error);
+            alert("An error occurred");
+        },
+    });
+}
 
 // Function to fetch reviews for the see reviews button
 function fetchReviews(seller_id, product_id) {

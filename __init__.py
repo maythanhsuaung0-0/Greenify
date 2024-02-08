@@ -7,7 +7,6 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
-# from set_image import create_image_set
 import secrets
 import shutil
 import User_login
@@ -39,19 +38,21 @@ app.config['UPLOAD_DIRECTORY'] = UPLOAD_DIRECTORY
 UPLOAD_FOLDER = 'C:/Users/Jia Ying/Downloads/Greenify/static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# UPLOAD_IMG_FOLDER = 'C:/Users/Rachel/PycharmProjects/Greenify/static/product_image'
 UPLOAD_IMG_FOLDER = os.path.join(app.root_path,'static','uploads/product_image')
 app.config['UPLOAD_IMG_FOLDER'] = UPLOAD_IMG_FOLDER
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 
-#Error Handling
+
+# Error Handling
 @app.errorhandler(404)
 def error_404(e):
     return render_template('error_msg.html')
 
+
 @app.errorhandler(403)
 def error_403(e):
     return render_template('error_msg.html')
+
 
 @app.errorhandler(500)
 def error_500(e):
@@ -62,13 +63,11 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+# Retrieving r and r
 def fetch_reviews(seller_id, product_id):
-
-    # Retrieving r and r
     reviews_db = shelve.open('reviews.db', 'r')
     ratings_reviews_dict = reviews_db.get('Reviews', {})
 
-    # Get the seller ID and product ID
     seller_id = int(seller_id)
     product_id = int(product_id)
 
@@ -276,21 +275,18 @@ def product(seller, product_id):
         if sent_data["request_type"] == "customer_feedback":
             reviews_db = shelve.open('reviews.db', 'c')
             try:
-                # Get the existing dictionary of ratings and reviews or create a new one
                 ratings_reviews_dict = reviews_db.get('Reviews', {})
 
                 # Get the seller ID and product ID from the sent data
-                seller_id = int(sent_data.get('seller_id', ''))  # Convert to int
-                product_id = int(sent_data.get('product_id', ''))  # Convert to int
+                seller_id = int(sent_data.get('seller_id', ''))
+                product_id = int(sent_data.get('product_id', ''))
 
-                # Ensure the seller ID is in the dictionary
                 if seller_id not in ratings_reviews_dict:
                     ratings_reviews_dict[seller_id] = {}
 
                 # Get the seller's dictionary
                 seller_reviews = ratings_reviews_dict[seller_id]
 
-                # Ensure the product ID is in the seller's dictionary
                 if product_id not in seller_reviews:
                     seller_reviews[product_id] = []
 
@@ -304,16 +300,9 @@ def product(seller, product_id):
                     'timestamp': date.today()
                 }
 
-                # Add the new feedback to the list under the product ID
                 product_reviews.append(new_feedback)
-
-                # Store the updated dictionary back to the database
                 reviews_db['Reviews'] = ratings_reviews_dict
-                # print("seller_id:", seller_id)
-                # print("product_id:", product_id)
                 print("ratings_reviews_dict:", ratings_reviews_dict)
-                # print("seller_reviews:", seller_reviews)
-                # print("product_reviews:", product_reviews)
 
             except Exception as e:
                 print("Error in handling customer feedback:", str(e))
@@ -421,14 +410,6 @@ def product(seller, product_id):
 
             print(users_shopping_cart)
             return json.jsonify({"data": saved_cart_qty, "result": True})
-
-    # NEW
-    # Handle GET requests
-    # if request.method == "GET":
-    #     # Initial retrieval of reviews for the product
-    #     initial_reviews = get_initial_reviews(seller_id, product_id)
-    #     # print(initial_reviews)
-    #     return json.jsonify({'data': initial_reviews, 'result': True})
 
     print(product.get_image())
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
@@ -1136,7 +1117,7 @@ def create_product(seller_id_hash):
                                                      create_product_form.product_stock.data,
                                                      create_product_form.description.data)
 
-        # New
+        # Image handling
         if 'image' in request.files and request.files['image'].filename != '':
             image = request.files['image']
             if image and allowed_file(image.filename):
@@ -1146,10 +1127,6 @@ def create_product(seller_id_hash):
                 image.save(image_path)
                 print(f"Image saved at: {image_path}")
 
-                # Call the create_image_set function
-                # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
-
-                # Set the image field in your SellerProduct instance
                 create_product.set_image(filename)
         else:
             print("not working")
@@ -1162,11 +1139,9 @@ def create_product(seller_id_hash):
         # create dict with product id as key and create_product as value; dict name is seller_products
         seller_products[create_product.get_product_id()] = create_product
         # store seller_products(dict) in seller_product_db, with seller_id as key and seller_products as value
-        # New
         seller_product_info["products"] = seller_products
         seller_product_info["id"] = seller_product_id
         seller_product_db[str(seller_id)] = seller_product_info
-        #
         seller_product_db.close()
 
         return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
@@ -1256,10 +1231,6 @@ def update_product(seller_id, product_id):
                     image.save(image_path)
                     print(f"New image saved at: {image_path}")
 
-                    # Call the create_image_set function if needed (not sure yet)
-                    # create_image_set(app.config['UPLOAD_IMG_FOLDER'], filename)
-
-                    # Set the image field in your SellerProduct instance
                     sellerProduct.set_image(filename)
 
             seller_product_db[str(seller_id)] = seller_products
