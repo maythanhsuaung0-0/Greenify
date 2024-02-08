@@ -28,7 +28,7 @@
                     <div class="payment-content col-md-6 d-flex align-items-center"><span id="email">{{ db.get_email() }}</span></div>
                     <button type="button" class="btn col-md-1" onclick="editField('email')"><i class="bi bi-pencil-square"></i></button>
                     <div class="hidden-field"  id="email-edit" data-status="off" style="display: none;">
-                        <input id="email-input" type="email" value='{{ db.get_email() }}'>
+                        <input id="email-input" name="email-input" type="email" value='{{ db.get_email() }}'>
                         <button type="button" class="btn btn-success" onclick="validateEmailAndSubmit('email')"><i class="bi bi-check-lg"></i></button>
                     </div>
                 </div>
@@ -40,7 +40,7 @@
         <button type="button" class="btn col-md-1" onclick="editField('password')"><i class="bi bi-pencil-square"></i></button>
         <div class="hidden-field" id="password-edit" data-status="off" style="display: none;">
             <div class="custom-input-group">
-            <input id="password-input" type="password" value='{{ db.get_password() }}'>
+            <input id="password-input" name="password-input" type="password" value='{{ db.get_password() }}'>
             <span class="input-group-addon custom-addon" role="button" title="Show Password" id="passBtn">
                 <i class="fa fa-eye fa-fw eye" aria-hidden="true"></i>
             </span>
@@ -56,7 +56,7 @@
         <button type="button" class="btn col-md-1" onclick="editField('confirm_password')"><i class="bi bi-pencil-square"></i></button>
         <div class="hidden-field" id="confirm_password-edit" data-status="off" style="display: none;">
             <div class="custom-input-group">
-            <input id="confirm_password-input" type="password" value='{{ db.get_password() }}'>
+            <input id="confirm_password-input" name="confirm_password-input" type="password" value='{{ db.get_password() }}'>
             <span class="input-group-addon custom-addon" role="button" title="Show Password" id="passBtn2">
                 <i class="fa fa-eye fa-fw eye" aria-hidden="true"></i>
             </span>
@@ -74,7 +74,7 @@
                     <div class="payment-content col-md-6 d-flex align-items-center"><span id="name">{{ db.get_name() }}</span></div>
                     <button type="button" class="btn col-md-1" onclick="editField('name')"><i class="bi bi-pencil-square"></i></button>
                     <div class="hidden-field"  id="name-edit" data-status="off" style="display: none;">
-                        <input id="name-input" type="text" value='{{ db.get_name() }}'>
+                        <input id="name-input" name="name-input" type="text" value='{{ db.get_name() }}'>
                         <button type="button" class="btn btn-success" onclick="editField('name')"><i class="bi bi-check-lg"></i></button>
                     </div>
                 </div>
@@ -83,7 +83,7 @@
                     <div class="payment-content col-md-6 d-flex align-items-center"><span id="contact_number">{{ db.get_contact_number() }}</span></div>
                     <button type="button" class="btn col-md-1" onclick="editField('contact_number')"><i class="bi bi-pencil-square"></i></button>
                     <div class="hidden-field"  id="contact_number-edit" data-status="off" style="display: none;">
-                        <input id="contact_number-input" type="number" pattern="[0-9]*" value='{{ db.get_contact_number() }}'>
+                        <input id="contact_number-input" name="contact_number-input" type="number" pattern="[0-9]*" value='{{ db.get_contact_number() }}'>
                         <button type="button" class="btn btn-success" onclick="editField('contact_number')"><i class="bi bi-check-lg"></i></button>
                     </div>
                 </div>
@@ -92,7 +92,7 @@
                     <div class="payment-content col-md-6 d-flex align-items-center"><span id="postal_code">{{ db.get_postal_code() }}</span></div>
                     <button type="button" class="btn col-md-1" onclick="editField('postal_code')"><i class="bi bi-pencil-square"></i></button>
                     <div class="hidden-field"  id="postal_code-edit" data-status="off" style="display: none;">
-                        <input id="postal_code-input" type="number" pattern="[0-9]*" value='{{ db.get_postal_code() }}'>
+                        <input id="postal_code-input" name="postal_code-input" type="number" pattern="[0-9]*" value='{{ db.get_postal_code() }}'>
                         <button type="button" class="btn btn-success" onclick="editField('postal_code')"><i class="bi bi-check-lg"></i></button>
                     </div>
                 </div>
@@ -101,7 +101,7 @@
                     <div class="payment-content col-md-6 d-flex align-items-center"><span id="address">{{ db.get_address() }}</span></div>
                     <button type="button" class="btn col-md-1" onclick="editField('address')"><i class="bi bi-pencil-square"></i></button>
                     <div class="hidden-field"  id="address-edit" data-status="off" style="display: none;">
-                        <input id="address-input" type="text" value='{{ db.get_address() }}'>
+                        <input id="address-input" name="address-input" type="text" value='{{ db.get_address() }}'>
                         <button type="button" class="btn btn-success" onclick="editField('address')"><i class="bi bi-check-lg"></i></button>
                     </div>
                 </div>

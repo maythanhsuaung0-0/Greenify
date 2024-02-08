@@ -949,7 +949,7 @@ def profile(user_id_hash):
 
 @app.route('/<user_id_hash>/updateUser', methods=['GET', 'POST'])
 def update_user(user_id_hash):
-    global user_obj
+    global user_obj, email, password, confirm_password, name, contact_number, postal_code, address
     print("user_id_hash:", user_id_hash)
     search_form = Search(request.form)
 
@@ -960,32 +960,35 @@ def update_user(user_id_hash):
     user_id_hash = session['user_id_hash']
     user = session['user_id']
     error = None
-    update_user_form = CreateUserForm(request.form)
 
     if request.method == 'POST':
+        email = request.form.get('email-input')
+        password = request.form.get('password-input')
+        confirm_password = request.form.get('confirm_password-input')
+        name = request.form.get('name-input')
+        contact_number = request.form.get('contact_number-input')
+        postal_code = request.form.get('postal_code-input')
+        address = request.form.get('address-input')
         users_dict = {}
         db = shelve.open('user.db', 'w')
         users_dict = db['Users']
 
         user_obj = users_dict[user]
 
-        if update_user_form.validate():
-            if len(str(update_user_form.contact_number.data)) != 8:
-                error = 'Phone number must be 8 digits.'
-            elif len(str(update_user_form.postal_code.data)) != 6:
-                error = 'Postal code must be 6 digits.'
-            elif update_user_form.password.data != update_user_form.confirm_password.data:
-                error = 'Passwords must match.'
-            else:
-                user_obj.set_email(update_user_form.email.data)
-                user_obj.set_password(update_user_form.password.data)
-                user_obj.set_name(update_user_form.name.data)
-                user_obj.set_contact_number(update_user_form.contact_number.data)
-                user_obj.set_postal_code(update_user_form.postal_code.data)
-                user_obj.set_address(update_user_form.address.data)
-                error = "Update Successful."
+        if len(str(contact_number)) != 8:
+            error = 'Phone number must be 8 digits.'
+        elif len(str(postal_code)) != 6:
+            error = 'Postal code must be 6 digits.'
+        elif password != confirm_password:
+            error = 'Passwords must match.'
         else:
-            error = "Update Unsuccessful."
+            user_obj.set_email(email)
+            user_obj.set_password(password)
+            user_obj.set_name(name)
+            user_obj.set_contact_number(contact_number)
+            user_obj.set_postal_code(postal_code)
+            user_obj.set_address(address)
+            error = "Update Successful."
 
         db['Users'] = users_dict
         db.close()
@@ -998,18 +1001,17 @@ def update_user(user_id_hash):
         user_obj = users_dict[user]
 
         if user:
-            update_user_form.email.data = user_obj.get_email()
-            update_user_form.password.data = user_obj.get_password()
-            update_user_form.name.data = user_obj.get_name()
-            update_user_form.contact_number.data = user_obj.get_contact_number()
-            update_user_form.postal_code.data = user_obj.get_postal_code()
-            update_user_form.address.data = user_obj.get_address()
+            email = user_obj.get_email()
+            password = user_obj.get_password()
+            name = user_obj.get_name()
+            contact_number = user_obj.get_contact_number()
+            postal_code = user_obj.get_postal_code()
+            address = user_obj.get_address()
 
         db.close()
 
     if session.get('user_logged_in'):
-        return render_template('customer/updateUser.html', form=update_user_form, error=error, db=user_obj,
-                               user=user_id_hash)
+        return render_template('customer/updateUser.html', error=error, db=user_obj, user=user_id_hash)
     else:
         return redirect(url_for('login'))
 
