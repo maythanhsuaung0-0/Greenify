@@ -7,7 +7,6 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
-import re
 import secrets
 import shutil
 import User_login
@@ -21,7 +20,6 @@ import uuid
 from crud_functions import *
 from seller_order import SellerOrder
 from searchForm import Search
-from email_validator import validate_email, EmailNotValidError
 from updateUser import update
 from chat import get_response
 
@@ -1568,7 +1566,6 @@ def dashboard():
 @app.route('/seller/<seller_id_hash>/updateSeller', methods=['GET', 'POST'])
 def update_seller(seller_id_hash):
     error = None
-    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if seller_id_hash != session['seller_id_hash']:
         print('route error')
         return render_template('error_msg.html')

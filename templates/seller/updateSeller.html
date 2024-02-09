@@ -27,39 +27,40 @@
             <button type="submit" class="btn btn-lg custom-btn" id="update">Update</button>
         </div>
 </form>
-    </div>
+
 
 <form method="POST" action="{{url_for('delete_seller', seller_id_hash=seller_id_hash)}}">
-  <input value="Delete" type="button" class="btn btn-danger" data-bs-toggle="modal" align="center" id="delete"/>
-<!-- The Modal -->
-<div class="modal">
-<div class="modal-dialog">
-<div class="modal-content">
-<!-- Modal Header -->
-<div class="modal-header">
-<h4 class="modal-title">Delete Confirmation</h4>
-<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-</div>
-<!-- Modal body -->
-<div class="modal-body">
-Are you sure you want to delete your account?
-</div>
-<!-- Modal footer -->
-<div class="modal-footer">
-<input type="submit" value="Delete" class="btn btn-danger">
-<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-</div>
-</div>
-</div>
-</div>
+  <input value="Delete" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal" id="delete"/>
+
+  <!-- The Modal -->
+  <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title" id="deleteConfirmationModalLabel">Delete Confirmation</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <!-- Modal body -->
+        <div class="modal-body">
+          Are you sure you want to delete your account?
+        </div>
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <input type="submit" name="delete" value="Delete" class="btn btn-danger">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </form>
+
 <form method="GET" action="{{url_for('seller_logout', seller_id_hash=seller_id_hash)}}">
   <input value="Logout" type="submit" class="btn btn-danger" id="logout"/>
 </form>
-
+</div>
 <script>
 function validateForm() {
-    // Get the email input field
     var emailInput = document.getElementById('seller_email');
 
     // Validate email using regex
@@ -70,7 +71,26 @@ function validateForm() {
         // Prevent form submission
         return false;
     }
-    // Allow form submission if email is valid
+
+    var businessName = document.getElementById('business_name');
+    // Validate input for special characters using regex
+    var specialCharacterRegex = /^[a-zA-Z0-9\s]*$/;
+    if (!specialCharacterRegex.test(businessName.value)) {
+        alert("Special characters are not allowed for business name.");
+        // Prevent form submission
+        return false;
+    }
+
+    var businessDesc = document.getElementById('business_desc');
+    // Validate input for special characters using regex
+    var specialCharacterRegex = /^[a-zA-Z0-9\s!]*$/;
+    if (!specialCharacterRegex.test(businessDesc.value)) {
+        alert("Special characters are not allowed for business description.");
+        // Prevent form submission
+        return false;
+    }
+
+    // Allow form submission if email is valid and special characters are not found
     return true;
 }
 </script>

@@ -8,14 +8,24 @@ function editField(input_change) {
     var target_input = `#${input_change}`;
 
     if (new_input === "") {
-      // If the input is empty, show an alert and prevent further action
       alert("Input cannot be empty.");
       return;
-    } else if (input_change === 'email') { // If the input is for email
+    } else if (input_change === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(new_input)) {
-        // If the input is not a valid email, show an alert and prevent further action
         alert("Please enter a valid email address.");
+        return;
+      }
+    } else if (input_change === 'name') {
+      const specialCharacterRegex = /^[a-zA-Z0-9\s]*$/;
+      if (!specialCharacterRegex.test(new_input)) {
+        alert("Special characters are not allowed.");
+        return;
+      }
+    } else if (input_change === 'address') {
+      const specialCharacterRegex = /^[a-zA-Z0-9\s]*$/;
+      if (!specialCharacterRegex.test(new_input)) {
+        alert("Special characters are not allowed.");
         return;
       }
     }
