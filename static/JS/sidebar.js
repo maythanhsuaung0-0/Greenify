@@ -13,6 +13,7 @@ logo.addEventListener("click", function () {
 function showActiveNavLink() {
     // Get the current pathname
     var currentPathname = window.location.pathname;
+    console.log(currentPathname)
     // Add active class to the nav link that corresponds to the current pathname
     if (currentPathname == "/staff/dashboard") { 
         dashboard.classList.add("active");

@@ -34,15 +34,5 @@ $.ajax({
                  "request_type": "filter",
                  "filter_by":filter_by,
              }),
-             success: function (response) {
-                 // Handle success if needed
-                 if(response.result){
-                 console.log(response.result,"filtered successful");
-                 alert('Successfully '+ action+'d '+name)}
-             },
-             error: function (xhr, status, error) {
-                 // Handle error if needed
-                 console.error("Error:", error);
-             }
          });
 }

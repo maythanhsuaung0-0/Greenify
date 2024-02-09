@@ -25,7 +25,7 @@
   />
   {% block JS_CSS %}{% endblock %}
 </head>
-{% macro orderComponent(obj,products,orders) %}
+{% macro orderComponent(status,obj,products,orders) %}
 <div class="card" id="card-{{obj.get_email()}}">
       <div
       class="row card-body ">
@@ -41,12 +41,14 @@
       </div>
 
 
-      <div class="col-2 text-center fw-normal">
-          {{obj.get_date()}}
-      </div>
-      <div class="col-1 text-center fw-normal">
+
+      {% if status == "to_send" %}
+          <div class="col-2 text-center fw-normal">
+              {{obj.get_date()}}
+          </div>
+          <div class="col-1 text-center fw-normal">
           <!-- Button trigger modal -->
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal-{{obj.get_email()}}" onclick="handleSendingOrder('{{orders[]}}')">
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal-{{obj.get_email()}}" >
               Send
             </button>
 
@@ -65,13 +67,18 @@
                     Are you sure you want to send the receipt to <b>{{obj.get_name()}}</b> ?
                   </div>
                   <div class="modal-footer">
-                    <button type="button" class="w-full btn btn-primary" data-bs-dismiss="modal" onclick="">Send Email</button>
+                    <button type="button" class="w-full btn btn-primary" data-bs-dismiss="modal" onclick="handleSendingOrder('{{obj.get_order_id()}}','{{obj.get_email()}}')">Send</button>
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                   </div>
                 </div>
               </div>
             </div>
       </div>
+          {% else %}
+          <div class="col-3 text-center fw-normal">
+              {{obj.get_date()}}
+          </div>
+      {% endif %}
       <div class="col-1">
         <a class="btn btn-sm btn-light" data-bs-toggle="collapse" href="#collapse{{obj.get_email()}}" role="button" aria-expanded="false" aria-controls="collapse{{obj.get_email()}}"> <i class="fa-solid fa-caret-down"></i> </a>
       </div>

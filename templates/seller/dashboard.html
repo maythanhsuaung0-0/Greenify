@@ -1,38 +1,24 @@
 {% extends "includes/staff_seller/sellerBaseLayout.html" %}
 {% from "includes/staff_seller/sellerDataComponent.html" import accordionComponent%}
+{% from "includes/staff_seller/scorecard_component.html" import scoreCard%}
+
 {% block title %}Application Forms{% endblock %}
 {% block content %}
-<h4>Seller's Dashboard</h4>
-<div class="row mt-4 gap-1">
-    <div class="col-md-3">
-        <div class="my-card shadow-sm p-3 mb-5 bg-body rounded">
-          <div class="p-2">
-              <div class="text-success"><i class="fa-solid fa-user-group"></i></div>
-              <h3 class="mt-2">{{customers}}</h3>
-               <small class="text-sm">Total number of Customers</small>
-          </div>
-        </div>
+<h4>Welcome <i>{{seller_name}}</i></h4>
+
+    <div class="d-flex gap-3 mt-4">
+    <div>
+        {{scoreCard('Total Revenue - commission 10% ', earning,"fa-solid fa-sack-dollar",'+25% than last week')}}
     </div>
-     <div class="col-md-3">
-        <div class="my-card shadow-sm p-3 mb-5 bg-body rounded">
-          <div class="p-2">
-              <div class="text-success"><i class="fa-solid fa-boxes-packing"></i></div>
-              <h3 class="mt-2">{{sold_out}}</h3>
-               <small class="text-sm">Total number of Sold Out Products</small>
-          </div>
-        </div>
+    <div>
+        {{scoreCard('Sold Out', sold_out,"fa-solid fa-boxes-packing",'+25% than last week')}}
+
     </div>
-     <div class="my-card col-md-3">
-        <div class="my-card shadow-sm p-3 mb-5 bg-body rounded">
-          <div class="p-2">
-              <div class="text-success"><i class="fa-solid fa-sack-dollar"></i></div>
-              <h3 class="mt-2">$ {{earning}}</h3>
-               <small class="text-sm">Total Amount of Revenue</small>
-          </div>
         </div>
-    </div>
-</div>
-<!--<canvas id="myChart" style="width:100%;max-width:700px"></canvas>-->
+    <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+
+
+
 {% endblock %}
 
 

@@ -1,30 +1,20 @@
 {% extends "includes/staff_seller/baseLayout.html" %}
-{% from "includes/staff_seller/accordion_component.html" import accordionComponent%}
+{% from "includes/staff_seller/scorecard_component.html" import scoreCard%}
 {% block title %}Application Forms{% endblock %}
 {% block content %}
 <h4>Staff's Dashboard</h4>
-<div class="row mt-4">
-    <div class="col-md-3">
-        <div class="shadow-sm p-3 mb-5 bg-body rounded">
-          <div class="p-2">
-              <div class="text-success"><i class="fa-solid fa-user-group"></i></div>
-              <h3 class="mt-2">{{sellers_count}}</h3>
-               <small class="text-sm">Total number of Sellers</small>
-          </div>
-        </div>
+<div class="d-flex gap-3 mt-4">
+    <div>
+        {{scoreCard('Total Sellers',sellers_count|length,"fa-solid fa-user-group",'+25% than last week')}}
     </div>
-     <div class="col-md-4">
-        <div class="shadow-sm p-3 mb-5 bg-body rounded">
-          <div class="p-2">
-              <div class="text-success"><i class="fa-solid fa-user-group"></i></div>
-              <h3 class="mt-2">{{users_count}}</h3>
-               <small class="text-sm">Total number of Website Users</small>
-          </div>
-        </div>
+    <div>
+        {{scoreCard('Total Website Users', users_count|length,"fa-solid fa-user-group",'+25% than last week')}}
     </div>
-    <div class="col-md-6"></div>
+     <div>
+        {{scoreCard('Seller Application Forms', app_count|length,"fa-solid fa-book",'+25% than last week')}}
+    </div>
 </div>
-<!--<canvas id="myChart" style="width:100%;max-width:700px"></canvas>-->
+<canvas id="myChart" style="width:100%;max-width:700px"></canvas>
 {% endblock %}
 
 

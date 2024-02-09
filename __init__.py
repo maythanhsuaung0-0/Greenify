@@ -16,6 +16,7 @@ from datetime import date
 from urllib.parse import quote
 # for sending mail
 import string
+import csv
 from send_email import send_mail
 import uuid
 from crud_functions import *
@@ -1308,7 +1309,7 @@ def delete_product(seller_id, product_id):
         return "Error in deleting product from seller-product db"
 
 
-@app.route('/seller/<seller_id_hash>/orders')
+@app.route('/seller/<seller_id_hash>/orders',methods = ['POST','GET'])
 def orders(seller_id_hash):
     print(seller_id_hash)
     seller_id = str(session['seller_id'])
@@ -1318,13 +1319,11 @@ def orders(seller_id_hash):
         return render_template('error_msg.html')
 
     seller_id_hash = session['seller_id_hash']
-    print('sellerid:::', seller_id)
     orders_db = shelve.open('seller_order.db', 'r')
     seller_orders = orders_db[seller_id]
     sent_out_orders = []
     to_send_orders = []
     seller_products = retrieve_db('seller-product.db', seller_id)
-    print(seller_products)
     total_orders = []
     for order in seller_orders:
         for order_id in order:
@@ -1333,8 +1332,22 @@ def orders(seller_id_hash):
             else:
                 to_send_orders.append(order[order_id])
         total_orders.append(order)
+    orders_db.close()
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        updated_orders = {}
+        _orders_ = shelve.open('seller_order.db', 'w')
+        updated_orders = _orders_[seller_id]
+        if data["request_type"] == 'order_sent':
+            print('received',data["id"])
+            for order in updated_orders:
+                if data["id"] in order:
+                    print('order status to change',order[data["id"]].get_sent_out())
+                    order[data["id"]].set_sent_out(True)
+            _orders_[seller_id] = updated_orders
+            _orders_.close()
     return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
-                           to_send=to_send_orders,products = seller_products,orders = total_orders)
+                           to_send=to_send_orders, products=seller_products, orders=total_orders)
 
 
 @app.route('/seller/<seller_id_hash>/dashboard')
@@ -1344,19 +1357,28 @@ def seller_dashboard(seller_id_hash):
         return render_template('error_msg.html')
     seller_id_hash = session['seller_id_hash']
     seller_id = session['seller_id']
+    sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
+    print("sellers", sellers_list)
+    seller_name = ''
+    for i in sellers_list:
+        if i.get_application_id() == seller_id:
+            seller_name += i.get_name()
     orders_db = shelve.open('seller_order.db', 'r')
     seller_orders = orders_db[str(seller_id)]
     customers = 0
     sold_out = 0
-    earning = 0
+    earning = 0.0
     for order in seller_orders:
         for order_id in order:
             customers += 1
             for i in order[order_id].get_order_products():
                 sold_out += i['quantity']
-                earning += i['product_price']
-    print(customers,sold_out,earning)
-    return render_template('seller/dashboard.html', seller=seller_id_hash, customers = customers, sold_out = sold_out, earning = earning)
+                earning += float(i['product_price'])
+    commission = earning * 0.10
+    earning -= commission
+    earning = '$' + str(earning)
+    return render_template('seller/dashboard.html', seller=seller_id_hash, seller_name=seller_name, customers=customers,
+                           sold_out=sold_out, earning=earning)
 
 
 @app.route('/respond')
@@ -1367,6 +1389,50 @@ def respond():
 @app.route('/errorPage')
 def error():
     return render_template('staff/errorPage.html')
+
+
+@app.route('/readApplicationsFromFile')
+def readApplicationsFromFile():
+    application_form = {}
+    with shelve.open('application.db', 'c') as db:
+        try:
+            application_form = db['Application']
+        except:
+            print("Error in retrieving application from application.db")
+        # store id
+        try:
+            prev_id = db['Id']
+        except KeyError:
+            if application_form.keys():
+                prev_id = max(application_form.keys())
+            else:
+                prev_id = 0
+        db['Id'] = prev_id
+        with open('static/documents/applications.txt', 'r') as applicationFile:
+            for i in applicationFile:
+                seller = i.split(',')
+                formatted_seller = []
+                for j in seller:
+                    withoutPunctuation = j.replace("\"", "")
+                    formatted = withoutPunctuation.replace("\n", '')
+                    formatted_seller.append(formatted)
+                appForm = AppFormFormat(prev_id, formatted_seller[0], formatted_seller[1],
+                                        formatted_seller[2],
+                                        formatted_seller[3])
+                appForm.set_date(formatted_seller[4])
+                application_form[appForm.get_application_id()] = appForm
+                db['Application'] = application_form
+                # testing
+                application_form = db['Application']
+                appForm = application_form[appForm.get_application_id()]
+                print(appForm.get_name(), appForm.get_email(),
+                      "was stored in application.db successfully with user_id ==",
+                      appForm.get_application_id())
+                print("last id--", prev_id)
+                if application_form.keys():
+                    prev_id = max(application_form.keys())
+                db['Id'] = prev_id
+    return redirect(url_for('retrieveApplicationForms'))
 
 
 @app.route("/register", methods=['GET', 'POST'])
@@ -1434,56 +1500,58 @@ def view_pdf(pdf):
 @app.route('/staff/retrieveApplicationForms', methods=['POST', 'GET'])  # read
 def retrieveApplicationForms():
     app_list = retrieve_db('application.db', 'Application')
-    if request.method == 'POST':
-        data_to_modify = json.loads(request.data)
-        # for rejecting the form
-        if data_to_modify['request_type'] == 'reject':
-            print(data_to_modify['id'], "rejected")
-            rejected = extracting('application.db', 'Application', data_to_modify['id'])
-            if rejected.get_doc():
-                delete_folder(rejected)
-            send_mail(rejected.get_email(), False, rejected.get_name(), '')
-        if data_to_modify['request_type'] == 'approve':
-            print(data_to_modify['id'], "approved")
-            # take the approved application
-            approved = extracting('application.db', 'Application', data_to_modify['id'])
-            print("This user is approved", approved.get_application_id())
-            # store in the approved_sellers
-            approved_sellers = {}
-            approved_db = shelve.open('approved_sellers.db', 'c')
-            try:
-                approved_sellers = approved_db['Approved_sellers']
-            except:
-                print("Error in retrieving sellers from application.db")
-
-            passwords = []
-            while True:
-                password = generate_password(14)
-                if password not in passwords:
-                    break
-            approved.set_password(password)
-            # storing approved seller
-            approved_sellers[approved.get_application_id()] = approved
-            approved_db['Approved_sellers'] = approved_sellers
-            for key, seller in approved_db['Approved_sellers'].items():
-                passwords.append(seller.get_password())
-            approved_db.close()
-
-            send_mail(approved.get_email(), True, approved.get_seller_name(), password)
-        if data_to_modify['request_type'] == 'filter':
-            print(" got filered")
-            if data_to_modify['id'] == '1':
-                certify = []
-                print('filtered')
-                for i in app_list:
-                    print(i)
-                    if i.get_doc():
-                        print('have certificate')
-                        certify.append(i)
-                        print('certified sellers', i.get_name())
-                print('certified', certify)
-                return render_template('staff/retrieveAppForms.html', count=len(certify), app_list=certify)
     if session.get('staff_logged_in'):
+        if request.method == 'POST':
+            data_to_modify = json.loads(request.data)
+            # for rejecting the form
+            if data_to_modify['request_type'] == 'reject':
+                print(data_to_modify['id'], "rejected")
+                rejected = extracting('application.db', 'Application', data_to_modify['id'])
+                if rejected.get_doc():
+                    delete_folder(rejected)
+                send_mail(rejected.get_email(), False, rejected.get_name(), '')
+            if data_to_modify['request_type'] == 'approve':
+                print(data_to_modify['id'], "approved")
+                # take the approved application
+                approved = extracting('application.db', 'Application', data_to_modify['id'])
+                print("This user is approved", approved.get_application_id())
+                # store in the approved_sellers
+                approved_sellers = {}
+                approved_db = shelve.open('approved_sellers.db', 'c')
+                try:
+                    approved_sellers = approved_db['Approved_sellers']
+                except:
+                    print("Error in retrieving sellers from application.db")
+
+                passwords = []
+                while True:
+                    password = generate_password(14)
+                    if password not in passwords:
+                        break
+                approved.set_password(password)
+                approved_date = date.today()
+                approved.set_date(approved_date)
+                # storing approved seller
+                approved_sellers[approved.get_application_id()] = approved
+                approved_db['Approved_sellers'] = approved_sellers
+                for key, seller in approved_db['Approved_sellers'].items():
+                    passwords.append(seller.get_password())
+                approved_db.close()
+
+                send_mail(approved.get_email(), True, approved.get_seller_name(), password)
+            if data_to_modify['request_type'] == 'filter':
+                print(" got filered")
+                if data_to_modify['id'] == '1':
+                    certify = []
+                    print('filtered')
+                    for i in app_list:
+                        print(i)
+                        if i.get_doc():
+                            print('have certificate')
+                            certify.append(i)
+                            print('certified sellers', i.get_name())
+                    print('certified', certify)
+                    return render_template('staff/retrieveAppForms.html', count=len(certify), app_list=certify)
         return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
     else:
         return redirect(url_for('staff_login'))
@@ -1524,43 +1592,41 @@ def retrieveUpdateForms():  # for approving updates
 
 
 @app.route('/staff/retrieveSellers', methods=['POST', 'GET'])
-def retrieveSellers():  # read
+def retrieveSellers():
     sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
     print("sellers", sellers_list)
-    if request.method == 'POST':
-        data_to_modify = json.loads(request.data)
-        # for removing
-        if data_to_modify['request_type'] == 'delete':
-            print(data_to_modify['id'], "deleted")
-            deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
-            if deleted_item.get_doc():
-                delete_folder(deleted_item)
-        if data_to_modify['request_type'] == 'filter':
-            print(" got filered")
-            print(data_to_modify['filter_by'])
-            if data_to_modify['filter_by'] == 'certificate':
-                certify = []
-                print('filtered')
-                for i in sellers_list:
-                    print(i)
-                    if i.get_doc():
-                        print('have certificate')
-                        certify.append(i)
-                        print('certified sellers', i.get_name())
-                print('certified', certify)
-                return render_template('staff/retrieveSellers.html', count=len(certify), sellers=certify)
     if session.get('staff_logged_in'):
-        return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
+        if request.method == 'POST':
+            data_to_modify = json.loads(request.data)
+            # for removing
+            if data_to_modify['request_type'] == 'delete':
+                print(data_to_modify['id'], "deleted")
+                deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
+                if deleted_item.get_doc():
+                    delete_folder(deleted_item)
+            elif data_to_modify['request_type'] == 'filter':
+                if data_to_modify['filter_by'] == 'certificate':
+                    certify = []
+                    print('filtered')
+                    for i in sellers_list:
+                        print(i)
+                        if i.get_doc():
+                            print('have certificate')
+                            certify.append(i)
+                    return redirect(url_for('staff_login'))  # Redirect when filtering by certificate
+        else:
+            return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
     else:
-        return redirect(url_for('staff_login'))
+        return redirect(url_for('staff_login'))  # Redirect if staff not logged in
 
 
 @app.route('/staff/dashboard')
 def dashboard():
     sellers = retrieve_db('approved_sellers.db', 'Approved_sellers')
     users = retrieve_db('user.db', 'Users')
+    applications = retrieve_db('application.db', 'Application')
     if session.get('staff_logged_in'):
-        return render_template('staff/dashboard.html', sellers_count=len(sellers), users_count=len(users))
+        return render_template('staff/dashboard.html', sellers_count=sellers, users_count=users, app_count=applications)
     else:
         return redirect(url_for('staff_login'))
 

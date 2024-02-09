@@ -53,7 +53,11 @@ body {
     font-weight: bold;
 }
 .my-card{
-min-height:11em}
+min-height:9em;
+min-width:18em;
+display:grid;
+align-items:center;
+}
   @media screen and (max-width: 700px) {
     .side-nav {
       width: 100%;

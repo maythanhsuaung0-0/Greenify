@@ -1,0 +1,21 @@
+name,business_name,email,description,date,sustainable_concept
+John Doe,Green Living Co.,john@example.com,Eco-friendly products and services,2023-01-15,yes
+Emily Smith,EcoWares,emily@example.com,Sustainable fashion brand,2023-02-28,yes
+Michael Johnson,Organic Harvest,michael@example.com,Organic farm produce supplier,2023-03-10,yes
+Sarah Brown,GreenTech Solutions,sarah@example.com,Provider of renewable energy solutions,2023-04-05,yes
+David Lee,EcoEats,david@example.com,Plant-based food delivery service,2023-05-20,yes
+Jessica Wilson,EarthCraft,jessica@example.com,Handmade sustainable home decor,2023-06-08,yes
+Daniel Martinez,Sunrise Farms,daniel@example.com,Sustainable agriculture practices,2023-07-12,yes
+Rachel Taylor,GreenGenius,rachel@example.com,Eco-friendly cleaning products,2023-08-22,yes
+Chris Anderson,RecycleCycle, chris@example.com,Recycling services provider,2023-09-17,yes
+Linda Garcia,GreenGardens,linda@example.com,Sustainable landscaping services,2023-10-30,yes
+Alexandra Clark,ZeroWaste Foods,alexandra@example.com,Zero-waste grocery store,2023-11-11,yes
+Kevin White,PlanetPlates,kevin@example.com,Eco-friendly dinnerware manufacturer,2023-12-05,yes
+Michelle Young,SustainStyle,michelle@example.com,Sustainable clothing brand,2024-01-18,yes
+Andrew Turner,GreenRides, andrew@example.com,Sustainable transportation services,2024-02-09,yes
+Amanda Evans,Earthly Delights,amanda@example.com,Organic food market,2024-03-14,yes
+Mark Thompson,GreenHomes,mark@example.com,Eco-friendly home construction,2024-04-20,yes
+Jennifer Hall,SustainableSips,jennifer@example.com,Eco-friendly coffee shop,2024-05-25,yes
+Brian Rodriguez,ReNewTech,brian@example.com,Recycled electronics retailer,2024-06-30,yes
+Samantha Scott,GreenPrints,samantha@example.com,Eco-conscious printing services,2024-07-08,yes
+Patrick Nguyen,EarthEssentials,patrick@example.com,Sustainable personal care products,2024-08-22,yes
