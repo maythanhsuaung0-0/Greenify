@@ -846,40 +846,42 @@ def create_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global user_id, user
     error = None
     login_form = LoginForm(request.form)
     if request.method == 'POST' and login_form.validate():
-        users_dict = {}
         user = User_login.UserLogin(login_form.email.data, login_form.password.data)
+        email = login_form.email.data
+        password = login_form.password.data
         db = shelve.open('user.db', 'r')
-        passwords = []
-        for user_id, user_instance in db['Users'].items():
-            passwords.append(user_instance.get_password())
         try:
             if 'Users' in db:
                 users_dict = db["Users"]
-                if login_form.email.data in users_dict and login_form.password.data in passwords:
-                    key = get_key(login_form.password.data, db['Users'])
-                    if key == user.get_email():
+                user_id = get_key(email, users_dict)
+                if user_id is not None:
+                    stored_password = users_dict[user_id].get_password()
+                    if password == stored_password:
                         user_id_hash = uuid.uuid4().hex
                         session['user_id_hash'] = user_id_hash
                         session['user_id'] = user.get_email()
                         session['user_logged_in'] = True
-                        print(session['user_id'])
-                        print(f"User login status = {session.get('user_logged_in')}")
-                        return redirect(session['last_url'])
-                error = 'Email or Password is incorrect, please try again.'
+                        session['user_email'] = email
+                        return redirect(session.get('last_url', '/'))
+                    else:
+                        error = 'Email or Password is incorrect, please try again.'
+                else:
+                    error = 'Email or Password is incorrect, please try again.'
             else:
-                return render_template('customer/createUser.html')
-        except:
-            print("Error in opening user.db")
-    return render_template('customer/login.html', form=login_form, user_logged_in=user_logged_in, error=error)
+                error = 'Email or Password is incorrect, please try again.'
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            db.close()
+    return render_template('customer/login.html', form=login_form, error=error)
 
 
-def get_key(val, users_dict):
+def get_key(email, users_dict):
     for key, value in users_dict.items():
-        if val == value.get_password():
+        if value.get_email() == email:
             return key
 
 
@@ -991,6 +993,9 @@ def update_user(user_id_hash):
             user_obj.set_address(address)
             error = "Update Successful."
 
+            session['user_id'] = email
+            print(session['user_id'])
+
         db['Users'] = users_dict
         db.close()
 
@@ -999,6 +1004,7 @@ def update_user(user_id_hash):
         db = shelve.open('user.db', 'r')
         users_dict = db['Users']
 
+        user = session['user_id']
         user_obj = users_dict[user]
 
         if user:
