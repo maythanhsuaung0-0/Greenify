@@ -1026,6 +1026,7 @@ def delete_user(user_id_hash):
     users_dict = db['Users']
 
     users_dict.pop(user)
+    user_logout(user_id_hash)
 
     db['Users'] = users_dict
     db.close()
@@ -1205,9 +1206,12 @@ def retrieve_product(seller_id_hash):
     for product_id, product in seller_products.items():
         product_list.append(product)
 
-    return render_template('seller/retrieveProducts.html', seller=seller_id_hash, seller_id=seller_id,
-                           count=len(product_list),
-                           product_list=product_list)
+    if session.get('seller_logged_in'):
+        return render_template('seller/retrieveProducts.html', seller=seller_id_hash, seller_id=seller_id,
+                               count=len(product_list),
+                               product_list=product_list)
+    else:
+        return redirect(url_for('seller_login'))
 
 
 @app.route('/seller/<seller_id>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
@@ -1266,10 +1270,13 @@ def update_product(seller_id, product_id):
             update_product_form.product_price.data = sellerProduct.get_product_price()
             update_product_form.product_stock.data = sellerProduct.get_product_stock()
             update_product_form.description.data = sellerProduct.get_description()
+            if session.get('seller_logged_in'):
+                return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash,
+                                       seller_id=seller_id,
+                                       product_id=product_id)
+            else:
+                return redirect(url_for('seller_login'))
 
-            return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash,
-                                   seller_id=seller_id,
-                                   product_id=product_id)
     return "Product not found"
 
 
@@ -1299,8 +1306,10 @@ def delete_product(seller_id, product_id):
             if os.path.exists(deleted_image_path):
                 os.remove(deleted_image_path)
                 print(f"Deleted image file at: {deleted_image_path}")
-
-        return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
+        if session.get('seller_logged_in'):
+            return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
+        else:
+            return redirect(url_for('seller_login'))
     except Exception as e:
         print("Error:", str(e))
         return "Error in deleting product from seller-product db"
@@ -1331,8 +1340,11 @@ def orders(seller_id_hash):
             else:
                 to_send_orders.append(order[order_id])
         total_orders.append(order)
-    return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
-                           to_send=to_send_orders,products = seller_products,orders = total_orders)
+    if session.get('seller_logged_in'):
+        return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
+                               to_send=to_send_orders, products=seller_products, orders=total_orders)
+    else:
+        return redirect(url_for('seller_login'))
 
 
 @app.route('/seller/<seller_id_hash>/dashboard')
@@ -1354,7 +1366,11 @@ def seller_dashboard(seller_id_hash):
                 sold_out += i['quantity']
                 earning += i['product_price']
     print(customers,sold_out,earning)
-    return render_template('seller/dashboard.html', seller=seller_id_hash, customers = customers, sold_out = sold_out, earning = earning)
+    if session.get('seller_logged_in'):
+        return render_template('seller/dashboard.html', seller=seller_id_hash, customers=customers, sold_out=sold_out,
+                               earning=earning)
+    else:
+        return redirect(url_for('seller_login'))
 
 
 @app.route('/respond')
@@ -1630,12 +1646,12 @@ def delete_seller(seller_id_hash):
     approved_sellers = approved_db['Approved_sellers']
 
     approved_sellers.pop(seller_id)
+    seller_logout(seller_id_hash)
 
     approved_db['Approved_sellers'] = approved_sellers
     approved_db.close()
 
     return "Your account has successfully been deleted."
-
 
 # game1
 @app.route('/submit_score', methods=['POST'])
