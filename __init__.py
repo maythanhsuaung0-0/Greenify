@@ -7,7 +7,6 @@ from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
 import os
-import re
 import secrets
 import shutil
 import User_login
@@ -22,7 +21,6 @@ import uuid
 from crud_functions import *
 from seller_order import SellerOrder
 from searchForm import Search
-from email_validator import validate_email, EmailNotValidError
 from updateUser import update
 from chat import get_response
 
@@ -849,40 +847,42 @@ def create_user():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    global user_id, user
     error = None
     login_form = LoginForm(request.form)
     if request.method == 'POST' and login_form.validate():
-        users_dict = {}
         user = User_login.UserLogin(login_form.email.data, login_form.password.data)
+        email = login_form.email.data
+        password = login_form.password.data
         db = shelve.open('user.db', 'r')
-        passwords = []
-        for user_id, user_instance in db['Users'].items():
-            passwords.append(user_instance.get_password())
         try:
             if 'Users' in db:
                 users_dict = db["Users"]
-                if login_form.email.data in users_dict and login_form.password.data in passwords:
-                    key = get_key(login_form.password.data, db['Users'])
-                    if key == user.get_email():
+                user_id = get_key(email, users_dict)
+                if user_id is not None:
+                    stored_password = users_dict[user_id].get_password()
+                    if password == stored_password:
                         user_id_hash = uuid.uuid4().hex
                         session['user_id_hash'] = user_id_hash
                         session['user_id'] = user.get_email()
                         session['user_logged_in'] = True
-                        print(session['user_id'])
-                        print(f"User login status = {session.get('user_logged_in')}")
-                        return redirect(session['last_url'])
-                error = 'Email or Password is incorrect, please try again.'
+                        session['user_email'] = email
+                        return redirect(session.get('last_url', '/'))
+                    else:
+                        error = 'Email or Password is incorrect, please try again.'
+                else:
+                    error = 'Email or Password is incorrect, please try again.'
             else:
-                return render_template('customer/createUser.html')
-        except:
-            print("Error in opening user.db")
-    return render_template('customer/login.html', form=login_form, user_logged_in=user_logged_in, error=error)
+                error = 'Email or Password is incorrect, please try again.'
+        except Exception as e:
+            print(f"Error: {e}")
+        finally:
+            db.close()
+    return render_template('customer/login.html', form=login_form, error=error)
 
 
-def get_key(val, users_dict):
+def get_key(email, users_dict):
     for key, value in users_dict.items():
-        if val == value.get_password():
+        if value.get_email() == email:
             return key
 
 
@@ -994,6 +994,9 @@ def update_user(user_id_hash):
             user_obj.set_address(address)
             error = "Update Successful."
 
+            session['user_id'] = email
+            print(session['user_id'])
+
         db['Users'] = users_dict
         db.close()
 
@@ -1002,6 +1005,7 @@ def update_user(user_id_hash):
         db = shelve.open('user.db', 'r')
         users_dict = db['Users']
 
+        user = session['user_id']
         user_obj = users_dict[user]
 
         if user:
@@ -1029,6 +1033,7 @@ def delete_user(user_id_hash):
     users_dict = db['Users']
 
     users_dict.pop(user)
+    user_logout(user_id_hash)
 
     db['Users'] = users_dict
     db.close()
@@ -1208,9 +1213,12 @@ def retrieve_product(seller_id_hash):
     for product_id, product in seller_products.items():
         product_list.append(product)
 
-    return render_template('seller/retrieveProducts.html', seller=seller_id_hash, seller_id=seller_id,
-                           count=len(product_list),
-                           product_list=product_list)
+    if session.get('seller_logged_in'):
+        return render_template('seller/retrieveProducts.html', seller=seller_id_hash, seller_id=seller_id,
+                               count=len(product_list),
+                               product_list=product_list)
+    else:
+        return redirect(url_for('seller_login'))
 
 
 @app.route('/seller/<seller_id>/updateProduct/<int:product_id>/', methods=['GET', 'POST'])
@@ -1269,10 +1277,13 @@ def update_product(seller_id, product_id):
             update_product_form.product_price.data = sellerProduct.get_product_price()
             update_product_form.product_stock.data = sellerProduct.get_product_stock()
             update_product_form.description.data = sellerProduct.get_description()
+            if session.get('seller_logged_in'):
+                return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash,
+                                       seller_id=seller_id,
+                                       product_id=product_id)
+            else:
+                return redirect(url_for('seller_login'))
 
-            return render_template('/seller/updateProduct.html', form=update_product_form, seller=seller_id_hash,
-                                   seller_id=seller_id,
-                                   product_id=product_id)
     return "Product not found"
 
 
@@ -1302,8 +1313,10 @@ def delete_product(seller_id, product_id):
             if os.path.exists(deleted_image_path):
                 os.remove(deleted_image_path)
                 print(f"Deleted image file at: {deleted_image_path}")
-
-        return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
+        if session.get('seller_logged_in'):
+            return redirect(url_for('retrieve_product', seller_id_hash=seller_id_hash))
+        else:
+            return redirect(url_for('seller_login'))
     except Exception as e:
         print("Error:", str(e))
         return "Error in deleting product from seller-product db"
@@ -1312,42 +1325,45 @@ def delete_product(seller_id, product_id):
 @app.route('/seller/<seller_id_hash>/orders',methods = ['POST','GET'])
 def orders(seller_id_hash):
     print(seller_id_hash)
-    seller_id = str(session['seller_id'])
+
 
     if seller_id_hash != session['seller_id_hash']:
         print('route error')
         return render_template('error_msg.html')
-
-    seller_id_hash = session['seller_id_hash']
-    orders_db = shelve.open('seller_order.db', 'r')
-    seller_orders = orders_db[seller_id]
-    sent_out_orders = []
-    to_send_orders = []
-    seller_products = retrieve_db('seller-product.db', seller_id)
-    total_orders = []
-    for order in seller_orders:
-        for order_id in order:
-            if order[order_id].get_sent_out():
-                sent_out_orders.append(order[order_id])
-            else:
-                to_send_orders.append(order[order_id])
-        total_orders.append(order)
-    orders_db.close()
-    if request.method == 'POST':
-        data = json.loads(request.data)
-        updated_orders = {}
-        _orders_ = shelve.open('seller_order.db', 'w')
-        updated_orders = _orders_[seller_id]
-        if data["request_type"] == 'order_sent':
-            print('received',data["id"])
-            for order in updated_orders:
-                if data["id"] in order:
-                    print('order status to change',order[data["id"]].get_sent_out())
-                    order[data["id"]].set_sent_out(True)
-            _orders_[seller_id] = updated_orders
-            _orders_.close()
-    return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
-                           to_send=to_send_orders, products=seller_products, orders=total_orders)
+    if session.get('seller_logged_in'):
+        seller_id = str(session['seller_id'])
+        seller_id_hash = session['seller_id_hash']
+        orders_db = shelve.open('seller_order.db', 'r')
+        seller_orders = orders_db[seller_id]
+        sent_out_orders = []
+        to_send_orders = []
+        seller_products = retrieve_db('seller-product.db', seller_id)
+        total_orders = []
+        for order in seller_orders:
+            for order_id in order:
+                if order[order_id].get_sent_out():
+                    sent_out_orders.append(order[order_id])
+                else:
+                    to_send_orders.append(order[order_id])
+            total_orders.append(order)
+        orders_db.close()
+        if request.method == 'POST':
+            data = json.loads(request.data)
+            updated_orders = {}
+            _orders_ = shelve.open('seller_order.db', 'w')
+            updated_orders = _orders_[seller_id]
+            if data["request_type"] == 'order_sent':
+                print('received',data["id"])
+                for order in updated_orders:
+                    if data["id"] in order:
+                        print('order status to change',order[data["id"]].get_sent_out())
+                        order[data["id"]].set_sent_out(True)
+                _orders_[seller_id] = updated_orders
+                _orders_.close()
+        return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
+                            to_send=to_send_orders, products=seller_products, orders=total_orders)  
+    else:
+        return redirect(url_for('seller_login'))
 
 
 @app.route('/seller/<seller_id_hash>/dashboard')
@@ -1634,7 +1650,6 @@ def dashboard():
 @app.route('/seller/<seller_id_hash>/updateSeller', methods=['GET', 'POST'])
 def update_seller(seller_id_hash):
     error = None
-    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     if seller_id_hash != session['seller_id_hash']:
         print('route error')
         return render_template('error_msg.html')
@@ -1699,12 +1714,12 @@ def delete_seller(seller_id_hash):
     approved_sellers = approved_db['Approved_sellers']
 
     approved_sellers.pop(seller_id)
+    seller_logout(seller_id_hash)
 
     approved_db['Approved_sellers'] = approved_sellers
     approved_db.close()
 
     return "Your account has successfully been deleted."
-
 
 # game1
 @app.route('/submit_score', methods=['POST'])

@@ -15,6 +15,3 @@ class UserLogin:
 
     def set_password(self, password):
         self.__password = password
-
-    def check_password(self, entered_password):
-        return self.__password == entered_password
