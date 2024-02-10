@@ -6,6 +6,7 @@ from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
+import random
 import os
 import secrets
 import shutil
@@ -1722,6 +1723,16 @@ def delete_seller(seller_id_hash):
     return "Your account has successfully been deleted."
 
 # game1
+@app.route('/game1')
+def game1():
+    if not (session.get('user_logged_in') or session.get('seller_logged_in') or session.get('staff_logged_in')):
+        # If no user is logged in, redirect to login page
+        return redirect(url_for('login'))
+    # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
+    user_id = session.get('user_id', 'Unknown Player')
+    return render_template('/games/game1.html', user_id=user_id)
+
+
 @app.route('/submit_score', methods=['POST'])
 def submit_score():
     data = request.get_json()
@@ -1787,19 +1798,21 @@ def delete_score_page():
     return render_template('/staff/game1_delete_player.html')
 
 
-@app.route('/')
-def dummy_index():
-    message = 'To test the game1 route, append /game1 at the end of the URL string'
-    return message
-
-
-@app.route('/games/game1')
-def game1():
-    user_id = session.get('user_id', 'Unknown Player')
-    if session.get('logged_in'):
-        return render_template('/games/game1.html', user_id=user_id)
-    else:
+@app.route('/game2')
+def game2():
+    if not (session.get('user_logged_in') or session.get('seller_logged_in') or session.get('staff_logged_in')):
+        # If no user is logged in, redirect to login page
         return redirect(url_for('login'))
+    # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
+    user_id = session.get('user_id', 'Unknown Player')
+    return render_template('/games/game2.html', user_id=user_id)
+
+@app.route('/game2/start')
+def start_game():
+    words = ["reuse", "reduce", "recycle", "sustainability", "environment", "conservation", "green"]
+    selected_word = random.choice(words)
+    session['game_word'] = selected_word  # Store the selected word in session
+    return jsonify({'success': True})
 
 
 # @app.route('/about_us')

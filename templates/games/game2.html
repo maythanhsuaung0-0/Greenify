@@ -1,0 +1,35 @@
+{% extends "customer/Customer_Base.html" %}
+
+{% block title %}Game 2{% endblock %}
+
+{% block Head_JS_CSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game2.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<br>
+<br>
+<br>
+
+<div class="game2-container">
+    <div class="wrapper">
+        <h1>Guess the Word</h1>
+        <div class="content">
+            <input type="text" class="typing-input" maxlength="1">
+            <div class="inputs"></div>
+            <div class="details">
+                <p class="hint">Hint: <span></span></p>
+                <p class="guess-left">Remaining guesses: <span></span></p>
+                <p class="wrong-letter">Wrong letters: <span></span></p>
+            </div>
+            <button class="reset-btn">Reset Game</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block End_JS_CSS %}
+<script src="{{ url_for('static', filename='js/words.js') }}"></script>
+<script src="{{ url_for('static', filename='js/game2.js') }}"></script>
+{% endblock %}

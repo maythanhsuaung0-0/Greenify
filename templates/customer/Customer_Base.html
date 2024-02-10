@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -10,22 +11,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/icon_dropdown_list.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     <link rel="icon" type="image/x-icon" href="../images/favicon.ico">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/Customer base.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
-    <script>$SCRIPT_ROOT = {{ request.script_root|tojson }}</script>
+    <script>$SCRIPT_ROOT = {{ request.script_root | tojson }}</script>
     <script type="text/javascript" src="{{ url_for('static', filename='JS/chatbot.js') }}"></script>
 
     {% block Head_JS_CSS %}{% endblock %}
     <title>{% block title %}{% endblock%}</title>
 </head>
+
 <body>
     <nav class="custom-nav navbar navbar-expand-lg bg-body-tertiary border-bottom border-bottom-dark sticky-top">
         <div class="container-fluid px-5">
             <a class="navbar-brand col-1" href="{{ url_for('home') }}">
-            <img src="{{ url_for('static', filename='images/favicon.svg') }}"
-                alt="Greenify Trademark" class="trademark">
+                <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="Greenify Trademark"
+                    class="trademark">
 
             </a>
 
@@ -36,12 +39,14 @@
             </button>
 
             <!-- Offcanvas -->
-            <div class="collapse navbar-collapse offcanvas container-fluid offcanvas-start sidebar" id="offcanvasNavbar" tabindex="-1">
+            <div class="collapse navbar-collapse offcanvas container-fluid offcanvas-start sidebar" id="offcanvasNavbar"
+                tabindex="-1">
 
                 <!-- Offcanvas Head -->
                 <div class="offcanvas-header border-end w-100">
                     <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
-                    <button type="button" class="btn-close d-none d-md-block d-lg-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    <button type="button" class="btn-close d-none d-md-block d-lg-none" data-bs-dismiss="offcanvas"
+                        aria-label="Close"></button>
                 </div>
 
                 <!-- Offcanvas Body -->
@@ -57,12 +62,15 @@
 
             <!-- Search Engine -->
             <div>
+                {% if form is defined %}
                 <form method="POST" action="" class="d-flex" role="search">
                     {% from "includes/_formHelper.html" import render_field %}
                     {{ render_field(form.search_query, class="form-control", placeholder='Search') }}
                     <button class="btn btn-sm custom-btn mx-3" type="submit">Search</button>
                 </form>
+                {% endif %}
             </div>
+
 
             <!--Shopping Cart-->
             {% if user == None %}
@@ -71,7 +79,8 @@
                 <span id="cart-item-qty" class="badge rounded-pill text-black">0</span>
             </a>
             {% else %}
-            <a href="{{ url_for('shopping_cart', user_id_hash=user) }}" class="btn cart-container col-1 position-relative">
+            <a href="{{ url_for('shopping_cart', user_id_hash=user) }}"
+                class="btn cart-container col-1 position-relative">
                 <i class="bi bi-bag"></i>
                 <span id="cart-item-qty" class="badge rounded-pill text-black">{{ saved_cart_qty }}</span>
             </a>
@@ -83,7 +92,7 @@
                 <a href="{{ url_for('login') }}" class="btn d-flex justify-content-center account w-20">
                     <i class="bi bi-person-circle" id="dropdownIcon" onclick="toggleDropdown()"></i>
                 </a>
-                 <!-- Dropdown content -->
+                <!-- Dropdown content -->
                 <div class="dropdown-content" id="myDropdown">
                     <a href="/createUser">Sign Up as User</a>
                     <a href="/stafflogin">Login as Staff</a>
@@ -92,13 +101,16 @@
             </div>
             {% else %}
             <div class="dropdown col-1">
-                <a href="{{ url_for('profile', user_id_hash=user) }}" class="btn d-flex justify-content-center account w-20">
+                <a href="{{ url_for('profile', user_id_hash=user) }}"
+                    class="btn d-flex justify-content-center account w-20">
                     <i class="bi bi-person-circle" id="dropdownIcon" onclick="toggleDropdown()"></i>
                 </a>
-                 <!-- Dropdown content -->
+                <!-- Dropdown content -->
                 <div class="dropdown-content" id="myDropdown">
-                    <a href="{{ url_for('profile', user_id_hash=user) }}"><i class="bi bi-person-circle mx-2"></i> Profile</a>   
-                    <a href="{{ url_for('user_logout', user_id_hash=user) }}" style="color: red;"><i class="bi bi-box-arrow-right mx-2 fs-5"></i>   Logout</a>                 
+                    <a href="{{ url_for('profile', user_id_hash=user) }}"><i class="bi bi-person-circle mx-2"></i>
+                        Profile</a>
+                    <a href="{{ url_for('user_logout', user_id_hash=user) }}" style="color: red;"><i
+                            class="bi bi-box-arrow-right mx-2 fs-5"></i> Logout</a>
                 </div>
             </div>
             {% endif %}
@@ -111,7 +123,8 @@
             <div class="chatbox__support">
                 <div class="chatbox__header">
                     <div class="chatbox__image--header">
-                        <img src="https://img.icons8.com/color/48/000000/circled-user-female-skin-type-5--v1.png" alt="image">
+                        <img src="https://img.icons8.com/color/48/000000/circled-user-female-skin-type-5--v1.png"
+                            alt="image">
                     </div>
                     <div class="chatbox__content--header">
                         <h4 class="chatbox__heading--header">Chat support</h4>
@@ -138,8 +151,9 @@
     </div>
 
     {% block End_JS_CSS %}
-      <script type="text/javascript" src="{{ url_for('static', filename='js/product_base.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/product_base.js') }}"></script>
     {% endblock %}
 
 </body>
+
 </html>
