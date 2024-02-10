@@ -6,6 +6,7 @@ from sellerproductForm import CreateProductForm
 from applicationForm import ApplicationForm
 from application import ApplicationFormFormat as AppFormFormat
 # for accessing and storing image
+import random
 import os
 import secrets
 import shutil
@@ -204,13 +205,27 @@ def home():
     if request.method == 'POST' and search_form.validate():
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
+    # Fetch product data
+    all_result = []  # Assume this will fetch all products, adjust according to your application logic
+    seller_product_db = shelve.open('seller-product.db')
+
+    for seller_id in seller_product_db:
+        seller_products = seller_product_db[str(seller_id)]['products']
+
+        # Accessing Individual Product
+        for product_id in seller_products:
+            all_result.append([seller_name_search(seller_id), seller_products[product_id]])
+
+    seller_product_db.close()
+
+    # Your existing logic to render the template, now including 'all_result' in the context
     try:
         user = session['user_id']
         user_id_hash = session['user_id_hash']
-        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user),
-                               form=search_form)
+        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, all_result=all_result)
     except:
-        return render_template("customer/homepage.html", user=None, form=search_form)
+        return render_template("customer/homepage.html", user=None, form=search_form, all_result=all_result)
+
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
@@ -1830,6 +1845,16 @@ def delete_seller(seller_id_hash):
     return "Your account has successfully been deleted."
 
 # game1
+@app.route('/game1')
+def game1():
+    if not (session.get('user_logged_in') or session.get('seller_logged_in') or session.get('staff_logged_in')):
+        # If no user is logged in, redirect to login page
+        return redirect(url_for('login'))
+    # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
+    user_id = session.get('user_id', 'Unknown Player')
+    return render_template('/games/game1.html', user_id=user_id)
+
+
 @app.route('/submit_score', methods=['POST'])
 def submit_score():
     data = request.get_json()
@@ -1895,19 +1920,21 @@ def delete_score_page():
     return render_template('/staff/game1_delete_player.html')
 
 
-@app.route('/')
-def dummy_index():
-    message = 'To test the game1 route, append /game1 at the end of the URL string'
-    return message
-
-
-@app.route('/games/game1')
-def game1():
-    user_id = session.get('user_id', 'Unknown Player')
-    if session.get('logged_in'):
-        return render_template('/games/game1.html', user_id=user_id)
-    else:
+@app.route('/game2')
+def game2():
+    if not (session.get('user_logged_in') or session.get('seller_logged_in') or session.get('staff_logged_in')):
+        # If no user is logged in, redirect to login page
         return redirect(url_for('login'))
+    # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
+    user_id = session.get('user_id', 'Unknown Player')
+    return render_template('/games/game2.html', user_id=user_id)
+
+@app.route('/game2/start')
+def start_game():
+    words = ["reuse", "reduce", "recycle", "sustainability", "environment", "conservation", "green"]
+    selected_word = random.choice(words)
+    session['game_word'] = selected_word  # Store the selected word in session
+    return jsonify({'success': True})
 
 
 # @app.route('/about_us')
