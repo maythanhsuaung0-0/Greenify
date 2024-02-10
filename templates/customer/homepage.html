@@ -1,5 +1,9 @@
 {% extends "customer/Customer_Base.html" %}
 
+{% block Head_JS_CSS %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/product_all.css') }}">
+{% endblock %}
+
 {% block title %}Homepage{% endblock %}
 
 {% block body %}
@@ -70,13 +74,17 @@
         <div class="col indv-prod ms-3">
             <a href="{{ url_for('product', seller=seller, product_id=product.get_product_id()) }}">
                 <div class="image">
-                    <img src="{{ url_for('static', filename='uploads/product_image/' + product.get_image()) }}" alt="">
+                    <!-- Corrected way to access the product image -->
+                    <img src="{{ url_for('static', filename='uploads/product_image/' + product.get_image()) }}" alt=""
+                        style="max-height: 200px; width: auto; object-fit: contain;">
                 </div>
+                <!-- Corrected way to access the product name and price -->
                 <p class="product-name my-2">{{ product.get_product_name() }}</p>
                 <p class="product-price">$ {{ "%.2f"|format(product.get_product_price()) }}</p>
             </a>
         </div>
         {% endfor %}
+
     </div>
 </div>
 
