@@ -29,11 +29,17 @@ new Chart("myChart", {
       text: "Revenues within last week"
     },
     scales: {
+    y: {
+        min: 0,
+      },
      yAxes: [{
           scaleLabel: {
             display: true,
             labelString: 'Revenue in SGD ($)'
-          }
+          },
+          ticks: {
+            beginAtZero: true,
+              }
     }],
     xAxes: [{
           scaleLabel: {
