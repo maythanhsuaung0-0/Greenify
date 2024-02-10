@@ -1,208 +1,86 @@
 {% extends "customer/Customer_Base.html" %}
 
-{% block Head_JS_CSS %}
-
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/homepage.css') }}">
-<script src="{{url_for('static', filename='JS/homepage1.js')}}"></script>
-{% endblock %}
-
-{% block title%}Homepage{% endblock %}
+{% block title %}Homepage{% endblock %}
 
 {% block body %}
-    <!-- hero section -->
-    <header class="hero-section">
-        <div class="content">
-            <p class="sub-heading">Most Sustainable E-commerce Website Of All Time</p>
-            <img src="{{ url_for('static', filename='images/#') }}" alt="jsfdj i need a nicer pic" height = 525px width = 2000px>
+
+<!-- video background -->
+<style>
+    .video-background {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .video-cta {
+        position: absolute;
+        top: 90%;
+        /* Adjust this value as needed to move the button up or down */
+        right: 10%;
+        /* Place the button towards the right of the container */
+        transform: translateY(-50%);
+        /* Center the button vertically */
+        z-index: 2;
+        /* Ensure it's above the video */
+    }
+
+    .video-button {
+        background-color: #4CAF50;
+        /* Green background */
+        border: none;
+        /* Remove border if any */
+        color: white;
+        /* Button text color */
+        padding: 10px 20px;
+        /* Adjust button padding */
+        font-size: 20px;
+        /* Adjust font size */
+        text-decoration: none;
+        /* Remove underline from anchor link */
+        cursor: pointer;
+        /* Change cursor to pointer on hover */
+        border-radius: 5px;
+        /* Optional: add border-radius for rounded corners */
+    }
+
+    video {
+        width: 100%;
+        max-height: 90vh;
+        object-fit: cover;
+    }
+</style>
+
+<!-- video background -->
+<div class="video-background">
+    <div class="video-wrap">
+        <video src="{{ url_for('static', filename='images/homepagevid.mp4') }}" autoplay loop muted playsinline></video>
+    </div>
+    <!-- Go to Products Button -->
+    <div class="video-cta">
+        <a href="{{ url_for('product_all') }}" class="btn btn-primary video-button">Go to Products</a>
+    </div>
+</div>
+
+
+<!-- Products display section -->
+<div class="container my-5">
+    <h1>All Products</h1>
+    <div class="row row-cols-lg-4 row-cols-2 my-5">
+        {% for seller, product in all_result %}
+        <div class="col indv-prod ms-3">
+            <a href="{{ url_for('product', seller=seller, product_id=product.get_product_id()) }}">
+                <div class="image">
+                    <img src="{{ url_for('static', filename='uploads/product_image/' + product.get_image()) }}" alt="">
+                </div>
+                <p class="product-name my-2">{{ product.get_product_name() }}</p>
+                <p class="product-price">$ {{ "%.2f"|format(product.get_product_price()) }}</p>
+            </a>
         </div>
-    </header>
-
-    <!-- The discount section -->
-    <section class="product">
-        <h2 class="product-category">Promotions</h2>
-        <button class="pre-btn"><img src="{{ url_for('static', filename='images/arrow.png') }}" alt="Prev"></button>
-        <div class="product-container">
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="#" class="product-thumb" alt="">
-                    <button class="card-btn">Redeem</button>
-                </div>
-                <div class="product-info">
-                    <p class="product-short-des">a short line about the discount</p>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="#" class="product-thumb" alt="">
-                    <button class="card-btn">Redeem</button>
-                </div>
-                <div class="product-info">
-                    <p class="product-short-des">a short line about the discount</p>
-                </div>
-            </div>
-        </div>
-        <button class="nxt-btn"><img src="{{ url_for('static', filename='images/arrow.png') }}" alt="Next"></button>
-    </section>
+        {% endfor %}
+    </div>
+</div>
 
 
 
-    <!-- // inside product section. -->
-
-    <section class="product">
-        <h2 class="product-category">best selling</h2>
-        <button class="pre-btn"><img src="{{ url_for('static', filename='images/arrow.png') }}" alt="Previous"></button>
-        <div class="product-container">
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>
-        
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>     
-        </div>
-        <button class="nxt-btn"><img src="{{ url_for('static', filename='images/arrow.png') }}" alt="Next"></button>
-    </section>
-
-     <!-- The discount section -->
-     <section class="product">
-        <h2 class="product-category">Clothes</h2>
-        <button class="pre-btn"><img src="{{ url_for('static', filename='images/arrow.png') }}" alt="Prev"></button>
-        <div class="product-container">
-            <div class="product-card">
-                <div class="product-image">
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image">
-                    <span class="discount-tag">50% off</span>
-                    <img src="img/card1.png" class="product-thumb" alt="">
-                    <button class="card-btn">add to whislist</button>
-                </div>
-                <div class="product-info">
-                    <h2 class="product-brand">brand</h2>
-                    <span class="price">$20</span><span class="actual-price">$40</span>
-                </div>
-            </div>
-        </div>
-        <button class="nxt-btn"><img src="{{ url_for('static', filename='images/arrow.png') }}" alt="Next"></button>
-    </section>
-    
-
-
-
-
-    <footer>
-        <div class="footer-container">
-            <p class="footer-title">about company</p>
-            <p class="info">support emails - enquiries@Greenify.com, customersupport@Greenify.com</p>
-            <p class="info">telephone - 63 1234 4488, 4321 8844</p>
-            <div class="footer-social-container">
-                <div>
-                    <a href="#" class="social-link">terms & services</a>
-                </div>
-                <div>
-                    <a href="#" class="social-link">instagram</a>
-                    <a href="#" class="social-link">facebook</a>
-                    <a href="#" class="social-link">twitter</a>
-                </div>
-            </div>
-        </div>
-    </footer>
 
 {% endblock %}

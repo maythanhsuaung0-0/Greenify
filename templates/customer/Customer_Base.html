@@ -55,7 +55,17 @@
 
                         <li class="nav-item"><a href="{{ url_for('home') }}">Home</a></li>
                         <li class="nav-item"><a href="{{ url_for('product_all') }}">Product</a></li>
-                        <li class="nav-item"><a href="/games/game1">Games</a></li>
+                        <!-- Games Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownGames" role="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                                Games
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownGames">
+                                <li><a class="dropdown-item" href="{{ url_for('game1') }}">Game #1</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('game2') }}">Game #2</a></li>
+                            </ul>
+                        </li>
                     </ul>
                 </div>
             </div>

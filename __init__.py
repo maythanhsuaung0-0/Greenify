@@ -205,13 +205,27 @@ def home():
     if request.method == 'POST' and search_form.validate():
         search_engine(search_form.search_query.data)
         return redirect(url_for('product_search'))
+    # Fetch product data
+    all_result = []  # Assume this will fetch all products, adjust according to your application logic
+    seller_product_db = shelve.open('seller-product.db')
+
+    for seller_id in seller_product_db:
+        seller_products = seller_product_db[str(seller_id)]['products']
+
+        # Accessing Individual Product
+        for product_id in seller_products:
+            all_result.append([seller_name_search(seller_id), seller_products[product_id]])
+
+    seller_product_db.close()
+
+    # Your existing logic to render the template, now including 'all_result' in the context
     try:
         user = session['user_id']
         user_id_hash = session['user_id_hash']
-        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user),
-                               form=search_form)
+        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, all_result=all_result)
     except:
-        return render_template("customer/homepage.html", user=None, form=search_form)
+        return render_template("customer/homepage.html", user=None, form=search_form, all_result=all_result)
+
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
