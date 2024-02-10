@@ -26,7 +26,7 @@
   {% block JS_CSS %}{% endblock %}
 </head>
 {% macro orderComponent(status,obj,products,orders) %}
-<div class="card" id="card-{{obj.get_email()}}">
+<div class="card" id="card-{{obj.get_order_id()}}">
       <div
       class="row card-body ">
       <div class="col-2 text-center fw-normal">{{obj.get_name()}}</div>
@@ -48,12 +48,12 @@
           </div>
           <div class="col-1 text-center fw-normal">
           <!-- Button trigger modal -->
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal-{{obj.get_email()}}" >
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal-{{obj.get_order_id()}}" >
               Send
             </button>
 
             <!-- Modal -->
-            <div class="modal fade" id="approveModal-{{obj.get_email()}}" tabindex="-1"
+            <div class="modal fade" id="approveModal-{{obj.get_order_id()}}" tabindex="-1"
                  role="dialog" aria-labelledby="approveModalLabel" aria-hidden="true">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -75,17 +75,17 @@
             </div>
       </div>
           {% else %}
-          <div class="col-3 text-center fw-normal">
+          <div class="col-3 text-center fw-normal date">
               {{obj.get_date()}}
           </div>
       {% endif %}
       <div class="col-1">
-        <a class="btn btn-sm btn-light" data-bs-toggle="collapse" href="#collapse{{obj.get_email()}}" role="button" aria-expanded="false" aria-controls="collapse{{obj.get_email()}}"> <i class="fa-solid fa-caret-down"></i> </a>
+        <a class="btn btn-sm btn-light" data-bs-toggle="collapse" href="#collapse{{obj.get_order_id()}}" role="button" aria-expanded="false" aria-controls="collapse{{obj.get_order_id()}}"> <i class="fa-solid fa-caret-down"></i> </a>
       </div>
       </div>
 
       <div class="row">
-          <div class="collapse multi-collapse" id="collapse{{obj.get_email()}}">
+          <div class="collapse multi-collapse" id="collapse{{obj.get_order_id()}}">
          <div class="container">
                 <div class="mx-5">
                     <hr>
@@ -127,16 +127,16 @@
                                  {{obj.set_total_products(i['quantity'])}}
                              </div>
                         </div>
-                         <div class="col-3 fw-normal" data="{{products[0][i['product_id']].get_product_price()*i['quantity']}}" >
+                         <div class="col-3 fw-normal" >
                             {{i['product_price']}}
-                        <div class="d-none">{{obj.set_total(products[0][i['product_id']].get_product_price()*i['quantity'])}}</div>
+                        <div class="d-none">{{obj.get_total()}}</div>
                         </div>
                     </div>
                     </div>
                         {% endfor %}
                     </div>
                      <div class="col-4">
-                               <h6 class="fw-bold">Total Costs: {{obj.get_total()}}</h6>
+                               <h6 class="fw-bold">Total Costs: <span class="total-container">{{obj.get_total()}}</span></h6>
                            <h6 class="fw-bold">Total Products Sold: {{obj.get_total_products()}}</h6>
                         </div>
                  </div>

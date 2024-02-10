@@ -8,7 +8,7 @@ class SellerOrder:
         self.__order_products = []
         self.__total_products = 0
         self.__sent_out = False
-        self.__total = 0
+        self.__total = 0.0
 
     def set_name(self, name):
         self.__name = name
@@ -33,7 +33,7 @@ class SellerOrder:
         self.__order_id = order_id
 
     def set_total(self, total):
-        self.__total += int(total)
+        self.__total += float(total)
 
     def set_total_products(self,product):
         print(product)

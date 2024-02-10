@@ -67,3 +67,33 @@ def send_mail(to_email, approve, seller_name, seller_password):
         smtp.starttls()
         smtp.login(smtp_username, smtp_password)
         smtp.sendmail(from_email, to_email, message.as_string())
+
+
+def send_notification(to_email,order_id):
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = 'your.greenify@gmail.com'
+    smtp_password = 'xvaqcjfbqcpzgjns'
+
+    from_email = smtp_username
+    subject = 'Order Delivery Notification'
+    message = MIMEMultipart()
+    body = f"""
+
+        Dear Customer, </br>
+
+        <p>Your order {order_id} has been transferred to Delivery successfully. Please ensure your phone service is available in order to get the parcel successfully. If you havne't received it after 24 hrs, you could kindly contact your local shipping company for further info.</p>
+        <p>Note:<br>
+        Please follow the local carrier notice if you have received it in advance.<br>
+        Please ignore this message if you have got the parcel already.</p>
+
+        Greenify Customer Service"""
+    message['From'] = from_email
+    message['To'] = to_email
+    message['Subject'] = subject
+    message.attach(MIMEText(body, 'html'))
+
+    with smtplib.SMTP(smtp_server, smtp_port) as smtp:
+        smtp.starttls()
+        smtp.login(smtp_username, smtp_password)
+        smtp.sendmail(from_email, to_email, message.as_string())

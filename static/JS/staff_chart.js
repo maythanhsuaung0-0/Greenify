@@ -1,6 +1,15 @@
-var xValues = ["Italy", "France", "Spain", "USA", "Argentina"];
-var yValues = [55, 49, 44, 24, 15];
-var barColors = ["red", "green","blue","orange","brown"];
+var chart = document.querySelector("#myChart")
+var data = JSON.parse(chart.dataset.dictionary)
+console.log(data)
+var dates_array = []
+var revenues_array = []
+for(var i =0; i <data.length; i++){
+dates_array.push(data[i]['date'])
+revenues_array.push(data[i]['revenue'])
+}
+var xValues = dates_array;
+var yValues = revenues_array;
+var barColors = ["orange"];
 
 new Chart("myChart", {
   type: "bar",
@@ -12,10 +21,28 @@ new Chart("myChart", {
     }]
   },
   options: {
-    legend: {display: false},
+    legend: {
+    display: false,
+    },
     title: {
       display: true,
-      text: "World Wine Production 2018"
+      text: "Revenues within last week"
+    },
+    scales: {
+     yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Revenue in SGD ($)'
+          }
+    }],
+    xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Last 7 days'
+          }
+    }]
+  },
     }
-  }
 });
+
+

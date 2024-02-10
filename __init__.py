@@ -11,12 +11,12 @@ import secrets
 import shutil
 import User_login
 from werkzeug.utils import secure_filename
-from datetime import date
+from datetime import date, timedelta
 from urllib.parse import quote
 # for sending mail
 import string
 import csv
-from send_email import send_mail
+from send_email import *
 import uuid
 from crud_functions import *
 from seller_order import SellerOrder
@@ -645,13 +645,14 @@ def payment(user_id_hash):
                     order = SellerOrder(name, email, address, date_purchased.strftime('%Y-%m-%d'), order_id)
 
                 # Calculating Total Price for both Product and Order
-                total_price = order.get_total()
+                total_price = 0.0
                 product_price = product_unit_price * bought_qty
-                total_price += product_price
+                total_price += float(product_price)
 
                 # Saving Data into order
                 order.set_order_products(product_id, bought_qty, product_price)
-
+                order.set_total(total_price)
+                print("my order total",order.get_total())
                 # Saving Everything to seller_order_dict
                 seller_id = item['seller_id']
                 seller_order_dict[seller_id] = order
@@ -1079,6 +1080,7 @@ def seller_login():
             seller_data['email'] = i.get_email()
             seller_data['pw'] = i.get_password()
             sellers.append(seller_data)
+            print("seller_id->",seller_data['id'])
         for j in sellers_list:
             seller_email.append(j.get_email())
         print(seller_email)
@@ -1325,19 +1327,24 @@ def delete_product(seller_id, product_id):
 @app.route('/seller/<seller_id_hash>/orders',methods = ['POST','GET'])
 def orders(seller_id_hash):
     print(seller_id_hash)
+    seller_id = str(session['seller_id'])
 
-
-    if seller_id_hash != session['seller_id_hash']:
-        print('route error')
-        return render_template('error_msg.html')
     if session.get('seller_logged_in'):
-        seller_id = str(session['seller_id'])
+        if seller_id_hash != session['seller_id_hash']:
+            print('route error')
+            return render_template('error_msg.html')
         seller_id_hash = session['seller_id_hash']
+        print('sellerid:::', seller_id)
         orders_db = shelve.open('seller_order.db', 'r')
-        seller_orders = orders_db[seller_id]
+        seller_orders = {}
+        try:
+            seller_orders = orders_db[seller_id]
+        except:
+            print("The seller has no order yet")
         sent_out_orders = []
         to_send_orders = []
         seller_products = retrieve_db('seller-product.db', seller_id)
+        print(seller_products)
         total_orders = []
         for order in seller_orders:
             for order_id in order:
@@ -1347,21 +1354,27 @@ def orders(seller_id_hash):
                     to_send_orders.append(order[order_id])
             total_orders.append(order)
         orders_db.close()
+        current_order = []
         if request.method == 'POST':
             data = json.loads(request.data)
             updated_orders = {}
             _orders_ = shelve.open('seller_order.db', 'w')
-            updated_orders = _orders_[seller_id]
+            try:
+                updated_orders = _orders_[seller_id]
+            except:
+                print("The seller has no order yet")
             if data["request_type"] == 'order_sent':
-                print('received',data["id"])
+                print('received', data["id"])
                 for order in updated_orders:
                     if data["id"] in order:
-                        print('order status to change',order[data["id"]].get_sent_out())
                         order[data["id"]].set_sent_out(True)
+                        current_order.append(order[data["id"]])
                 _orders_[seller_id] = updated_orders
                 _orders_.close()
+                if len(current_order) == 1:
+                    send_notification(current_order[0].get_email(),current_order[0].get_order_id())
         return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
-                            to_send=to_send_orders, products=seller_products, orders=total_orders)  
+                               to_send=to_send_orders, products=seller_products, orders=total_orders)
     else:
         return redirect(url_for('seller_login'))
 
@@ -1379,17 +1392,34 @@ def seller_dashboard(seller_id_hash):
     for i in sellers_list:
         if i.get_application_id() == seller_id:
             seller_name += i.get_name()
-    orders_db = shelve.open('seller_order.db', 'r')
-    seller_orders = orders_db[str(seller_id)]
+
+    try:
+        with shelve.open('seller_order.db'):
+            orders_db = shelve.open('seller_order.db', 'r')  # Just open and close to check if it exists
+    except Exception as e:
+        if isinstance(e, FileNotFoundError):
+            return False
+
+    print("sellerid--",str(seller_id))
+    seller_orders = {}
+    try:
+        seller_orders = orders_db[str(seller_id)]
+    except:
+        print("Error retrieving db")
     customers = 0
     sold_out = 0
     earning = 0.0
+    this_year = date.today().year
+    this_month = date.today().month
+    print(this_month)
     for order in seller_orders:
         for order_id in order:
-            customers += 1
-            for i in order[order_id].get_order_products():
-                sold_out += i['quantity']
-                earning += float(i['product_price'])
+            order_year = order[order_id].get_date().split('-')[0]
+            if order_year == str(this_year):
+                print(order[order_id].get_total())
+                earning += order[order_id].get_total()
+                for i in order[order_id].get_order_products():
+                    sold_out += i['quantity']
     commission = earning * 0.10
     earning -= commission
     earning = '$' + str(earning)
@@ -1553,7 +1583,7 @@ def retrieveApplicationForms():
                 for key, seller in approved_db['Approved_sellers'].items():
                     passwords.append(seller.get_password())
                 approved_db.close()
-
+                print("seller mail and pw:",approved.get_email(),approved.get_password())
                 send_mail(approved.get_email(), True, approved.get_seller_name(), password)
             if data_to_modify['request_type'] == 'filter':
                 print(" got filered")
@@ -1638,11 +1668,89 @@ def retrieveSellers():
 
 @app.route('/staff/dashboard')
 def dashboard():
-    sellers = retrieve_db('approved_sellers.db', 'Approved_sellers')
-    users = retrieve_db('user.db', 'Users')
-    applications = retrieve_db('application.db', 'Application')
+
     if session.get('staff_logged_in'):
-        return render_template('staff/dashboard.html', sellers_count=sellers, users_count=users, app_count=applications)
+        sellers = retrieve_db('approved_sellers.db', 'Approved_sellers')
+        users = retrieve_db('user.db', 'Users')
+        applications = retrieve_db('application.db', 'Application')
+        orders = {}
+        orders_db = shelve.open('seller_order.db', 'r')
+        seller_list = []
+        for i in orders_db:
+            seller_list.append(i)
+        for j in seller_list:
+            try:
+                orders[j] = orders_db[j]
+            except:
+                print("Key does not exists")
+
+        operation_weeks = []
+        today = date.today()
+        for i in range(0, 7):
+            operation_weeks.append(str(today - timedelta(days=i)))
+        commission = 0.0
+        max_sold_out = 0
+        revenue_in_days = []
+        sellers_record = []
+        for i in orders:
+            sellers = {}
+            sold_out_quantity = 0
+            sellers_revenue = 0.0
+            for j in orders[i]:
+                commission_for_time = {}
+                for key,val in j.items():
+                    rate = val.get_total() * 0.10
+                    commission += rate
+                    if val.get_date() in operation_weeks:
+                        rate_in_week = val.get_total() * 0.10
+                        commission_for_time["date"] = val.get_date()
+                        commission_for_time["revenue"] = rate_in_week
+                        sellers_revenue += val.get_total()
+                        for p in val.get_order_products():
+                            print(' product', p)
+                            sold_out_quantity += int(p['quantity'])
+                            sellers['seller_id'] = i
+                            sellers['sold_out'] = sold_out_quantity
+                        sellers['revenue'] = sellers_revenue
+                    else:
+                        print("no data within last week")
+                revenue_in_days.append(commission_for_time)
+            sellers_record.append(sellers)
+        print(sellers_record)
+        # getting the best seller
+        max_sold_out = max(entry['sold_out'] for entry in sellers_record)
+        max_sold_out_entries = [entry for entry in sellers_record if entry['sold_out'] == max_sold_out]
+        max_revenue = max(max_sold_out_entries, key=lambda x: x['revenue'])
+        if len(max_sold_out_entries) == 1:
+            max_sold_out_seller_id = max_sold_out_entries[0]['seller_id']
+        else:
+            max_revenue_entry = max_revenue
+            max_sold_out_seller_id = max_revenue_entry['seller_id']
+        revenue_in_week = []
+        for i in revenue_in_days:
+            if len(revenue_in_week) > 0:
+                for j in revenue_in_week:
+                    if i['date'] == j['date']:
+                        j['revenue'] += i['revenue']
+                    else:
+                        revenue_in_week.append(i)
+            else:
+                revenue_in_week.append(i)
+        json_revenue_in_week = json.dumps(revenue_in_week)
+        greenify_sellers = {}
+        try:
+            with shelve.open('approved_sellers.db','r') as approved_sellers:
+                greenify_sellers = approved_sellers['Approved_sellers']
+        except dbm.error:
+            return "DB file does not exists"
+
+        best_seller = {}
+        for key,val in greenify_sellers.items():
+            if int(max_sold_out_seller_id) == key:
+                best_seller = val
+        print(" best seller",best_seller.get_name(),max_sold_out,max_revenue)
+
+        return render_template('staff/dashboard.html', sellers_count=sellers, users_count=users, commission = f"${commission}", revenue_in_week = json_revenue_in_week, best_seller = best_seller,sold_out= max_sold_out,best_selling_detail = max_revenue)
     else:
         return redirect(url_for('staff_login'))
 
