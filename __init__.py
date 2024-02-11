@@ -924,7 +924,7 @@ def user_logout(user_id_hash):
         session.pop('user_id', None)
         session.pop('user_id_hash', None)
     print(f"User login status = {session.get('user_logged_in')}")
-    return "You have successfully logged out from your account."
+    return render_template('customer/logout.html')
 
 
 @app.route('/staff/logout')
@@ -932,7 +932,7 @@ def staff_logout():
     if session.get('staff_logged_in'):
         session.pop('staff_logged_in', None)
     print(f"Staff login status = {session.get('staff_logged_in')}")
-    return "You have successfully logged out from the account."
+    return render_template('customer/logout.html')
 
 
 @app.route('/seller/<seller_id_hash>/logout')
@@ -942,7 +942,7 @@ def seller_logout(seller_id_hash):
     if session.get('seller_logged_in'):
         session.pop('seller_logged_in', None)
     print(f"Seller login status = {session.get('seller_logged_in')}")
-    return "You have successfully logged out from your account."
+    return render_template('customer/logout.html')
 
 
 @app.route('/<user_id_hash>/profile', methods=['GET', 'POST'])
@@ -988,7 +988,6 @@ def update_user(user_id_hash):
     error = None
 
     if request.method == 'POST':
-        email = request.form.get('email-input')
         password = request.form.get('password-input')
         confirm_password = request.form.get('confirm_password-input')
         name = request.form.get('name-input')
@@ -1001,7 +1000,13 @@ def update_user(user_id_hash):
 
         user_obj = users_dict[user]
 
-        if len(str(password)) < 8 or len(str(confirm_password)) < 8:
+        if (password == user_obj.get_password() and confirm_password == user_obj.get_password() and
+                name == user_obj.get_name() and
+                contact_number == user_obj.get_contact_number() and
+                postal_code == user_obj.get_postal_code() and
+                address == user_obj.get_address()):
+            error = 'No changes were made to any of the fields.'
+        elif len(str(password)) < 8 or len(str(confirm_password)) < 8:
             error = 'Passwords must have at least 8 characters.'
         elif len(str(contact_number)) != 8:
             error = 'Phone number must be 8 digits.'
@@ -1010,16 +1015,12 @@ def update_user(user_id_hash):
         elif password != confirm_password:
             error = 'Passwords must match.'
         else:
-            user_obj.set_email(email)
             user_obj.set_password(password)
             user_obj.set_name(name)
             user_obj.set_contact_number(contact_number)
             user_obj.set_postal_code(postal_code)
             user_obj.set_address(address)
             error = "Update Successful."
-
-            session['user_id'] = email
-            print(session['user_id'])
 
         db['Users'] = users_dict
         db.close()
@@ -1062,7 +1063,7 @@ def delete_user(user_id_hash):
     db['Users'] = users_dict
     db.close()
 
-    return "Your account has successfully been deleted."
+    return render_template('customer/delete_successful.html')
 
 
 @app.route('/stafflogin', methods=['GET', 'POST'])
@@ -1898,7 +1899,6 @@ def update_seller(seller_id_hash):
 
         seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_name(update_seller_form.business_name.data)
-        seller.set_email(update_seller_form.seller_email.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
 
@@ -1917,6 +1917,7 @@ def update_seller(seller_id_hash):
         approved_db.close()
 
         seller = approved_sellers.get(seller_id)
+
         update_seller_form.business_name.data = seller.get_seller_name()
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
@@ -1955,7 +1956,7 @@ def delete_seller(seller_id_hash):
     approved_db.close()
     seller_product_db.close()
 
-    return "Your account has successfully been deleted."
+    return render_template('customer/delete_successful.html')
 
 # game1
 @app.route('/game1')

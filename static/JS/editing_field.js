@@ -10,12 +10,6 @@ function editField(input_change) {
     if (new_input === "") {
       alert("Input cannot be empty.");
       return;
-    } else if (input_change === 'email') {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(new_input)) {
-        alert("Please enter a valid email address.");
-        return;
-      }
     } else if (input_change === 'name') {
       const specialCharacterRegex = /^[a-zA-Z0-9\s]*$/;
       if (!specialCharacterRegex.test(new_input)) {
@@ -30,8 +24,13 @@ function editField(input_change) {
       }
     }
 
-    // If the input is not empty or if it's an email and it's valid, update the target input with the new value
-    $(target_input).text(new_input);
+    if (input_change === 'password' || input_change === 'confirm_password') {
+            // If the input field is visible (i.e., being edited)
+            $(target_input).text(maskPassword(new_input)); // Update the target input with the masked password
+        } else {
+            // For other fields, just update the target input with the new value
+            $(target_input).text(new_input);
+        }
 
     // Hide the input field
     $(input_class).css('display', 'none');
@@ -44,4 +43,24 @@ function editField(input_change) {
 
   // Update the data status attribute
   $(input_class).data("status", data_status);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    var passwordSpan = document.getElementById("password");
+    var password = passwordSpan.innerText;
+    var maskedPassword = maskPassword(password);
+    passwordSpan.innerText = maskedPassword;
+
+    var confirmPasswordSpan = document.getElementById("confirm_password");
+    var confirmPassword = confirmPasswordSpan.innerText;
+    var maskedConfirmPassword = maskPassword(confirmPassword);
+    confirmPasswordSpan.innerText = maskedConfirmPassword;
+});
+
+function maskPassword(password) {
+    var masked = '';
+    for (var i = 0; i < password.length; i++) {
+        masked += '•';
+    }
+    return masked;
 }
