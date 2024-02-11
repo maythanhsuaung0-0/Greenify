@@ -67,19 +67,27 @@ def allowed_file(filename):
 
 # Retrieving r and r
 def fetch_reviews(seller_id, product_id):
-    reviews_db = shelve.open('reviews.db', 'r')
-    ratings_reviews_dict = reviews_db.get('Reviews', {})
+    # Check if the file exists before attempting to open it
+    if not os.path.exists('reviews.db'):
+        return []
 
-    seller_id = int(seller_id)
-    product_id = int(product_id)
+    try:
+        reviews_db = shelve.open('reviews.db', 'r')
+        ratings_reviews_dict = reviews_db.get('Reviews', {})
 
-    # Get the seller's dictionary
-    seller_reviews = ratings_reviews_dict.get(seller_id, {})
+        seller_id = int(seller_id)
+        product_id = int(product_id)
 
-    # Get the list of reviews for the product
-    product_reviews = seller_reviews.get(product_id, [])
-    reviews_db.close()
-    return product_reviews
+        # Get the seller's dictionary
+        seller_reviews = ratings_reviews_dict.get(seller_id, {})
+
+        # Get the list of reviews for the product
+        product_reviews = seller_reviews.get(product_id, [])
+        reviews_db.close()
+        return product_reviews
+    except Exception as e:
+        print("Error fetching reviews:", e)
+        return []
 
 
 def delete_folder(item):
