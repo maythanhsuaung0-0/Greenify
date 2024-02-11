@@ -28,11 +28,6 @@
       <div class="row mb-3">
                     <label class="col-md-2 col-form-label">Email:</label>
                     <div class="payment-content col-md-6 d-flex align-items-center"><span id="email">{{ db.get_email() }}</span></div>
-                    <button type="button" class="btn col-md-1" onclick="editField('email')"><i class="bi bi-pencil-square"></i></button>
-                    <div class="hidden-field"  id="email-edit" data-status="off" style="display: none;">
-                        <input id="email-input" name="email-input" type="email" value='{{ db.get_email() }}'>
-                        <button type="button" class="btn btn-success" onclick="editField('email')"><i class="bi bi-check-lg"></i></button>
-                    </div>
                 </div>
     <div class="row mb-3">
         <label class="col-md-2 col-form-label">Password:</label>

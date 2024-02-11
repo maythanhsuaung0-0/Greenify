@@ -14,7 +14,8 @@
             {{render_field(form.business_name, class="form-control mt-1")}}
           </div>
         <div class="form-group" id="email">
-            {{render_field(form.seller_email, class="form-control mt-1")}}
+            {{ form.seller_email.label(class="form-label mt-1") }}
+            <p class="form-control-static">{{ form.seller_email.data }}</p> <!-- Render the field as plain text -->
         </div>
         <div class="form-group" id="desc">
             {{render_field(form.business_desc, class="form-control mt-1")}}
@@ -62,16 +63,6 @@
 </div>
 <script>
 function validateForm() {
-    var emailInput = document.getElementById('seller_email');
-
-    // Validate email using regex
-    var emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(emailInput.value)) {
-        // If email is invalid, display pop-up with error message
-        alert("Please enter a valid email.");
-        // Prevent form submission
-        return false;
-    }
 
     var businessName = document.getElementById('business_name');
     // Validate input for special characters using regex

@@ -988,7 +988,6 @@ def update_user(user_id_hash):
     error = None
 
     if request.method == 'POST':
-        email = request.form.get('email-input')
         password = request.form.get('password-input')
         confirm_password = request.form.get('confirm_password-input')
         name = request.form.get('name-input')
@@ -1010,16 +1009,12 @@ def update_user(user_id_hash):
         elif password != confirm_password:
             error = 'Passwords must match.'
         else:
-            user_obj.set_email(email)
             user_obj.set_password(password)
             user_obj.set_name(name)
             user_obj.set_contact_number(contact_number)
             user_obj.set_postal_code(postal_code)
             user_obj.set_address(address)
             error = "Update Successful."
-
-            session['user_id'] = email
-            print(session['user_id'])
 
         db['Users'] = users_dict
         db.close()
