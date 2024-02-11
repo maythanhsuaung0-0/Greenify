@@ -924,7 +924,7 @@ def user_logout(user_id_hash):
         session.pop('user_id', None)
         session.pop('user_id_hash', None)
     print(f"User login status = {session.get('user_logged_in')}")
-    return "You have successfully logged out from your account."
+    return render_template('customer/logout.html')
 
 
 @app.route('/staff/logout')
@@ -932,7 +932,7 @@ def staff_logout():
     if session.get('staff_logged_in'):
         session.pop('staff_logged_in', None)
     print(f"Staff login status = {session.get('staff_logged_in')}")
-    return "You have successfully logged out from the account."
+    return render_template('customer/logout.html')
 
 
 @app.route('/seller/<seller_id_hash>/logout')
@@ -942,7 +942,7 @@ def seller_logout(seller_id_hash):
     if session.get('seller_logged_in'):
         session.pop('seller_logged_in', None)
     print(f"Seller login status = {session.get('seller_logged_in')}")
-    return "You have successfully logged out from your account."
+    return render_template('customer/logout.html')
 
 
 @app.route('/<user_id_hash>/profile', methods=['GET', 'POST'])
@@ -1057,7 +1057,7 @@ def delete_user(user_id_hash):
     db['Users'] = users_dict
     db.close()
 
-    return "Your account has successfully been deleted."
+    return render_template('customer/delete_successful.html')
 
 
 @app.route('/stafflogin', methods=['GET', 'POST'])
@@ -1854,7 +1854,7 @@ def delete_seller(seller_id_hash):
     approved_db.close()
     seller_product_db.close()
 
-    return "Your account has successfully been deleted."
+    return render_template('customer/delete_successful.html')
 
 # game1
 @app.route('/game1')

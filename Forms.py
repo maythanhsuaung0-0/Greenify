@@ -14,7 +14,7 @@ class CreateUserForm(Form):
     name = StringField('Name', validators=[validators.DataRequired(), no_special_characters])
     contact_number = IntegerField('Phone Number', [validators.DataRequired(), validators.NumberRange(min=00000000, max=99999999)])
     postal_code = IntegerField('Postal Code', [validators.DataRequired(), validators.NumberRange(min=000000, max=999999)])
-    address = StringField('Address', [validators.DataRequired()])
+    address = StringField('Address', validators=[validators.DataRequired(), no_special_characters])
 
 
 class StaffLoginForm(Form):

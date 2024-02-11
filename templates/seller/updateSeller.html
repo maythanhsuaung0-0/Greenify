@@ -6,6 +6,10 @@
 
 <link rel="stylesheet" href="{{ url_for('static', filename='css/update_seller.css') }}">
 
+<button type="button" class="back button">
+    <a href="{{ url_for('seller_dashboard', seller_id_hash=seller_id_hash) }}">< Back to Dashboard</a>
+</button>
+
 <div class="main">
 <h1 class="header">Update Account Details</h1>
 
