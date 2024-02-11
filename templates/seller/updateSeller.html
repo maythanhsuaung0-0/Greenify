@@ -28,7 +28,7 @@
         </div>
 </form>
 
-
+<div class="button-container">
 <form method="POST" action="{{url_for('delete_seller', seller_id_hash=seller_id_hash)}}">
   <input value="Delete" type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmationModal" id="delete"/>
 
@@ -58,6 +58,7 @@
 <form method="GET" action="{{url_for('seller_logout', seller_id_hash=seller_id_hash)}}">
   <input value="Logout" type="submit" class="btn btn-danger" id="logout"/>
 </form>
+</div>
 </div>
 <script>
 function validateForm() {

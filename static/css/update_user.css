@@ -1,5 +1,5 @@
 #account_info {
-        width: 400px;
+        width: 465px;
         margin: 7em auto;
         margin-bottom: -30px;
         border-radius: 1.5em;
@@ -8,7 +8,7 @@
     }
 
 #address_info {
-        width: 400px;
+        width: 465px;
         margin: 7em auto;
         border-radius: 1.5em;
         box-shadow: 0px 11px 35px 2px rgba(0, 0, 0, 0.14);
@@ -40,9 +40,8 @@
         padding-right: 43px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-top: 20px;
-        margin-left: 134px;
-        margin-bottom:5px;
+        margin-left: 300px;
+        margin-bottom: 10px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
@@ -57,8 +56,7 @@
         padding-right: 46px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 134px;
-        margin-bottom:5px;
+        margin-left: -283px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
@@ -73,15 +71,13 @@
         padding-right: 40px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 134px;
-        margin-bottom:5px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
 
 .home-icon {
       float: right;
-      padding-top: 10px;
+      padding-top: 30px;
       padding-left: 25px;
     }
 
@@ -198,4 +194,11 @@ margin-left: 39px;
 
 #address-input {
 margin-left: 39px;
+}
+
+.button-row {
+  display: flex;
+  margin-left: -130px;
+  margin-top: 35px;
+  gap: 12px;
 }

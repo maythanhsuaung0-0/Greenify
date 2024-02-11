@@ -28,9 +28,9 @@
         padding-right: 43px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-top: 20px;
+        margin-top: 15px;
         margin-left: 160px;
-        margin-bottom:5px;
+        margin-bottom: 10px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
@@ -45,8 +45,8 @@
         padding-right: 46px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 160px;
-        margin-bottom:5px;
+        margin-left: 20px;
+        margin-bottom: 10px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
@@ -61,11 +61,17 @@
         padding-right: 40px;
         padding-bottom: 10px;
         padding-top: 10px;
-        margin-left: 160px;
-        margin-bottom:5px;
+        margin-bottom: 10px;
+        margin-left: 40px;
         font-size: 13px;
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
+
+.button-container {
+  display: flex;
+  gap: 120px;
+  margin-top: -49px;
+}
 
 #desc {
     width: 340px;
