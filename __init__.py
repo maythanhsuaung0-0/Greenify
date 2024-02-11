@@ -1438,8 +1438,12 @@ def seller_dashboard(seller_id_hash):
     commission = earning * 0.10
     earning -= commission
     earning = '$' + str(earning)
-    return render_template('seller/dashboard.html', seller=seller_id_hash, seller_name=seller_name, customers=customers,
-                           sold_out=sold_out, earning=earning)
+    if session.get('seller_logged_in'):
+        return render_template('seller/dashboard.html', seller=seller_id_hash, seller_name=seller_name,
+                               customers=customers,
+                               sold_out=sold_out, earning=earning)
+    else:
+        return redirect(url_for('seller_login'))
 
 
 @app.route('/respond')
@@ -1772,7 +1776,6 @@ def dashboard():
 
 @app.route('/seller/<seller_id_hash>/updateSeller', methods=['GET', 'POST'])
 def update_seller(seller_id_hash):
-    error = None
     if seller_id_hash != session['seller_id_hash']:
         print('route error')
         return render_template('error_msg.html')
@@ -1838,9 +1841,16 @@ def delete_seller(seller_id_hash):
 
     approved_sellers.pop(seller_id)
     seller_logout(seller_id_hash)
+    seller_product_db = shelve.open('seller-product.db', writeback=True)
+    if str(seller_id) in seller_product_db:
+        del seller_product_db[str(seller_id)]
+        print(f"Products of seller {seller_id} deleted successfully.")
+    else:
+        print(f"No products found for seller {seller_id}.")
 
     approved_db['Approved_sellers'] = approved_sellers
     approved_db.close()
+    seller_product_db.close()
 
     return "Your account has successfully been deleted."
 
