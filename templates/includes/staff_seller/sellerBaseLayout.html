@@ -17,6 +17,9 @@
     {% block JS_CSS %}{% endblock %}
     <!-- fontawesome for icons -->
     <script src="https://kit.fontawesome.com/344ef59591.js" crossorigin="anonymous"></script>
+        <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js">
+    </script>
 
 </head>
 
@@ -63,6 +66,7 @@
     <!-- own script -->
     <script src="{{ url_for('static', filename='js/sidebar.js') }}"></script>
     <script src="{{ url_for('static', filename='js/seller_order.js') }}"></script>
+      <script src="{{url_for('static' ,filename = 'js/seller_chart.js')}}"></script>
 </body>
 
 </html>

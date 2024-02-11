@@ -15,9 +15,47 @@
 
     </div>
         </div>
-    <canvas id="myChart" style="width:100%;max-width:700px"></canvas>
+<div class="fixed-container-sm">
+   <div class="d-flex gap-0 justify-content-center">
+      <div>
+           <canvas id="seller_chart" style="width:100%;max-width:800px" data-dictionary="{{revenue_in_week}}"></canvas>
+      </div>
+        <div class="">
+          <canvas id="stock_chart" style="width:100%;max-width:400px;max-height:400px;" data-dictionary="{{stock}}"></canvas>
+        </div>
+   </div>
+   <div class="mt-5">
+       <h4>Best Selling Item of the week</h4>
+        <div class="card mt-3">
+      <div class="row align-items-center card-body">
+<!--          profile,detail,sold out,revenue-->
+          <div class="col-2 text-center">
+              {% if best_item.get_image() %}
+              <img src="{{ url_for('static', filename='uploads/product_image/' + best_item.get_image()) }}" width="100%" height="100%" alt="profile">
+              {% else %}
+              <div class="w-full h-full profile-dummy">
+                  {{best_item.get_name()[0]}}
+              </div>
+              {% endif %}
+          </div>
+          <div class="col-6 ">
+            <div>
+                <div><h6 class="text-start fw-bold">{{best_item.get_product_name()}}</h6></div>
+              <div><p class="text-start mb-0">{{best_item.get_description()}}</p></div></div>
+          </div>
+          <div class="col-2 text-center">
+                <div><b>Sold Out</b></div>
+              <div><p class="mb-0">{{best_item_sold}}</p></div>
+          </div>
+          <div class="col-2 text-center">
+               <div><b>Revenue</b></div>
+              <div><p class="mb-0">S${{best_item_revenue['revenue']}}</p></div>
+          </div>
+      </div>
+    </div>
+   </div>
 
-
+</div>
 
 {% endblock %}
 
