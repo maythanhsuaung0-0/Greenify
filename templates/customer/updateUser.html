@@ -32,7 +32,7 @@
     <div class="row mb-3">
         <label class="col-md-2 col-form-label">Password:</label>
         <div class="payment-content col-md-6 d-flex align-items-center">
-                <span id="password">{{ db.get_password() }}</span>
+                <span id="password" class="masked-password">{{ db.get_password() }}</span>
         </div>
         <button type="button" class="btn col-md-1" onclick="editField('password')"><i class="bi bi-pencil-square"></i></button>
         <div class="hidden-field" id="password-edit" data-status="off" style="display: none;">
@@ -48,7 +48,7 @@
      <div class="row mb-3">
         <label class="col-md-2 col-form-label">Confirm Password:</label>
         <div class="payment-content col-md-6 d-flex align-items-center">
-                <span id="confirm_password">{{ db.get_password() }}</span>
+                <span id="confirm_password" class="masked-password">{{ db.get_password() }}</span>
         </div>
         <button type="button" class="btn col-md-1" onclick="editField('confirm_password')"><i class="bi bi-pencil-square"></i></button>
         <div class="hidden-field" id="confirm_password-edit" data-status="off" style="display: none;">

@@ -17,7 +17,7 @@
       <h3 class="sub-header" align="center">Account Info</h3>
       <div class="row mb-3">
           <label class="col-md-2 col-form-label">Email:</label>
-          <div class="payment-content col-md-6 d-flex align-items-center"><span id="email">{{ user_data.get_email() }}</span></div>
+          <div class="payment-content col-md-6 d-flex align-items-center"><span id="email" class="masked-password">{{ user_data.get_email() }}</span></div>
       </div>
       <div class="row mb-3">
           <label class="col-md-2 col-form-label">Password:</label>
@@ -53,7 +53,22 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    var passwordSpan = document.getElementById("password");
+    var password = passwordSpan.innerText;
+    var maskedPassword = maskPassword(password);
+    passwordSpan.innerText = maskedPassword;
+});
 
+function maskPassword(password) {
+    var masked = '';
+    for (var i = 0; i < password.length; i++) {
+        masked += '•';
+    }
+    return masked;
+}
+</script>
 {% endblock %}
 
 {% block Add_End_JS_CSS %}

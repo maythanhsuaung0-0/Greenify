@@ -1798,7 +1798,6 @@ def update_seller(seller_id_hash):
 
         seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_name(update_seller_form.business_name.data)
-        seller.set_email(update_seller_form.seller_email.data)
         seller.set_desc(update_seller_form.business_desc.data)
         seller.set_doc(update_seller_form.support_document.data)
 
