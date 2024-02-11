@@ -134,6 +134,77 @@
 
   <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10.11/dist/interact.min.js"></script>
 
+</head>
+
+<body>
+
+  <!-- <label for="playerName">Enter your name:</label>
+  <input type="text" id="playerName" name="playerName"> -->
+
+  <button id="redeemButton" style="display:none;">Click to receive promo code</button>
+
+  <audio id="dropSoundCorrect" src="{{ url_for('static', filename='sounds/666280__logatron__oldtada.mp3') }}"
+    preload="auto"></audio>
+  <audio id="dropSoundWrong" src="{{ url_for('static', filename='sounds/692847__beetlemuse__false-c.mp3') }}"
+    preload="auto"></audio>
+  <audio id="gameover" src="{{ url_for('static', filename='sounds/538151__fupicat__8bit-fall.mp3') }}"
+    preload="auto"></audio>
+  <audio id="gameoverfullmarks"
+    src="{{ url_for('static', filename='sounds/660408__kevp888__220625-08_fr_applause.mp3') }}" preload="auto"></audio>
+
+  <br>
+  <h1 id="ecosort_title">EcoSort Challenge</h1>
+  <br>
+  <br>
+
+  <h3 id="drag_item_text">Drag items into the correct recycle bins:</h3>
+  <br>
+  <br>
+  <div id="dragItems">
+    <img id="drag1" src="{{ url_for('static', filename='images/bottle.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="glass">
+    <img id="drag2" src="{{ url_for('static', filename='images/cup.jpeg') }}" draggable="true" ondragstart="drag(event)"
+      width="120" height="180" materialtype="paper">
+    <img id="drag3" src="{{ url_for('static', filename='images/plastic_bag.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
+    <img id="drag4" src="{{ url_for('static', filename='images/straw.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
+    <img id="drag5" src="{{ url_for('static', filename='images/plastic_bottle.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
+    <img id="drag6" src="{{ url_for('static', filename='images/newspaper.jpeg') }}" draggable="true"
+      ondragstart="drag(event)" width="120" height="180" materialtype="paper">
+    <!-- Conveyor Belt -->
+    <img id="conveyorBelt" src="{{ url_for('static', filename='images/conveyor.jpeg') }}" alt="Conveyor Belt">
+
+  </div>
+
+
+  <div id="div-bin1" ondrop="drop(event)" ondragover="allowDrop(event)">
+    <img id="dropzone1" src="{{ url_for('static', filename='images/bin1.jpeg') }}" draggable="false">
+    <img id="dropzone2" src="{{ url_for('static', filename='images/bin2.jpeg') }}" draggable="false">
+    <img id="dropzone3" src="{{ url_for('static', filename='images/bin3.jpeg') }}" draggable="false">
+  </div>
+
+
+
+
+  <div id="user_score_display"
+    style="font-family: 'Times New Roman', Times, serif; font-size: x-large; font-weight: bold;">
+    <div id="user_score"></div>
+  </div>
+
+  <div class="scoreboard-wrapper">
+    <div id="scoreboard" style="margin-top: 20px;">
+      <!-- The table will be inserted here  -->
+    </div>
+    <!-- Try Again Button -->
+    <button id="tryAgainButton"
+      style="padding: 15px 30px; font-size: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; align-self: flex-end;">Try
+      Again</button>
+  </div>
+
+  <br>
+
   <script>
 
     var playerName = "{{ user_id }}";
@@ -204,6 +275,7 @@
         if (items_played == total_items) {
           document.getElementById('user_score').textContent = 'Final Score: ' + score + ' / ' + total_items;
           document.getElementById('drag_item_text').style.display = 'none';
+          alert("Congratulations! You have earned a voucher. Click 'Redeem' to get your promo code.");
           if (score == total_items) {
             document.getElementById('gameoverfullmarks').play();
           } else {
@@ -309,78 +381,32 @@
       }
     });
 
+    // Show the redeem button after game completion alert
+    document.getElementById("redeemButton").style.display = "block";
+
+    // Add click event listener to redeem button
+    document.getElementById("redeemButton").addEventListener("click", function () {
+      alert("Your promo code is: CNY2024");
+    });
+
+    function checkGameCompletion() {
+      // Logic to check if the game is complete
+      // For demonstration, let's assume the game is complete when all items are played
+      if (items_played == total_items) {
+        alert("Congratulations! You have earned a voucher. Click 'OK' to redeem your promo code.");
+        document.getElementById("redeemButton").style.display = "block"; // Show the redeem button
+
+        // Now, attach the event listener to the redeem button here, or make sure it's outside any conditional logic that might not run
+        document.getElementById("redeemButton").addEventListener("click", function () {
+          alert("Your promo code is: CNY2024");
+        });
+      }
+    }
+
+
 
 
   </script>
-
-</head>
-
-<body>
-
-  <!-- <label for="playerName">Enter your name:</label>
-  <input type="text" id="playerName" name="playerName"> -->
-
-
-  <audio id="dropSoundCorrect" src="{{ url_for('static', filename='sounds/666280__logatron__oldtada.mp3') }}"
-    preload="auto"></audio>
-  <audio id="dropSoundWrong" src="{{ url_for('static', filename='sounds/692847__beetlemuse__false-c.mp3') }}"
-    preload="auto"></audio>
-  <audio id="gameover" src="{{ url_for('static', filename='sounds/538151__fupicat__8bit-fall.mp3') }}"
-    preload="auto"></audio>
-  <audio id="gameoverfullmarks"
-    src="{{ url_for('static', filename='sounds/660408__kevp888__220625-08_fr_applause.mp3') }}" preload="auto"></audio>
-
-  <br>
-  <h1 id="ecosort_title">EcoSort Challenge</h1>
-  <br>
-  <br>
-
-  <h3 id="drag_item_text">Drag items into the correct recycle bins:</h3>
-  <br>
-  <br>
-  <div id="dragItems">
-    <img id="drag1" src="{{ url_for('static', filename='images/bottle.jpeg') }}" draggable="true"
-      ondragstart="drag(event)" width="120" height="180" materialtype="glass">
-    <img id="drag2" src="{{ url_for('static', filename='images/cup.jpeg') }}" draggable="true" ondragstart="drag(event)"
-      width="120" height="180" materialtype="paper">
-    <img id="drag3" src="{{ url_for('static', filename='images/plastic_bag.jpeg') }}" draggable="true"
-      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
-    <img id="drag4" src="{{ url_for('static', filename='images/straw.jpeg') }}" draggable="true"
-      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
-    <img id="drag5" src="{{ url_for('static', filename='images/plastic_bottle.jpeg') }}" draggable="true"
-      ondragstart="drag(event)" width="120" height="180" materialtype="plastic">
-    <img id="drag6" src="{{ url_for('static', filename='images/newspaper.jpeg') }}" draggable="true"
-      ondragstart="drag(event)" width="120" height="180" materialtype="paper">
-    <!-- Conveyor Belt -->
-    <img id="conveyorBelt" src="{{ url_for('static', filename='images/conveyor.jpeg') }}" alt="Conveyor Belt">
-
-  </div>
-
-
-  <div id="div-bin1" ondrop="drop(event)" ondragover="allowDrop(event)">
-    <img id="dropzone1" src="{{ url_for('static', filename='images/bin1.jpeg') }}" draggable="false">
-    <img id="dropzone2" src="{{ url_for('static', filename='images/bin2.jpeg') }}" draggable="false">
-    <img id="dropzone3" src="{{ url_for('static', filename='images/bin3.jpeg') }}" draggable="false">
-  </div>
-
-
-
-
-  <div id="user_score_display"
-    style="font-family: 'Times New Roman', Times, serif; font-size: x-large; font-weight: bold;">
-    <div id="user_score"></div>
-  </div>
-
-  <div class="scoreboard-wrapper">
-    <div id="scoreboard" style="margin-top: 20px;">
-      <!-- The table will be inserted here  -->
-    </div>
-    <!-- Try Again Button -->
-    <button id="tryAgainButton"
-      style="padding: 15px 30px; font-size: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; align-self: flex-end;">Try Again</button>
-  </div>
-
-  <br>
 
 
   <script src="{{ url_for('static', filename='JS/game1.js') }}"></script>
