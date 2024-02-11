@@ -55,7 +55,6 @@ class ChatDataset(Dataset):
         self.x_data = x_train
         self.y_data = y_train
 
-    # dataset[idx]
     def __getitem__(self, index):
         return self.x_data[index], self.y_data[index]  # returns a tuple containing the input data and its
         # corresponding label.
@@ -113,7 +112,7 @@ print(f'final loss: {loss.item():.4f}')
 
 # save the model as dict
 data = {
-    "model_state": model.state_dict(),
+    "model_state": model.state_dict(),  # saving current state of the model's parameters  
     "input_size": input_size,
     "output_size": output_size,
     "hidden_size": hidden_size,
