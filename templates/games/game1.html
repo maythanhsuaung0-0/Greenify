@@ -371,9 +371,17 @@
     <div id="user_score"></div>
   </div>
 
-  <div id="scoreboard" style="margin-top: 20px;">
-    <!-- The table will be inserted here  -->
+  <div class="scoreboard-wrapper">
+    <div id="scoreboard" style="margin-top: 20px;">
+      <!-- The table will be inserted here  -->
+    </div>
+    <!-- Try Again Button -->
+    <button id="tryAgainButton"
+      style="padding: 15px 30px; font-size: 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; align-self: flex-end;">Try Again</button>
   </div>
+
+  <br>
+
 
   <script src="{{ url_for('static', filename='JS/game1.js') }}"></script>
 </body>

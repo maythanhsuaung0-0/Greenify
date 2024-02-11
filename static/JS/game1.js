@@ -209,3 +209,6 @@ function dragMoveListener(event) {
 }
 
 
+document.getElementById('tryAgainButton').addEventListener('click', function() {
+  window.location.reload();
+});
