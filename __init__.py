@@ -1000,7 +1000,13 @@ def update_user(user_id_hash):
 
         user_obj = users_dict[user]
 
-        if len(str(password)) < 8 or len(str(confirm_password)) < 8:
+        if (password == user_obj.get_password() and confirm_password == user_obj.get_password() and
+                name == user_obj.get_name() and
+                contact_number == user_obj.get_contact_number() and
+                postal_code == user_obj.get_postal_code() and
+                address == user_obj.get_address()):
+            error = 'No changes were made to any of the fields.'
+        elif len(str(password)) < 8 or len(str(confirm_password)) < 8:
             error = 'Passwords must have at least 8 characters.'
         elif len(str(contact_number)) != 8:
             error = 'Phone number must be 8 digits.'
@@ -1816,6 +1822,7 @@ def update_seller(seller_id_hash):
         approved_db.close()
 
         seller = approved_sellers.get(seller_id)
+
         update_seller_form.business_name.data = seller.get_seller_name()
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
