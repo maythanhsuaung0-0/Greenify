@@ -1,4 +1,3 @@
-from imp import reload
 
 from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
     send_from_directory
