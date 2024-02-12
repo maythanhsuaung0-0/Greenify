@@ -1059,12 +1059,17 @@ def delete_user(user_id_hash):
 @app.route('/stafflogin', methods=['GET', 'POST'])
 def staff_login():
     error = None
+    try:
+        if session['staff_logged_in']:
+            return redirect(url_for('dashboard'))
+    except:
+        pass
     staff_login_form = StaffLoginForm(request.form)
     if request.method == 'POST' and staff_login_form.validate():
         if staff_login_form.admin_email.data == 'admin@gmail.com' and staff_login_form.admin_password.data == 'admin_password':
             session['staff_logged_in'] = True
             print(f"Staff login status = {session.get('staff_logged_in')}")
-            return redirect(url_for('retrieveApplicationForms'))
+            return redirect(url_for('dashboard'))
         else:
             error = 'Email or Password is incorrect, please try again.'
     return render_template('staff/staff_login.html', form=staff_login_form, error=error)
