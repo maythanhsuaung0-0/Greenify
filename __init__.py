@@ -230,10 +230,10 @@ def home():
     try:
         user = session['user_id']
         user_id_hash = session['user_id_hash']
-        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user), form=search_form, all_result=all_result)
+        return render_template("customer/homepage.html", user=user_id_hash, saved_cart_qty=cart_qty(user),
+                               form=search_form, all_result=all_result)
     except:
         return render_template("customer/homepage.html", user=None, form=search_form, all_result=all_result)
-
 
 
 @app.route("/Product/<seller>/<int:product_id>", methods=['GET', 'POST'])
@@ -675,7 +675,7 @@ def payment(user_id_hash):
                 # Saving Data into order
                 order.set_order_products(product_id, bought_qty, product_price)
                 order.set_total(total_price)
-                print("my order total",order.get_total())
+                print("my order total", order.get_total())
                 # Saving Everything to seller_order_dict
                 seller_id = item['seller_id']
                 seller_order_dict[seller_id] = order
@@ -1098,13 +1098,11 @@ def seller_login():
         seller_password = []
         seller_email = []
         sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
-        seller_data = {}
+
         for i in sellers_list:
-            seller_data['id'] = i.get_application_id()
-            seller_data['email'] = i.get_email()
-            seller_data['pw'] = i.get_password()
+            seller_data = {'id': i.get_application_id(), 'email': i.get_email(), 'pw': i.get_password()}
             sellers.append(seller_data)
-            print("seller_id->",seller_data['id'])
+            print("seller_id->", seller_data['id'])
         for j in sellers_list:
             seller_email.append(j.get_email())
         print(seller_email)
@@ -1348,7 +1346,7 @@ def delete_product(seller_id, product_id):
         return "Error in deleting product from seller-product db"
 
 
-@app.route('/seller/<seller_id_hash>/orders',methods = ['POST','GET'])
+@app.route('/seller/<seller_id_hash>/orders', methods=['POST', 'GET'])
 def orders(seller_id_hash):
     print(seller_id_hash)
     seller_id = str(session['seller_id'])
@@ -1396,7 +1394,7 @@ def orders(seller_id_hash):
                 _orders_[seller_id] = updated_orders
                 _orders_.close()
                 if len(current_order) == 1:
-                    send_notification(current_order[0].get_email(),current_order[0].get_order_id())
+                    send_notification(current_order[0].get_email(), current_order[0].get_order_id())
         return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
                                to_send=to_send_orders, products=seller_products, orders=total_orders)
     else:
@@ -1405,7 +1403,7 @@ def orders(seller_id_hash):
 
 @app.route('/seller/<seller_id_hash>/dashboard')
 def seller_dashboard(seller_id_hash):
-
+    global max_revenue, max_sold_out_entries, max_sold_out_product_id
     if session.get('seller_logged_in'):
         if seller_id_hash != session['seller_id_hash']:
             print('route error')
@@ -1413,13 +1411,12 @@ def seller_dashboard(seller_id_hash):
         seller_id_hash = session['seller_id_hash']
         seller_id = session['seller_id']
         sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
-        product_list = retrieve_db('seller-product.db',str(seller_id))
+        product_list = retrieve_db('seller-product.db', str(seller_id))
         print("sellers", sellers_list)
         seller_name = ''
         for i in sellers_list:
             if i.get_application_id() == seller_id:
                 seller_name += i.get_name()
-
 
         try:
             with shelve.open('seller_order.db'):
@@ -1445,18 +1442,18 @@ def seller_dashboard(seller_id_hash):
             operation_weeks.append(str(today - timedelta(days=i)))
         for order in seller_orders:
             revenue_per_day = {}
-            for key,val in order.items():
+            for key, val in order.items():
                 if val.get_date() in operation_weeks:
                     commission = val.get_total() * 0.10
                     earn_amt = val.get_total() - commission
                     earning += earn_amt
                     revenue_per_day["date"] = val.get_date()
                     revenue_per_day["revenue"] = val.get_total() - commission
-                    print('total',val.get_total())
+                    print('total', val.get_total())
                     for i in val.get_order_products():
                         products_dict = {}
                         sold_out += int(i['quantity'])
-                        print( i['product_id'],i['quantity'],i['product_price'])
+                        print(i['product_id'], i['quantity'], i['product_price'])
                         products_dict['product_id'] = i['product_id']
                         products_dict['quantity'] = int(i['quantity'])
                         products_dict['revenue'] = int(i['product_price'])
@@ -1489,64 +1486,41 @@ def seller_dashboard(seller_id_hash):
             else:
                 revenue_in_week.append(i)
 
-        # getting the best selling item
-        max_sold_out = max(entry['quantity'] for entry in products_record)
-        max_sold_out_entries = [entry for entry in products_record if entry['quantity'] == max_sold_out]
-        max_revenue = max(max_sold_out_entries, key=lambda x: x['revenue'])
-        if len(max_sold_out_entries) == 1:
-            max_sold_out_product_id = max_sold_out_entries[0]['product_id']
+        # getting the best-selling item
+        best_selling_item = None
+        if products_record:
+            max_sold_out = max(entry['quantity'] for entry in products_record)
+            max_sold_out_entries = [entry for entry in products_record if entry['quantity'] == max_sold_out]
+            max_revenue = max(max_sold_out_entries, key=lambda x: x['revenue'])
+            if len(max_sold_out_entries) == 1:
+                max_sold_out_product_id = max_sold_out_entries[0]['product_id']
+            else:
+                max_revenue_entry = max_revenue
+                max_sold_out_product_id = max_revenue_entry['product_id']
+                best_selling_item = product_list[0].get(max_sold_out_product_id) if len(product_list)>0 else None
+            print('best', max_sold_out, max_revenue)
         else:
-            max_revenue_entry = max_revenue
-            max_sold_out_product_id = max_revenue_entry['product_id']
-        best_selling_item = product_list[0].get(max_sold_out_product_id)
-        print('best',max_sold_out,max_revenue)
+            max_sold_out = None
+            max_revenue = None
+
         earning = '$' + str(earning)
         revenue_in_week_json = json.dumps(revenue_in_week)
 
         stock_left = 0
-        for key,val in product_list[0].items():
-            stock_left += val.get_product_stock()
+        print('product_list', product_list)
+        if len(product_list) > 0:
+            for key, val in product_list[0].items():
+                stock_left += val.get_product_stock()
         original_stock = sold_out + stock_left
-        stock = [original_stock,sold_out]
+        stock = [original_stock, sold_out]
         stock_json = json.dumps(stock)
         return render_template('seller/dashboard.html', seller=seller_id_hash, seller_name=seller_name,
                                customers=customers,
-                               sold_out=sold_out, earning=earning, best_item = best_selling_item, revenue_in_week=revenue_in_week_json,
-                               best_item_sold = max_sold_out, best_item_revenue = max_revenue, stock = stock_json)
+                               sold_out=sold_out, earning=earning, best_item=best_selling_item,
+                               revenue_in_week=revenue_in_week_json,
+                               best_item_sold=max_sold_out, best_item_revenue=max_revenue, stock=stock_json)
     else:
         return redirect(url_for('seller_login'))
-
-# operation_weeks = []
-#         today = date.today()
-#         for i in range(0, 7):
-#             operation_weeks.append(str(today - timedelta(days=i)))
-#         commission = 0.0
-#         max_sold_out = 0
-#         revenue_in_days = []
-#         sellers_record = []
-#         for i in orders:
-#             sellers = {}
-#             sold_out_quantity = 0
-#             sellers_revenue = 0.0
-#             for j in orders[i]:
-#                 commission_for_time = {}
-#                 for key,val in j.items():
-#                     rate = val.get_total() * 0.10
-#                     commission += rate
-#                     if val.get_date() in operation_weeks:
-#                         rate_in_week = val.get_total() * 0.10
-#                         commission_for_time["date"] = val.get_date()
-#                         commission_for_time["revenue"] = rate_in_week
-#                         sellers_revenue += val.get_total()
-#                         for p in val.get_order_products():
-#                             print(' product', p)
-#                             sold_out_quantity += int(p['quantity'])
-#                             sellers['seller_id'] = i
-#                             sellers['sold_out'] = sold_out_quantity
-#                         sellers['revenue'] = sellers_revenue
-#                     else:
-#                         print("no data within last week")
-#                 revenue_in_days.append(commission_for_time)
 
 
 @app.route('/respond')
@@ -1705,21 +1679,8 @@ def retrieveApplicationForms():
                 for key, seller in approved_db['Approved_sellers'].items():
                     passwords.append(seller.get_password())
                 approved_db.close()
-                print("seller mail and pw:",approved.get_email(),approved.get_password())
+                print("seller mail and pw:", approved.get_email(), approved.get_password())
                 send_mail(approved.get_email(), True, approved.get_seller_name(), password)
-            if data_to_modify['request_type'] == 'filter':
-                print(" got filered")
-                if data_to_modify['id'] == '1':
-                    certify = []
-                    print('filtered')
-                    for i in app_list:
-                        print(i)
-                        if i.get_doc():
-                            print('have certificate')
-                            certify.append(i)
-                            print('certified sellers', i.get_name())
-                    print('certified', certify)
-                    return render_template('staff/retrieveAppForms.html', count=len(certify), app_list=certify)
         return render_template('staff/retrieveAppForms.html', count=len(app_list), app_list=app_list)
     else:
         return redirect(url_for('staff_login'))
@@ -1761,9 +1722,9 @@ def retrieveUpdateForms():  # for approving updates
 
 @app.route('/staff/retrieveSellers', methods=['POST', 'GET'])
 def retrieveSellers():
-    sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
-    print("sellers", sellers_list)
     if session.get('staff_logged_in'):
+        sellers_list = retrieve_db('approved_sellers.db', 'Approved_sellers')
+        print("sellers", sellers_list)
         if request.method == 'POST':
             data_to_modify = json.loads(request.data)
             # for removing
@@ -1777,11 +1738,14 @@ def retrieveSellers():
                     certify = []
                     print('filtered')
                     for i in sellers_list:
-                        print(i)
                         if i.get_doc():
                             print('have certificate')
                             certify.append(i)
-                    return redirect(url_for('staff_login'))  # Redirect when filtering by certificate
+                    print(certify)
+                    return render_template('staff/retrieveSellers.html', count=len(certify),
+                                           sellers=certify)  # Redirect when filtering by certificate
+                else:
+                    print("no")
         else:
             return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
     else:
@@ -1790,7 +1754,7 @@ def retrieveSellers():
 
 @app.route('/staff/dashboard')
 def dashboard():
-
+    global max_seller_sold_out_entries, max_sold_out_seller_id
     if session.get('staff_logged_in'):
         sellers = retrieve_db('approved_sellers.db', 'Approved_sellers')
         users = retrieve_db('user.db', 'Users')
@@ -1820,7 +1784,7 @@ def dashboard():
             sellers_revenue = 0.0
             for j in orders[i]:
                 commission_for_time = {}
-                for key,val in j.items():
+                for key, val in j.items():
                     rate = val.get_total() * 0.10
                     commission += rate
                     if val.get_date() in operation_weeks:
@@ -1839,15 +1803,20 @@ def dashboard():
                 revenue_in_days.append(commission_for_time)
             sellers_record.append(sellers)
         print(sellers_record)
-        # getting the best seller
-        max_sold_out = max(entry['sold_out'] for entry in sellers_record)
-        max_sold_out_entries = [entry for entry in sellers_record if entry['sold_out'] == max_sold_out]
-        max_revenue = max(max_sold_out_entries, key=lambda x: x['revenue'])
-        if len(max_sold_out_entries) == 1:
-            max_sold_out_seller_id = max_sold_out_entries[0]['seller_id']
+        # getting the best-seller
+        if sellers_record:
+            max_item_sold_out = max(entry['sold_out'] for entry in sellers_record)
+            max_seller_sold_out_entries = [entry for entry in sellers_record if entry['sold_out'] == max_item_sold_out]
+            max_seller_revenue = max(max_seller_sold_out_entries, key=lambda x: x['revenue'])
+            if len(max_seller_sold_out_entries) == 1:
+                max_sold_out_seller_id = max_seller_sold_out_entries[0]['seller_id']
+            else:
+                max_revenue_entry = max_seller_revenue
+                max_sold_out_seller_id = max_revenue_entry['seller_id']
         else:
-            max_revenue_entry = max_revenue
-            max_sold_out_seller_id = max_revenue_entry['seller_id']
+            max_item_sold_out = None
+            max_seller_revenue = None
+
         revenue_in_week = []
         for i in revenue_in_days:
             if len(revenue_in_week) > 0:
@@ -1862,18 +1831,21 @@ def dashboard():
         json_revenue_in_week = json.dumps(revenue_in_week)
         greenify_sellers = {}
         try:
-            with shelve.open('approved_sellers.db','r') as approved_sellers:
+            with shelve.open('approved_sellers.db', 'r') as approved_sellers:
                 greenify_sellers = approved_sellers['Approved_sellers']
         except dbm.error:
             return "DB file does not exists"
 
         best_seller = {}
-        for key,val in greenify_sellers.items():
-            if int(max_sold_out_seller_id) == key:
-                best_seller = val
-        print(" best seller",best_seller.get_name(),max_sold_out,max_revenue)
+        for key, val in greenify_sellers.items():
+            if max_sold_out_seller_id:
+                if int(max_sold_out_seller_id) == key:
+                    best_seller = val
+        print(" best seller", best_seller.get_name(), max_item_sold_out, max_seller_revenue)
 
-        return render_template('staff/dashboard.html', sellers_count=sellers, users_count=users, commission = f"${commission}", revenue_in_week = json_revenue_in_week, best_seller = best_seller,sold_out= max_sold_out,best_selling_detail = max_revenue)
+        return render_template('staff/dashboard.html', sellers_count=sellers, users_count=users,
+                               commission=f"${commission}", revenue_in_week=json_revenue_in_week,
+                               best_seller=best_seller, sold_out=max_item_sold_out, best_selling_detail=max_seller_revenue)
     else:
         return redirect(url_for('staff_login'))
 
@@ -1957,6 +1929,7 @@ def delete_seller(seller_id_hash):
     seller_product_db.close()
 
     return render_template('customer/delete_successful.html')
+
 
 # game1
 @app.route('/game1')
@@ -2042,6 +2015,7 @@ def game2():
     # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
     user_id = session.get('user_id', 'Unknown Player')
     return render_template('/games/game2.html', user_id=user_id)
+
 
 @app.route('/game2/start')
 def start_game():
