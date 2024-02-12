@@ -11,30 +11,6 @@
     {% elif count > 0 %}
     <div class="d-flex justify-content-between align-items-center">
         <div class="">Requests :<b>{{count}}</b></div>
-        <div class="">
-           <div class="dropdown show">
-              <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Filter by
-              </a>
-
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-<!--                <div class="dropdown-item" >-->
-<!--                    <button class="outline-none no-background">Date</button>-->
-<!--                </div>-->
-<!--               <div class="dropdown-item" >-->
-<!--                    <button class="outline-none no-background">Name(descendant)</button>-->
-<!--                </div>-->
-<!--                  <div class="dropdown-item" >-->
-<!--                    <button class="outline-none no-background">Name(ascendant)</button>-->
-<!--                </div>-->
-                  <div class="dropdown-item" >
-                    <button class="outline-none no-background" onclick="filter('certificate')">Certificate</button>
-                </div>
-                  <div class="dropdown-item" >
-                    <button class="outline-none no-background">No Certificate</button>
-                </div>
-              </div>
-            </div>
         </div>
     </div>
     <div class="fixed-container">

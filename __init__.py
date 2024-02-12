@@ -1751,19 +1751,6 @@ def retrieveSellers():
                 deleted_item = extracting('approved_sellers.db', 'Approved_sellers', data_to_modify['id'])
                 if deleted_item.get_doc():
                     delete_folder(deleted_item)
-            elif data_to_modify['request_type'] == 'filter':
-                if data_to_modify['filter_by'] == 'certificate':
-                    certify = []
-                    print('filtered')
-                    for i in sellers_list:
-                        if i.get_doc():
-                            print('have certificate')
-                            certify.append(i)
-                    print(certify)
-                    return render_template('staff/retrieveSellers.html', count=len(certify),
-                                           sellers=certify)  # Redirect when filtering by certificate
-                else:
-                    print("no")
         else:
             return render_template('staff/retrieveSellers.html', count=len(sellers_list), sellers=sellers_list)
     else:
@@ -1864,13 +1851,12 @@ def dashboard():
                 greenify_sellers = approved_sellers['Approved_sellers']
         except dbm.error:
             return "DB file does not exists"
-
+        commission = round(commission,2)
         best_seller = {}
         for key, val in greenify_sellers.items():
             if max_sold_out_seller_id:
                 if int(max_sold_out_seller_id) == key:
                     best_seller = val
-
         change = f"${commission} since last week"
         if last_week_commission > 0:
             change = f"{((commission - last_week_commission)/last_week_commission) * 100} % from last week"

@@ -67,7 +67,8 @@ overflow:scroll
 }
 .fixed-container-sm{
 height:55vh;
-overflow:scroll
+overflow-y:scroll;
+overflow-x:hidden;
 }
 .fixed-container::-webkit-scrollbar, .fixed-container-sm::-webkit-scrollbar{
     display: none;
