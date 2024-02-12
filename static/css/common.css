@@ -4,13 +4,14 @@
     src: url('../brand_font/Voga-Medium.otf') format('opentype');
 }
 :root{
-    --theme-color: #959D90;
+    --theme-color: #378753;
     --theme-color-light: #a4aba0;
+    --theme-color-dark:#244429;
     --theme-black:#1c1c1c;
     --theme-white:#f3f2f2;
     --theme-light-gray:#F5F5F5;
-    --unactive-color: #606060;
-    --unactive-dark-color: #3d3d3d;
+    --unactive-color: #a3c3a8;
+    --unactive-dark-color: #182d1b;
     --inter-font: 'Inter', sans-serif;
     --brand-font: 'Voga', serif;
 

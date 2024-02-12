@@ -82,12 +82,12 @@
     padding: 15px 0;
     font-size: 17px;
     border-radius: 5px;
-    background: #1BB295;
+    background: #378753;
     transition: all 0.3s ease;
 }
 
 .content .reset-btn:hover {
-    background: #18a589;
+    background: #244429;
 }
 
 @media screen and (max-width: 460px) {

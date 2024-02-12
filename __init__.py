@@ -1,3 +1,5 @@
+from imp import reload
+
 from flask import Flask, render_template, request, redirect, url_for, json, jsonify, session, send_file, \
     send_from_directory
 from Forms import CreateUserForm, StaffLoginForm, LoginForm
@@ -12,7 +14,7 @@ import secrets
 import shutil
 import User_login
 from werkzeug.utils import secure_filename
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from urllib.parse import quote
 # for sending mail
 import string
@@ -1389,8 +1391,8 @@ def orders(seller_id_hash):
                         current_order.append(order[data["id"]])
                 _orders_[seller_id] = updated_orders
                 _orders_.close()
-                if len(current_order) == 1:
-                    send_notification(current_order[0].get_email(), current_order[0].get_order_id())
+        if len(current_order) == 1:
+            send_notification(current_order[0].get_email(), current_order[0].get_order_id())
         return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
                                to_send=to_send_orders, products=seller_products, orders=total_orders)
     else:
@@ -1431,16 +1433,22 @@ def seller_dashboard(seller_id_hash):
         sold_out = 0
         earning = 0.0
         operation_weeks = []
+        last_week = []
         products_record = []
         revenue_in_days = []
         today = date.today()
         for i in range(0, 7):
             operation_weeks.append(str(today - timedelta(days=i)))
+        lastday = operation_weeks[len(operation_weeks)-1]
+        parsed_date = datetime.strptime(lastday, "%y-%m-%d").date()
+        for i in range(0,7):
+            last_week.append(str(parsed_date - timedelta(days=i)))
+        print(last_week)
         for order in seller_orders:
             revenue_per_day = {}
             for key, val in order.items():
                 if val.get_date() in operation_weeks:
-                    commission = val.get_total() * 0.10
+                    commission = round(val.get_total() * 0.10,2)
                     earn_amt = val.get_total() - commission
                     earning += earn_amt
                     revenue_per_day["date"] = val.get_date()
@@ -1471,16 +1479,19 @@ def seller_dashboard(seller_id_hash):
                 products_main_record.append(i)
 
         revenue_in_week = []
+        revenue_detail = {}
         for i in revenue_in_days:
-            if len(revenue_in_week) > 0:
-                for j in revenue_in_week:
-                    if i['date'] == j['date']:
-                        j['revenue'] += i['revenue']
-                    else:
-                        revenue_in_week.append(i)
-                    break
+            temp_date = i['date']
+            temp_revenue = i['revenue']
+            if temp_date in revenue_detail:
+                revenue_detail[temp_date] += temp_revenue
             else:
-                revenue_in_week.append(i)
+                revenue_detail[temp_date] = temp_revenue
+            print(revenue_detail)
+
+        for key,val in revenue_detail.items():
+            temp = {'date': key, 'revenue': val}
+            revenue_in_week.append(temp)
 
         # getting the best-selling item
         best_selling_item = None
@@ -1493,8 +1504,8 @@ def seller_dashboard(seller_id_hash):
             else:
                 max_revenue_entry = max_revenue
                 max_sold_out_product_id = max_revenue_entry['product_id']
-                best_selling_item = product_list[0].get(max_sold_out_product_id) if len(product_list)>0 else None
-            print('best', max_sold_out, max_revenue)
+            if len(product_list) > 0:
+                best_selling_item = product_list[0].get(max_sold_out_product_id)
         else:
             max_sold_out = None
             max_revenue = None
@@ -1503,7 +1514,6 @@ def seller_dashboard(seller_id_hash):
         revenue_in_week_json = json.dumps(revenue_in_week)
 
         stock_left = 0
-        print('product_list', product_list)
         if len(product_list) > 0:
             for key, val in product_list[0].items():
                 stock_left += val.get_product_stock()
@@ -1752,7 +1762,6 @@ def retrieveSellers():
 def dashboard():
     global max_seller_sold_out_entries, max_sold_out_seller_id
     if session.get('staff_logged_in'):
-        sellers = retrieve_db('approved_sellers.db', 'Approved_sellers')
         users = retrieve_db('user.db', 'Users')
         applications = retrieve_db('application.db', 'Application')
         orders = {}
@@ -1781,10 +1790,10 @@ def dashboard():
             for j in orders[i]:
                 commission_for_time = {}
                 for key, val in j.items():
-                    rate = val.get_total() * 0.10
+                    rate = round(val.get_total() * 0.10,2)
                     commission += rate
                     if val.get_date() in operation_weeks:
-                        rate_in_days = val.get_total() * 0.10
+                        rate_in_days = round(val.get_total() * 0.10, 2)
                         commission_for_time["date"] = val.get_date()
                         commission_for_time["revenue"] = rate_in_days
                         sellers_revenue += val.get_total()
@@ -1798,7 +1807,7 @@ def dashboard():
                         print("no data within last week")
                 revenue_in_days.append(commission_for_time)
             sellers_record.append(sellers)
-        print(sellers_record)
+        print('revenue_in_days',revenue_in_days)
         # getting the best-seller
         if sellers_record:
             max_item_sold_out = max(entry['sold_out'] for entry in sellers_record)
@@ -1814,16 +1823,20 @@ def dashboard():
             max_seller_revenue = None
 
         revenue_in_week = []
+        revenue_detail = {}
         for i in revenue_in_days:
-            if len(revenue_in_week) > 0:
-                for j in revenue_in_week:
-                    if i['date'] == j['date']:
-                        j['revenue'] += i['revenue']
-                    else:
-                        revenue_in_week.append(i)
-                    break
+            temp_date = i['date']
+            temp_revenue = i['revenue']
+            if temp_date in revenue_detail:
+                revenue_detail[temp_date] += temp_revenue
             else:
-                revenue_in_week.append(i)
+                revenue_detail[temp_date] = temp_revenue
+            print("revenue_detail", revenue_detail)
+
+        for key, val in revenue_detail.items():
+            temp = {'date': key, 'revenue': val}
+            revenue_in_week.append(temp)
+        print(revenue_in_week)
         json_revenue_in_week = json.dumps(revenue_in_week)
         greenify_sellers = {}
         try:
@@ -1839,7 +1852,7 @@ def dashboard():
                     best_seller = val
         print(" best seller", best_seller.get_name(), max_item_sold_out, max_seller_revenue)
 
-        return render_template('staff/dashboard.html', sellers_count=sellers, users_count=users,
+        return render_template('staff/dashboard.html', sellers_count=greenify_sellers, users_count=users,
                                commission=f"${commission}", revenue_in_week=json_revenue_in_week,
                                best_seller=best_seller, sold_out=max_item_sold_out, best_selling_detail=max_seller_revenue)
     else:

@@ -10,5 +10,5 @@ function handleSendingOrder(orderIdHash,id) {
                  "id": orderIdHash,
              })
          });
-           $('#card-'+id).remove()
+           $('#card-'+orderIdHash).remove()
 }

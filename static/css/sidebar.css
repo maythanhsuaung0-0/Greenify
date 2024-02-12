@@ -39,7 +39,7 @@ body {
   }
   
   .side-nav-link:hover:not(.active) {
-    background-color: var(--theme-color-light);
+    background-color:rgba(40,89,46,0.5);
     color: var(--theme-white);
   }
   

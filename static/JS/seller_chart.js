@@ -10,7 +10,13 @@ revenues_array.push(data[i]['revenue'])
 }
 var xValues = dates_array;
 var yValues = revenues_array;
-var barColors = ["orange"];
+var barColors = ["#005ca8","#725bb4","#b653ac","#e94e93","#ff5b6e","#ff7d43","#ffa600"];
+
+
+
+
+
+
 
 //pie chart data
 var pieChart = document.querySelector("#stock_chart")
