@@ -67,10 +67,6 @@ def allowed_file(filename):
 
 # Retrieving r and r
 def fetch_reviews(seller_id, product_id):
-    # Check if the file exists before attempting to open it
-    if not os.path.exists('reviews.db'):
-        return []
-
     try:
         reviews_db = shelve.open('reviews.db', 'r')
         ratings_reviews_dict = reviews_db.get('Reviews', {})

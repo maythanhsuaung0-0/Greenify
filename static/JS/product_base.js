@@ -204,5 +204,6 @@ function updateReviewsOnPage(reviewsList) {
         var noReviewsMessage = $('<p>').text('No reviews');
         reviewsContainer.append(noReviewsMessage);
         console.error('Invalid reviewsList:', reviewsList);
+        console.log('Reviews List:', reviewsList);
     }
 }
