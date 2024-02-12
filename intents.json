@@ -35,9 +35,8 @@
       "patterns": [
         "Which items do you have?",
         "What kinds of items are there?",
-        "What do you sell?",
-        "What is Greenify?",
-        "What does Greenify have?"
+        "Which products do you sell?",
+        "Which items do Greenify have?"
       ],
       "responses": [
         "We sell a wide range of sustainable products, such as reusable cutlery, sustainable water bottles, tote bags etc",
@@ -77,10 +76,11 @@
         "How do I earn points",
         "Where can I get vouchers",
         "How do I redeem points?",
-        "Where can I get discounts?"
+        "Where can I get discounts?",
+        "Where are the promo codes?"
       ],
       "responses": [
-        "After earning points from the games, you can redeem them under the voucher system",
+        "After earning points from the games, you can redeem them by clicking on the promo code button",
         "Click on the games to earn points and redeem exclusive vouchers along the way"
       ]
     },
@@ -131,7 +131,7 @@
         "How do I register?"
       ],
       "responses": [
-        "Click on the user icon on the top right of the page to login/register to Greenify."
+        "Click on the user icon on the top right of the page to login/register."
       ]
     }
   ]

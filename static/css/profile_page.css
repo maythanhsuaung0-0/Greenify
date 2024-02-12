@@ -46,6 +46,10 @@
         font-size: 13px;
     }
 
+#update:hover {
+background-color: #45a049;
+}
+
 .home-icon {
       float: right;
       padding-top: 10px;

@@ -23,7 +23,6 @@
 
 /* CONTENT IS CLOSE */
 .chatbox__support {
-    display: flex;
     flex-direction: column;
     width: 300px;
     height: 350px;
@@ -75,8 +74,9 @@
 .chatbox__messages {
     margin-top: auto;
     display: flex;
-    overflow-y: scroll;
+    overflow-y: auto;
     flex-direction: column-reverse;
+    max-height: 220px;
 }
 
 .messages__item {
@@ -96,7 +96,7 @@
 /* FOOTER */
 .chatbox__footer {
     position: sticky;
-    bottom: 0;
+    bottom: 45px;
 }
 
 .chatbox__support {

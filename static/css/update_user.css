@@ -46,6 +46,10 @@
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
 
+#update:hover {
+background-color: #45a049;
+}
+
 #delete {
       cursor: pointer;
         border-radius: 5em;
@@ -75,6 +79,10 @@
         box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     }
 
+#logout:hover {
+background-color: grey;
+}
+
 .home-icon {
       float: right;
       padding-top: 30px;
@@ -90,6 +98,10 @@
       text-decoration: none; /* Remove underline from the link */
       color: inherit; /* Inherit the color from the parent */
     }
+
+.icon-link:hover {
+    color: LimeGreen;
+}
 
 /* Password Input Styles */
 .custom-input-group {
@@ -126,7 +138,7 @@
 }
 
 label {
-margin-left: 42px;
+margin-left: 54px;
 }
 
 #confirm_password {

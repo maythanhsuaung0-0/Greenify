@@ -96,7 +96,7 @@
 }
 
 .back.button:hover {
-    background-color: #45a049;
+    background-color: LimeGreen;
 }
 
 #desc {
@@ -127,3 +127,11 @@
     text-align: center;
     margin-bottom: 10px;
     }
+
+.form-group input {
+    border: 1px solid black;
+}
+
+.form-group textarea {
+    border: 1px solid black;
+}
