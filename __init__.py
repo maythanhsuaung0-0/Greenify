@@ -1425,7 +1425,9 @@ def seller_dashboard(seller_id_hash):
             print("Error retrieving db")
         customers = 0
         sold_out = 0
+        last_week_sold_out = 0
         earning = 0.0
+        last_week_earning = 0.0
         operation_weeks = []
         last_week = []
         products_record = []
@@ -1434,7 +1436,7 @@ def seller_dashboard(seller_id_hash):
         for i in range(0, 7):
             operation_weeks.append(str(today - timedelta(days=i)))
         lastday = operation_weeks[len(operation_weeks)-1]
-        parsed_date = datetime.strptime(lastday, "%y-%m-%d").date()
+        parsed_date = datetime.strptime(lastday, '%Y-%m-%d').date()
         for i in range(0,7):
             last_week.append(str(parsed_date - timedelta(days=i)))
         print(last_week)
@@ -1456,6 +1458,12 @@ def seller_dashboard(seller_id_hash):
                         products_dict['quantity'] = int(i['quantity'])
                         products_dict['revenue'] = int(i['product_price'])
                         products_record.append(products_dict)
+                elif val.get_date() in last_week:
+                    commission = round(val.get_total() * 0.10, 2)
+                    earn_amt = val.get_total() - commission
+                    last_week_earning += earn_amt
+                    for i in val.get_order_products():
+                        last_week_sold_out += int(i['quantity'])
                 else:
                     print("no data within last week")
             revenue_in_days.append(revenue_per_day)
@@ -1504,6 +1512,12 @@ def seller_dashboard(seller_id_hash):
             max_sold_out = None
             max_revenue = None
 
+        change = f"$ {earning} since last week"
+        change_sold_out = f"{sold_out} since last week"
+        if last_week_earning > 0:
+            change = f"{((earning - last_week_earning) / last_week_earning) * 100} % from last week"
+        if last_week_sold_out > 0:
+            change_sold_out = f"{((sold_out - last_week_sold_out) / last_week_sold_out) * 100} % from last week"
         earning = '$' + str(earning)
         revenue_in_week_json = json.dumps(revenue_in_week)
 
@@ -1514,9 +1528,10 @@ def seller_dashboard(seller_id_hash):
         original_stock = sold_out + stock_left
         stock = [original_stock, sold_out]
         stock_json = json.dumps(stock)
+        print(change)
         return render_template('seller/dashboard.html', seller=seller_id_hash, seller_name=seller_name,
                                customers=customers,
-                               sold_out=sold_out, earning=earning, best_item=best_selling_item,
+                               sold_out=sold_out, earning=earning, change = change,change_sold_out = change_sold_out, best_item=best_selling_item,
                                revenue_in_week=revenue_in_week_json,
                                best_item_sold=max_sold_out, best_item_revenue=max_revenue, stock=stock_json)
     else:
@@ -1770,11 +1785,17 @@ def dashboard():
                 print("Key does not exists")
 
         operation_weeks = []
+        last_week = []
         today = date.today()
         for i in range(0, 7):
             operation_weeks.append(str(today - timedelta(days=i)))
 
+        lastday = operation_weeks[len(operation_weeks) - 1]
+        parsed_date = datetime.strptime(lastday, '%Y-%m-%d').date()
+        for i in range(0, 7):
+            last_week.append(str(parsed_date - timedelta(days=i)))
         commission = 0.0
+        last_week_commission = 0.0
         revenue_in_days = []
         sellers_record = []
         for i in orders:
@@ -1784,12 +1805,11 @@ def dashboard():
             for j in orders[i]:
                 commission_for_time = {}
                 for key, val in j.items():
-                    rate = round(val.get_total() * 0.10,2)
-                    commission += rate
                     if val.get_date() in operation_weeks:
-                        rate_in_days = round(val.get_total() * 0.10, 2)
+                        rate = round(val.get_total() * 0.10, 2)
+                        commission += rate
                         commission_for_time["date"] = val.get_date()
-                        commission_for_time["revenue"] = rate_in_days
+                        commission_for_time["revenue"] = rate
                         sellers_revenue += val.get_total()
                         for p in val.get_order_products():
                             print(' product', p)
@@ -1797,6 +1817,9 @@ def dashboard():
                             sellers['seller_id'] = i
                             sellers['sold_out'] = sold_out_quantity
                         sellers['revenue'] = sellers_revenue
+                    elif val.get_date() in last_week:
+                        rate = round(val.get_total() * 0.10, 2)
+                        last_week_commission += rate
                     else:
                         print("no data within last week")
                 revenue_in_days.append(commission_for_time)
@@ -1844,10 +1867,12 @@ def dashboard():
             if max_sold_out_seller_id:
                 if int(max_sold_out_seller_id) == key:
                     best_seller = val
-        print(" best seller", best_seller.get_name(), max_item_sold_out, max_seller_revenue)
 
+        change = f"${commission} since last week"
+        if last_week_commission > 0:
+            change = f"{((commission - last_week_commission)/last_week_commission) * 100} % from last week"
         return render_template('staff/dashboard.html', sellers_count=greenify_sellers, users_count=users,
-                               commission=f"${commission}", revenue_in_week=json_revenue_in_week,
+                               commission=f"${commission}", revenue_in_week=json_revenue_in_week, change = change,
                                best_seller=best_seller, sold_out=max_item_sold_out, best_selling_detail=max_seller_revenue)
     else:
         return redirect(url_for('staff_login'))

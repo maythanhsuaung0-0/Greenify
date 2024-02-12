@@ -5,13 +5,13 @@
 <h4>Staff's Dashboard</h4>
 <div class="d-flex gap-3 mt-4">
     <div>
-        {{scoreCard('Total Revenues',commission,"fa-solid fa-sack-dollar",'+25% than last week')}}
+        {{scoreCard('Total Revenues',commission,"fa-solid fa-sack-dollar",change)}}
     </div>
     <div>
-        {{scoreCard('Total Sellers',sellers_count|length,"fa-solid fa-user-group",'+25% than last week')}}
+        {{scoreCard('Total Sellers',sellers_count|length,"fa-solid fa-user-group",'Since inception')}}
     </div>
     <div>
-        {{scoreCard('Total Website Users', users_count|length,"fa-solid fa-user-group",'+25% than last week')}}
+        {{scoreCard('Total Website Users', users_count|length,"fa-solid fa-user-group",'Since inception')}}
     </div>
 </div>
  {% if best_seller != None %}
