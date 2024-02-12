@@ -1001,13 +1001,7 @@ def update_user(user_id_hash):
                 contact_number == user_obj.get_contact_number() and
                 postal_code == user_obj.get_postal_code() and
                 address == user_obj.get_address()):
-            error = 'No changes were made to any of the fields.'
-        elif len(str(password)) < 8 or len(str(confirm_password)) < 8:
-            error = 'Passwords must have at least 8 characters.'
-        elif len(str(contact_number)) != 8:
-            error = 'Phone number must be 8 digits.'
-        elif len(str(postal_code)) != 6:
-            error = 'Postal code must be 6 digits.'
+            error = 'Please make changes before updating.'
         elif password != confirm_password:
             error = 'Passwords must match.'
         else:
@@ -1864,7 +1858,9 @@ def update_seller(seller_id_hash):
         approved_sellers = approved_db['Approved_sellers']
 
         seller = approved_sellers.get(seller_id)
+        password = request.form.get('password-input')
 
+        seller.set_password(password)
         seller.set_seller_name(update_seller_form.business_name.data)
         seller.set_name(update_seller_form.business_name.data)
         seller.set_desc(update_seller_form.business_desc.data)
@@ -1887,6 +1883,7 @@ def update_seller(seller_id_hash):
         seller = approved_sellers.get(seller_id)
 
         update_seller_form.business_name.data = seller.get_seller_name()
+        get_password = seller.get_password()
         update_seller_form.seller_email.data = seller.get_email()
         update_seller_form.business_name.data = seller.get_name()
         update_seller_form.business_desc.data = seller.get_desc()
@@ -1894,7 +1891,7 @@ def update_seller(seller_id_hash):
 
         if session.get('seller_logged_in'):
             return render_template('/seller/updateSeller.html', form=update_seller_form, seller_id_hash=seller_id_hash,
-                                   seller_id=seller_id)
+                                   seller_id=seller_id, get_password=get_password)
         else:
             return redirect(url_for('seller_login'))
 
