@@ -22,8 +22,8 @@
     color: #fff;
     text-transform: uppercase;
 }
-.theme-background-light{
-    background-color: var(--theme-color-light);
+.theme-background{
+    background-color: var(--theme-color);
 }
 .custom-btn{
     background-color: var(--theme-black);
