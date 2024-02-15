@@ -39,7 +39,7 @@ new Chart("seller_chart", {
     },
     title: {
       display: true,
-      text: "Revenues within last week"
+      text: "Sales Revenues within this week"
     },
     scales: {
     y: {
