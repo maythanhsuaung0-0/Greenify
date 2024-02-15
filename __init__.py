@@ -16,7 +16,6 @@ from datetime import date, timedelta, datetime
 from urllib.parse import quote
 # for sending mail
 import string
-import csv
 from send_email import *
 import uuid
 from crud_functions import *
@@ -1400,6 +1399,8 @@ def orders(seller_id_hash):
                 _orders_.close()
         if len(current_order) == 1:
             send_notification(current_order[0].get_email(), current_order[0].get_order_id())
+
+        print('orders',to_send_orders, sent_out_orders)
         return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
                                to_send=to_send_orders, products=seller_products, orders=total_orders)
     else:
@@ -1457,11 +1458,11 @@ def seller_dashboard(seller_id_hash):
             revenue_per_day = {}
             for key, val in order.items():
                 if val.get_date() in operation_weeks:
-                    commission = round(val.get_total() * 0.10,2)
-                    earn_amt = val.get_total() - commission
+                    rate = val.get_total() * 0.10
+                    earn_amt = val.get_total() - rate
                     earning += earn_amt
                     revenue_per_day["date"] = val.get_date()
-                    revenue_per_day["revenue"] = val.get_total() - commission
+                    revenue_per_day["revenue"] = val.get_total() - rate
                     print('total', val.get_total())
                     for i in val.get_order_products():
                         products_dict = {}
@@ -1472,8 +1473,8 @@ def seller_dashboard(seller_id_hash):
                         products_dict['revenue'] = int(i['product_price'])
                         products_record.append(products_dict)
                 elif val.get_date() in last_week:
-                    commission = round(val.get_total() * 0.10, 2)
-                    earn_amt = val.get_total() - commission
+                    rate = val.get_total() * 0.10
+                    earn_amt = val.get_total() - rate
                     last_week_earning += earn_amt
                     for i in val.get_order_products():
                         last_week_sold_out += int(i['quantity'])
@@ -1503,7 +1504,6 @@ def seller_dashboard(seller_id_hash):
             else:
                 revenue_detail[temp_date] = temp_revenue
             print(revenue_detail)
-
         for key,val in revenue_detail.items():
             temp = {'date': key, 'revenue': val}
             revenue_in_week.append(temp)
@@ -1525,13 +1525,14 @@ def seller_dashboard(seller_id_hash):
             max_sold_out = None
             max_revenue = None
 
-        change = f"$ {earning} since last week"
+        solid_earning = '$' + "{:.2f}".format(earning)
+        change = f"{solid_earning} since last week"
         change_sold_out = f"{sold_out} since last week"
         if last_week_earning > 0:
             change = f"{((earning - last_week_earning) / last_week_earning) * 100} % from last week"
         if last_week_sold_out > 0:
             change_sold_out = f"{((sold_out - last_week_sold_out) / last_week_sold_out) * 100} % from last week"
-        earning = '$' + str(earning)
+
         revenue_in_week_json = json.dumps(revenue_in_week)
 
         stock_left = 0
@@ -1544,7 +1545,7 @@ def seller_dashboard(seller_id_hash):
         print(change)
         return render_template('seller/dashboard.html', seller=seller_id_hash, seller_name=seller_name,
                                customers=customers,
-                               sold_out=sold_out, earning=earning, change = change,change_sold_out = change_sold_out, best_item=best_selling_item,
+                               sold_out=sold_out, earning=solid_earning, change = change,change_sold_out = change_sold_out, best_item=best_selling_item,
                                revenue_in_week=revenue_in_week_json,
                                best_item_sold=max_sold_out, best_item_revenue=max_revenue, stock=stock_json)
     else:
@@ -1806,7 +1807,7 @@ def dashboard():
                 commission_for_time = {}
                 for key, val in j.items():
                     if val.get_date() in operation_weeks:
-                        rate = round(val.get_total() * 0.10, 2)
+                        rate = val.get_total() * 0.10
                         commission += rate
                         commission_for_time["date"] = val.get_date()
                         commission_for_time["revenue"] = rate
@@ -1818,7 +1819,7 @@ def dashboard():
                             sellers['sold_out'] = sold_out_quantity
                         sellers['revenue'] = sellers_revenue
                     elif val.get_date() in last_week:
-                        rate = round(val.get_total() * 0.10, 2)
+                        rate = val.get_total() * 0.10
                         last_week_commission += rate
                     else:
                         print("no data within last week")
@@ -1861,17 +1862,19 @@ def dashboard():
                 greenify_sellers = approved_sellers['Approved_sellers']
         except dbm.error:
             return "DB file does not exists"
-        commission = round(commission,2)
+
         best_seller = {}
         for key, val in greenify_sellers.items():
             if max_sold_out_seller_id:
                 if int(max_sold_out_seller_id) == key:
                     best_seller = val
-        change = f"${commission} since last week"
+        solid_commission ="$"+ "{:.2f}".format(commission)
+        change = f"{solid_commission} since last week"
         if last_week_commission > 0:
             change = f"{((commission - last_week_commission)/last_week_commission) * 100} % from last week"
+
         return render_template('staff/dashboard.html', sellers_count=greenify_sellers, users_count=users,
-                               commission=f"${commission}", revenue_in_week=json_revenue_in_week, change = change,
+                               commission=solid_commission, revenue_in_week=json_revenue_in_week, change = change,
                                best_seller=best_seller, sold_out=max_item_sold_out, best_selling_detail=max_seller_revenue)
     else:
         return redirect(url_for('staff_login'))

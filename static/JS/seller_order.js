@@ -16,7 +16,7 @@ function handleSendingOrder(orderIdHash,id) {
                  "id": orderIdHash,
              })
          });
-           sent_out_container.append(target_element)
+           sent_out_container.appendChild(target_element)
            to_send_length.innerText = parseInt(to_send_length.innerText) - 1
             send_out_length.innerText = parseInt(to_send_length.innerText) + 1
             console.log(send_out_length,to_send_length)
