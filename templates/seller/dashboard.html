@@ -23,14 +23,14 @@
            <canvas id="seller_chart" style="width:100%;max-width:800px" data-dictionary="{{revenue_in_week}}"></canvas>
       </div>
        {% else %}
-       <div></div>
+       <div>No statistics to show</div>
        {% endif %}
-       {% if stock %}
+       {% if stock|length > 0 %}
         <div class="">
           <canvas id="stock_chart" style="width:100%;max-width:400px;max-height:400px;" data-dictionary="{{stock}}"></canvas>
         </div>
        {% else %}
-       <div></div>
+       <div>No items to show</div>
        {% endif %}
    </div>
     {% if best_item != None %}

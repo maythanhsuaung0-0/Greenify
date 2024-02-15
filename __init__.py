@@ -1503,7 +1503,9 @@ def seller_dashboard(seller_id_hash):
                 revenue_detail[temp_date] += temp_revenue
             else:
                 revenue_detail[temp_date] = temp_revenue
-            print(revenue_detail)
+        if str(today) not in revenue_detail:
+            revenue_detail[str(today)] = 0
+        print('revenue_detail',revenue_detail)
         for key,val in revenue_detail.items():
             temp = {'date': key, 'revenue': val}
             revenue_in_week.append(temp)
