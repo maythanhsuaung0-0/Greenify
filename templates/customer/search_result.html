@@ -17,7 +17,7 @@
                     <img src="{{ url_for('static', filename='uploads/product_image/' + product[1].get_image()) }}" alt="">
                 </div>
                 <p class="product-name">{{ product[1].get_product_name() }}</p>
-                <p class="product-price">$ {{ product[1].get_product_price() }}</p>
+                <p class="product-price">$ {{ "%.2f"|format(product[1].get_product_price()) }}</p>
             </a>
         </div>
         {% endfor %}

@@ -76,7 +76,7 @@
             <!-- Search Engine -->
             <div>
                 {% if form is defined %}
-                <form method="POST" action="" class="d-flex" role="search">
+                <form method="GET" action="" class="d-flex" role="search">
                     {% from "includes/_formHelper.html" import render_field %}
                     {{ render_field(form.search_query, class="form-control", placeholder='Search') }}
                     <button class="btn btn-sm custom-btn mx-3" type="submit">Search</button>

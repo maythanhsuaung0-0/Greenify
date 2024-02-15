@@ -277,16 +277,15 @@ def product(seller, product_id):
     seller_product_db.close()
 
     product_reviews = []
+
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
+
     # Received AJAX Request
     if request.method == "POST":
-
-        # Search Query
-        try:
-            if search_form.search_query.id.data != None and search_form.validate():
-                search_engine(search_form.search_query.data)
-                return redirect(url_for('product_search'))
-        except:
-            pass
 
         sent_data = json.loads(request.data)
 
@@ -427,10 +426,8 @@ def product(seller, product_id):
             shopping_cart_db[user] = users_shopping_cart
             shopping_cart_db.close()
 
-            print(users_shopping_cart)
             return json.jsonify({"data": saved_cart_qty, "result": True})
 
-    print(product.get_image())
     return render_template("customer/product.html", product=product, seller=seller, seller_id=seller_id,
                            saved_cart_qty=cart_qty(user), user=user_id_hash, form=search_form,
                            product_reviews=product_reviews)
@@ -503,17 +500,16 @@ def shopping_cart(user_id_hash):
     else:
         return render_template("customer/empty_cart.html")
 
+
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
+
+
     # Receive AJAX Request
     if request.method == "POST":
-
-        # Search Query
-        try:
-            if search_form.search_query.id.data != None and search_form.validate():
-                search_engine(search_form.search_query.data)
-                return redirect(url_for('product_search'))
-        except:
-            pass
-
         sent_data = json.loads(request.data)
 
         # Request to Update Cart Qty
@@ -599,17 +595,16 @@ def payment(user_id_hash):
     user_id_hash = session['user_id_hash']
     user = session['user_id']
 
+    #Search Query
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
+
+
     # Receive AJAX Request
     if request.method == "POST":
-
-        # Search Query
-        try:
-            if search_form.search_query.id.data != None and search_form.validate():
-                search_engine(search_form.search_query.data)
-                return redirect(url_for('product_search'))
-        except:
-            pass
-
         sent_data = json.loads(request.data)
 
         if sent_data['request_type'] == 'payment':
@@ -743,9 +738,12 @@ def product_search():
     last_url(url_for('product_search'))
 
     search_form = Search(request.form)
-    if request.method == 'POST' and search_form.validate():
-        search_engine(search_form.search_query.data)
-        return redirect(url_for('product_search'))
+    #Search Query
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
 
     search_db = shelve.open('search.db')
     result_list = search_db['result_list']
@@ -765,9 +763,12 @@ def product_all():
     last_url(url_for('product_search'))
 
     search_form = Search(request.form)
-    if request.method == 'POST' and search_form.validate():
-        search_engine(search_form.search_query.data)
-        return redirect(url_for('product_search'))
+    # Search Query
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
 
     # Adding All Saved Products From All Seller Into A List
     all_result = []
@@ -795,9 +796,12 @@ def success_payment():
 
     search_form = Search(request.form)
     global result_list
-    if request.method == 'POST' and search_form.validate():
-        result_list = search_engine(search_form.search_query.data)
-        return redirect(url_for('product_search'))
+    # Search Query
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
     return render_template('customer/success_payment.html', user=user_id_hash, saved_cart_qty=cart_qty(user),
                            form=search_form)
 
@@ -815,9 +819,12 @@ def order_history(user_id_hash):
     last_url(url_for('product_search'))
 
     search_form = Search(request.form)
-    if request.method == 'POST' and search_form.validate():
-        search_engine(search_form.search_query.data)
-        return redirect(url_for('product_search'))
+    # Search Query
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
 
     order_history_db = shelve.open('order_history.db')
 
@@ -954,9 +961,12 @@ def profile(user_id_hash):
 
     last_url(url_for('product_search'))
 
-    if request.method == 'POST' and search_form.validate():
-        search_engine(search_form.search_query.data)
-        return redirect(url_for('product_search'))
+    # Search Query
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
 
     user_data = shelve.open('user.db')
     users_dict = user_data.get('Users', {})
@@ -1952,14 +1962,33 @@ def delete_seller(seller_id_hash):
 
 
 # game1
-@app.route('/game1')
+@app.route('/game1', methods=['GET', 'POST'])
 def game1():
+    try:
+        user = session['user_id']
+        user_id_hash = session['user_id_hash']
+    except:
+        user = None
+        user_id_hash = None
+
+    search_form = Search(request.form)
+    # Search Query
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
+
+
     if not (session.get('user_logged_in') or session.get('seller_logged_in') or session.get('staff_logged_in')):
         # If no user is logged in, redirect to login page
         return redirect(url_for('login'))
     # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
     user_id = session.get('user_id', 'Unknown Player')
-    return render_template('/games/game1.html', user_id=user_id)
+    return render_template('/games/game1.html', user_id=user_id, user=user_id_hash, form=search_form, saved_cart_qty=cart_qty(user))
+
+
+
 
 
 @app.route('/submit_score', methods=['POST'])
@@ -2027,14 +2056,29 @@ def delete_score_page():
     return render_template('/staff/game1_delete_player.html')
 
 
-@app.route('/game2')
+@app.route('/game2', methods=['GET', 'POST'])
 def game2():
+    try:
+        user = session['user_id']
+        user_id_hash = session['user_id_hash']
+    except:
+        user = None
+        user_id_hash = None
+
+    search_form = Search(request.form)
+    # Search Query
+    if request.method == 'GET' and 'search_query' in request.args:
+        sent_data = request.args.get('search_query')
+        if search_form.validate():
+            search_engine(sent_data)
+            return redirect(url_for('product_search'))
+
     if not (session.get('user_logged_in') or session.get('seller_logged_in') or session.get('staff_logged_in')):
         # If no user is logged in, redirect to login page
         return redirect(url_for('login'))
     # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
     user_id = session.get('user_id', 'Unknown Player')
-    return render_template('/games/game2.html', user_id=user_id)
+    return render_template('/games/game2.html', user_id=user_id, user=user_id_hash, form=search_form, saved_cart_qty=cart_qty(user))
 
 
 @app.route('/game2/start')
