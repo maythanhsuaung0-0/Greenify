@@ -499,13 +499,11 @@ def shopping_cart(user_id_hash):
     else:
         return render_template("customer/empty_cart.html")
 
-
     if request.method == 'GET' and 'search_query' in request.args:
         sent_data = request.args.get('search_query')
         if search_form.validate():
             search_engine(sent_data)
             return redirect(url_for('product_search'))
-
 
     # Receive AJAX Request
     if request.method == "POST":
@@ -594,13 +592,12 @@ def payment(user_id_hash):
     user_id_hash = session['user_id_hash']
     user = session['user_id']
 
-    #Search Query
+    # Search Query
     if request.method == 'GET' and 'search_query' in request.args:
         sent_data = request.args.get('search_query')
         if search_form.validate():
             search_engine(sent_data)
             return redirect(url_for('product_search'))
-
 
     # Receive AJAX Request
     if request.method == "POST":
@@ -737,7 +734,7 @@ def product_search():
     last_url(url_for('product_search'))
 
     search_form = Search(request.form)
-    #Search Query
+    # Search Query
     if request.method == 'GET' and 'search_query' in request.args:
         sent_data = request.args.get('search_query')
         if search_form.validate():
@@ -1400,7 +1397,7 @@ def orders(seller_id_hash):
         if len(current_order) == 1:
             send_notification(current_order[0].get_email(), current_order[0].get_order_id())
 
-        print('orders',to_send_orders, sent_out_orders)
+        print('orders', to_send_orders, sent_out_orders)
         return render_template('seller/orders.html', seller=seller_id_hash, sent_out=sent_out_orders,
                                to_send=to_send_orders, products=seller_products, orders=total_orders)
     else:
@@ -1449,9 +1446,9 @@ def seller_dashboard(seller_id_hash):
         today = date.today()
         for i in range(0, 7):
             operation_weeks.append(str(today - timedelta(days=i)))
-        lastday = operation_weeks[len(operation_weeks)-1]
+        lastday = operation_weeks[len(operation_weeks) - 1]
         parsed_date = datetime.strptime(lastday, '%Y-%m-%d').date()
-        for i in range(0,7):
+        for i in range(0, 7):
             last_week.append(str(parsed_date - timedelta(days=i)))
         print(last_week)
         for order in seller_orders:
@@ -1503,10 +1500,16 @@ def seller_dashboard(seller_id_hash):
                 revenue_detail[temp_date] += temp_revenue
             else:
                 revenue_detail[temp_date] = temp_revenue
-        if str(today) not in revenue_detail:
-            revenue_detail[str(today)] = 0
-        print('revenue_detail',revenue_detail)
-        for key,val in revenue_detail.items():
+
+        for i in operation_weeks:
+            if i not in revenue_detail:
+                revenue_detail[i] = 0
+        print('revenue_detail', revenue_detail)
+
+        sorted_keys = sorted(revenue_detail.keys())
+        sorted_revenue = {key: revenue_detail[key] for key in sorted_keys}
+
+        for key, val in sorted_revenue.items():
             temp = {'date': key, 'revenue': val}
             revenue_in_week.append(temp)
 
@@ -1547,7 +1550,8 @@ def seller_dashboard(seller_id_hash):
         print(change)
         return render_template('seller/dashboard.html', seller=seller_id_hash, seller_name=seller_name,
                                customers=customers,
-                               sold_out=sold_out, earning=solid_earning, change = change,change_sold_out = change_sold_out, best_item=best_selling_item,
+                               sold_out=sold_out, earning=solid_earning, change=change, change_sold_out=change_sold_out,
+                               best_item=best_selling_item,
                                revenue_in_week=revenue_in_week_json,
                                best_item_sold=max_sold_out, best_item_revenue=max_revenue, stock=stock_json)
     else:
@@ -1827,7 +1831,7 @@ def dashboard():
                         print("no data within last week")
                 revenue_in_days.append(commission_for_time)
             sellers_record.append(sellers)
-        print('revenue_in_days',revenue_in_days)
+        print('revenue_in_days', revenue_in_days)
         # getting the best-seller
         if sellers_record:
             max_item_sold_out = max(entry['sold_out'] for entry in sellers_record)
@@ -1853,7 +1857,15 @@ def dashboard():
                 revenue_detail[temp_date] = temp_revenue
             print("revenue_detail", revenue_detail)
 
-        for key, val in revenue_detail.items():
+        for i in operation_weeks:
+            if i not in revenue_detail:
+                revenue_detail[i] = 0
+        print('revenue_detail', revenue_detail)
+
+        sorted_keys = sorted(revenue_detail.keys())
+        sorted_revenue = {key: revenue_detail[key] for key in sorted_keys}
+
+        for key, val in sorted_revenue.items():
             temp = {'date': key, 'revenue': val}
             revenue_in_week.append(temp)
         print(revenue_in_week)
@@ -1870,14 +1882,15 @@ def dashboard():
             if max_sold_out_seller_id:
                 if int(max_sold_out_seller_id) == key:
                     best_seller = val
-        solid_commission ="$"+ "{:.2f}".format(commission)
+        solid_commission = "$" + "{:.2f}".format(commission)
         change = f"{solid_commission} since last week"
         if last_week_commission > 0:
-            change = f"{((commission - last_week_commission)/last_week_commission) * 100} % from last week"
+            change = f"{((commission - last_week_commission) / last_week_commission) * 100} % from last week"
 
         return render_template('staff/dashboard.html', sellers_count=greenify_sellers, users_count=users,
-                               commission=solid_commission, revenue_in_week=json_revenue_in_week, change = change,
-                               best_seller=best_seller, sold_out=max_item_sold_out, best_selling_detail=max_seller_revenue)
+                               commission=solid_commission, revenue_in_week=json_revenue_in_week, change=change,
+                               best_seller=best_seller, sold_out=max_item_sold_out,
+                               best_selling_detail=max_seller_revenue)
     else:
         return redirect(url_for('staff_login'))
 
@@ -1984,16 +1997,13 @@ def game1():
             search_engine(sent_data)
             return redirect(url_for('product_search'))
 
-
     if not (session.get('user_logged_in') or session.get('seller_logged_in') or session.get('staff_logged_in')):
         # If no user is logged in, redirect to login page
         return redirect(url_for('login'))
     # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
     user_id = session.get('user_id', 'Unknown Player')
-    return render_template('/games/game1.html', user_id=user_id, user=user_id_hash, form=search_form, saved_cart_qty=cart_qty(user))
-
-
-
+    return render_template('/games/game1.html', user_id=user_id, user=user_id_hash, form=search_form,
+                           saved_cart_qty=cart_qty(user))
 
 
 @app.route('/submit_score', methods=['POST'])
@@ -2083,7 +2093,8 @@ def game2():
         return redirect(url_for('login'))
     # Assuming 'user_id' is set for any logged-in user, otherwise, adjust accordingly
     user_id = session.get('user_id', 'Unknown Player')
-    return render_template('/games/game2.html', user_id=user_id, user=user_id_hash, form=search_form, saved_cart_qty=cart_qty(user))
+    return render_template('/games/game2.html', user_id=user_id, user=user_id_hash, form=search_form,
+                           saved_cart_qty=cart_qty(user))
 
 
 @app.route('/game2/start')
